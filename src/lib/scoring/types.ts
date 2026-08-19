@@ -69,6 +69,17 @@ export interface ResultSet {
   finalResult?: FinalResult;
   finalTable?: FinalTableRow[];
   statLeaders?: Record<string, StatLeaderEntry[]>;
+  /**
+   * Admin-settled facts that aren't derivable from finalResult/finalTable/
+   * statLeaders — doc 03 API §3.6's manual settlement endpoint posts an
+   * `{ answer }` shaped exactly like a pick answer (POST
+   * /questions/:qid/settle). The caller stores that settled value here,
+   * keyed by questionId, for `boolean` and `custom` questions (`champion`,
+   * `runner_up`, `top_n_*`, `wooden_spoon`, `team_over_under` are all
+   * derivable from finalTable/finalResult instead; `stat_leader` from
+   * statLeaders).
+   */
+  questionResults?: Record<string, Answer>;
 }
 
 export interface ScoringConfig {
@@ -157,4 +168,19 @@ export interface QuestionResolver {
   boldnessUnits?(answer: Answer): string[];
   /** The set of units that are actually correct for this question, if resolvable yet. */
   correctUnitSet?(question: Question, results: ResultSet): Set<string>;
+  /**
+   * Escape hatch for resolvers whose per-member award is inherently relative
+   * to every other member's answer to the same question — currently only
+   * `numeric` (doc 03 §2.3: "closest gets points, second gets points ×
+   * secondPlaceRatio" ranks all of a question's answers against each other,
+   * not each answer independently against a fixed target, so the standard
+   * one-answer-at-a-time `resolve` contract can't express it). When present,
+   * the orchestrator calls this once per question — with every eligible
+   * member's answer — instead of calling `resolve` once per member.
+   */
+  resolveGroup?(
+    question: Question,
+    answers: ReadonlyMap<string, Answer>,
+    results: ResultSet
+  ): ReadonlyMap<string, ResolvedAnswer>;
 }

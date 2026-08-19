@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { score } from "@/lib/scoring";
+import type { QuestionType } from "@/lib/db/schema";
 import type { Question, ResultSet, ScoringConfig, ScoringInput } from "@/lib/scoring/types";
 
 const championQuestion: Question = {
@@ -97,9 +98,14 @@ describe("score", () => {
   });
 
   it("marks a question pending, awarding zero, when a resolver isn't registered for its type", () => {
+    // Every real QuestionType now has a registered resolver, so this
+    // exercises the registry-miss path with a type that deliberately isn't
+    // one of them, rather than depending on a specific type staying
+    // unregistered forever.
+    const unregisteredType = "not_a_real_question_type" as QuestionType;
     const input: ScoringInput = {
-      questions: [{ id: "q-numeric", type: "numeric", config: {}, points: 10 }],
-      picks: [{ questionId: "q-numeric", memberId: "m1", answer: { value: 500 } }],
+      questions: [{ id: "q-unregistered", type: unregisteredType, config: {}, points: 10 }],
+      picks: [{ questionId: "q-unregistered", memberId: "m1", answer: { value: 500 } }],
       results,
       config: baseConfig(),
       memberIds: ["m1"],
@@ -226,6 +232,40 @@ describe("score", () => {
       // gt picked alone (share 1/2, multiplier 1.5) worth 5*1.5 = 7.5.
       // total 22.5 -> floors to 22.
       expect(m1.breakdown[0].awarded).toBe(22);
+    });
+
+    // doc 03 §2.4: "For numeric, boldness does not apply (there's no
+    // meaningful 'share')." Prove it end-to-end through the orchestrator: a
+    // numeric pick that's a lone (maximally "bold") correct guess still
+    // comes out with multiplier 1 and unboosted points.
+    it("never applies the boldness multiplier to a numeric pick, however bold", () => {
+      const numericQuestion: Question = {
+        id: "q-numeric",
+        type: "numeric",
+        config: {},
+        points: 10,
+      };
+      const input: ScoringInput = {
+        questions: [numericQuestion],
+        picks: [
+          // m1 is the lone closest guess by a wide margin - the "boldest"
+          // possible numeric pick - while m2's guess isn't close to anyone.
+          { questionId: "q-numeric", memberId: "m1", answer: { value: 700 } },
+          { questionId: "q-numeric", memberId: "m2", answer: { value: 0 } },
+        ],
+        results: { questionResults: { "q-numeric": { value: 700 } } },
+        config: baseConfig({ boldPickEnabled: true }),
+        memberIds: ["m1", "m2"],
+        isProjected: false,
+      };
+
+      const output = score(input);
+      const m1 = output.standings.find((s) => s.memberId === "m1")!;
+      expect(m1.breakdown[0]).toMatchObject({
+        awarded: 10,
+        status: "correct",
+        boldnessMultiplier: 1,
+      });
     });
   });
 });
