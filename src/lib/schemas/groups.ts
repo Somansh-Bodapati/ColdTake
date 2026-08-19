@@ -64,9 +64,23 @@ export const groupMemberSchema = z.object({
 });
 export type GroupMember = z.infer<typeof groupMemberSchema>;
 
+// Minimal per-season summary for the group page's season list (this
+// hardening session's fix, see src/lib/seasons/service.ts's
+// listSeasonsByGroup) — just enough to render a list with the right link
+// per status, not the full SeasonResponse (questions/scoringConfig aren't
+// needed here and would mean an extra join per season).
+export const groupSeasonSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: z.enum(["draft", "open", "locked", "settled", "voided"]),
+  lockAt: z.string(),
+});
+export type GroupSeasonSummary = z.infer<typeof groupSeasonSummarySchema>;
+
 export const groupDetailResponseSchema = z.object({
   group: groupSummarySchema,
   members: z.array(groupMemberSchema),
+  seasons: z.array(groupSeasonSummarySchema),
 });
 export type GroupDetailResponse = z.infer<typeof groupDetailResponseSchema>;
 

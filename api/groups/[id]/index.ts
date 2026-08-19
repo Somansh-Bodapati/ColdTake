@@ -6,6 +6,7 @@
 import { db } from "@/lib/db/client";
 import { requireUser } from "@/lib/auth/session";
 import { requireMembership, getGroupDetail } from "@/lib/groups/service";
+import { listSeasonsByGroup } from "@/lib/seasons/service";
 import type { GroupDetailResponse } from "@/lib/schemas/groups";
 import { jsonResponse, pathSegment, withErrorHandling } from "@/lib/http";
 import { AppError } from "@/lib/errors";
@@ -19,8 +20,21 @@ async function handler(request: Request): Promise<Response> {
   const currentUser = await requireUser(db, request);
   await requireMembership(db, groupId, currentUser.id);
 
-  const detail = await getGroupDetail(db, groupId);
-  const body: GroupDetailResponse = detail;
+  const now = new Date();
+  const [detail, seasonRows] = await Promise.all([
+    getGroupDetail(db, groupId),
+    listSeasonsByGroup(db, groupId, now),
+  ]);
+
+  const body: GroupDetailResponse = {
+    ...detail,
+    seasons: seasonRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      status: row.status,
+      lockAt: row.lockAt.toISOString(),
+    })),
+  };
   return jsonResponse(body);
 }
 

@@ -7,8 +7,36 @@ import {
   removeGroupMember,
   transferGroupAdmin,
 } from "@/lib/groups/client";
-import type { GroupDetailResponse } from "@/lib/schemas/groups";
+import type { GroupDetailResponse, GroupSeasonSummary } from "@/lib/schemas/groups";
 import { Button } from "@/components/ui/button";
+
+// Where a season's "open this season" link goes, keyed by its effective
+// status (src/lib/seasons/state.ts) — this hardening session's fix: before
+// this, a group's seasons weren't listed anywhere in the UI at all, so
+// there was no way back into a season page except the moment right after
+// creating it. draft has no member-facing page yet (only the admin's
+// season-new flow writes it), so it isn't linked here.
+function seasonLinkPath(groupId: string, seasonRow: GroupSeasonSummary): string | null {
+  switch (seasonRow.status) {
+    case "open":
+      return `/groups/${groupId}/seasons/${seasonRow.id}/picks`;
+    case "locked":
+    case "settled":
+      return `/groups/${groupId}/seasons/${seasonRow.id}/reveal`;
+    case "voided":
+      return `/groups/${groupId}/seasons/${seasonRow.id}/standings`;
+    case "draft":
+      return null;
+  }
+}
+
+const SEASON_STATUS_LABEL: Record<GroupSeasonSummary["status"], string> = {
+  draft: "Draft",
+  open: "Open — picks are being made",
+  locked: "Locked — picks are revealed",
+  settled: "Settled",
+  voided: "Voided",
+};
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Group | ColdTake" }];
@@ -156,6 +184,47 @@ export default function GroupPage() {
           + Set up a season
         </Link>
       )}
+
+      {/* Season list (this hardening session's fix, doc 04's "a group with
+          no seasons yet" empty state, and the only navigable way back into
+          a season a member didn't just create). */}
+      <div>
+        <h2 className="mb-2 font-medium">Seasons</h2>
+        {detail.seasons.length === 0 ? (
+          <p className="text-muted-foreground text-sm">
+            No seasons yet.
+            {isAdmin
+              ? " Set one up above to get started."
+              : " Check back once an admin sets one up."}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {detail.seasons.map((seasonRow) => {
+              const path = seasonLinkPath(groupId, seasonRow);
+              return (
+                <li
+                  key={seasonRow.id}
+                  className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+                >
+                  <span className="flex flex-col">
+                    <span className="font-medium">{seasonRow.name}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {SEASON_STATUS_LABEL[seasonRow.status]}
+                    </span>
+                  </span>
+                  {path ? (
+                    <Link className="underline" to={path}>
+                      Open →
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">Not published yet</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
 
       <div>
         <h2 className="mb-2 font-medium">Members ({detail.members.length})</h2>

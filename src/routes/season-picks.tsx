@@ -161,6 +161,16 @@ export default function SeasonPicksPage() {
         <p className="text-sm font-medium">Your slate is complete. Good luck.</p>
       )}
 
+      {/* Empty state: a season an admin published without adding any
+          questions yet (this hardening session's fix — doc 04's "a season
+          with no questions" checklist item). Distinct from `locked`, which
+          has its own message above. */}
+      {total === 0 && !locked && (
+        <p className="text-muted-foreground text-sm">
+          This season doesn't have any questions yet. Check back once the admin adds some.
+        </p>
+      )}
+
       <div className="flex flex-col gap-4">
         {season.questions.map((question) => (
           <QuestionCard

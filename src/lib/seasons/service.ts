@@ -4,7 +4,7 @@
 // business logic around them, imported directly by api/seasons/* and
 // api/tournaments/*.
 
-import { asc, and, eq, isNull, sql } from "drizzle-orm";
+import { asc, and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Db } from "@/lib/auth/session";
 import { member, question, season, tournament, type SeasonStatus } from "@/lib/db/schema";
 import { createId } from "@/lib/db/id";
@@ -166,6 +166,27 @@ export async function createSeason(db: Db, args: CreateSeasonArgs) {
 
 export async function getQuestions(db: Db, seasonId: string) {
   return db.select().from(question).where(eq(question.seasonId, seasonId)).orderBy(asc(question.sortOrder));
+}
+
+// Group-scoped season list — this hardening session's fix: before this,
+// nothing in the API surface let a member discover a group's existing
+// seasons at all (GET /api/groups/:id never returned them and there was no
+// other listing route), so the group page had no way to link into a
+// season, show "no seasons yet," or let a member who joined later find
+// their slate. Caller (api/groups/[id]/index.ts) has already verified group
+// membership. Uses effectiveSeasonStatus (not the raw stored column) so a
+// season whose lock_at has passed but hasn't been read/written since shows
+// as "locked" here too — same lazy-lock discipline as loadSeason.
+export async function listSeasonsByGroup(db: Db, groupId: string, now: Date) {
+  const rows = await db
+    .select()
+    .from(season)
+    .where(eq(season.groupId, groupId))
+    .orderBy(desc(season.createdAt));
+  return rows.map((row) => ({
+    ...row,
+    status: effectiveSeasonStatus(row.status, row.lockAt, now),
+  }));
 }
 
 export interface UpdateSeasonArgs {
