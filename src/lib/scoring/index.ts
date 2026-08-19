@@ -118,6 +118,7 @@ export function score(input: ScoringInput): ScoringOutput {
         correctUnitSet,
         shareForUnit,
         preResolved: groupResolved?.get(memberId),
+        isProjected: input.isProjected,
       });
       breakdownsByMember.get(memberId)?.push(entry);
     }
@@ -137,6 +138,15 @@ function scoreOneAnswer(params: {
   shareForUnit: (unit: string) => number;
   /** Pre-computed by `resolver.resolveGroup`, if the resolver has one. */
   preResolved: ResolvedAnswer | undefined;
+  /**
+   * doc 03 §2.5: in projected mode, a question that "cannot be projected"
+   * resolves to status `pending` (the resolver has nothing in `results` to
+   * compare against — same code path as an as-yet-unsettled question) and
+   * must be "excluded from maxPossible displays". Settled mode's own
+   * mid-season `pending`s (before the admin settles) keep the full
+   * `question.points` in maxPossible — only projected mode zeroes it.
+   */
+  isProjected: boolean;
 }): QuestionBreakdown {
   const {
     question,
@@ -148,13 +158,17 @@ function scoreOneAnswer(params: {
     correctUnitSet,
     shareForUnit,
     preResolved,
+    isProjected,
   } = params;
+
+  const maxPossibleFor = (status: QuestionBreakdown["status"]) =>
+    isProjected && status === "pending" ? 0 : question.points;
 
   if (!resolver) {
     return {
       questionId: question.id,
       awarded: 0,
-      maxPossible: question.points,
+      maxPossible: maxPossibleFor("pending"),
       status: "pending",
       boldnessMultiplier: 1,
       explanation: `No resolver registered for question type "${question.type}".`,
@@ -194,7 +208,7 @@ function scoreOneAnswer(params: {
   return {
     questionId: question.id,
     awarded,
-    maxPossible: question.points,
+    maxPossible: maxPossibleFor(base.status),
     status: base.status,
     boldnessMultiplier: multiplier,
     explanation: base.explanation,

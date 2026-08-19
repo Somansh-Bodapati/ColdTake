@@ -1,0 +1,210 @@
+{
+  "_comment": "Golden-file fixture for src/lib/scoring/golden.test.ts (doc 03 §2.6: \"A golden-file test that scores a fixture season and diffs against a committed expected output\"). A complete, realistic CPL 2026 season: full 10-team tournament, a slate covering all 10 question types, picks from all 6 group members (including some no-picks), and a final settled result. `teams`/`players` are here for realism/documentation only — score() itself only consumes questions/picks/results/config/memberIds, per src/lib/scoring/types.ts's ScoringInput.",
+  "tournament": {
+    "id": "cpl-2026",
+    "teamIds": [
+      "team-mum",
+      "team-che",
+      "team-del",
+      "team-kol",
+      "team-blr",
+      "team-hyd",
+      "team-pun",
+      "team-raj",
+      "team-guj",
+      "team-lko"
+    ]
+  },
+  "teams": [
+    { "id": "team-mum", "shortName": "MUM", "name": "Mumbai Monsoons" },
+    { "id": "team-che", "shortName": "CHE", "name": "Chennai Chargers" },
+    { "id": "team-del", "shortName": "DEL", "name": "Delhi Dynamite" },
+    { "id": "team-kol", "shortName": "KOL", "name": "Kolkata Krakens" },
+    { "id": "team-blr", "shortName": "BLR", "name": "Bengaluru Blazers" },
+    { "id": "team-hyd", "shortName": "HYD", "name": "Hyderabad Hawks" },
+    { "id": "team-pun", "shortName": "PUN", "name": "Punjab Panthers" },
+    { "id": "team-raj", "shortName": "RAJ", "name": "Rajasthan Rangers" },
+    { "id": "team-guj", "shortName": "GUJ", "name": "Gujarat Giants" },
+    { "id": "team-lko", "shortName": "LKO", "name": "Lucknow Lions" }
+  ],
+  "players": [
+    { "id": "player-mum-1", "teamId": "team-mum", "name": "Rohan Sharma" },
+    { "id": "player-che-1", "teamId": "team-che", "name": "Suresh Nair" },
+    { "id": "player-del-1", "teamId": "team-del", "name": "Sanjay Rao" },
+    { "id": "player-kol-1", "teamId": "team-kol", "name": "Manoj Chatterjee" },
+    { "id": "player-blr-1", "teamId": "team-blr", "name": "Amit Kapoor" }
+  ],
+  "memberIds": [
+    "member-priya",
+    "member-arjun",
+    "member-fatima",
+    "member-devansh",
+    "member-meera",
+    "member-oscar"
+  ],
+  "config": {
+    "boldPickEnabled": true,
+    "boldnessWeight": 1.0
+  },
+  "questions": [
+    { "id": "q-champion", "type": "champion", "config": {}, "points": 30 },
+    { "id": "q-runner-up", "type": "runner_up", "config": {}, "points": 20 },
+    { "id": "q-top4", "type": "top_n_unordered", "config": { "n": 4 }, "points": 25 },
+    { "id": "q-podium", "type": "top_n_ordered", "config": { "n": 3, "exactBonus": 10 }, "points": 30 },
+    { "id": "q-wooden-spoon", "type": "wooden_spoon", "config": {}, "points": 15 },
+    { "id": "q-orange-cap", "type": "stat_leader", "config": { "statCategory": "runs" }, "points": 20 },
+    {
+      "id": "q-guj-over-under",
+      "type": "team_over_under",
+      "config": { "teamId": "team-guj", "threshold": 5, "comparison": "over" },
+      "points": 15
+    },
+    { "id": "q-total-sixes", "type": "numeric", "config": { "secondPlaceRatio": 0.5 }, "points": 20 },
+    { "id": "q-super-over-final", "type": "boolean", "config": {}, "points": 10 },
+    {
+      "id": "q-fair-play",
+      "type": "custom",
+      "config": {
+        "options": [
+          { "id": "opt-mum", "label": "Mumbai Monsoons" },
+          { "id": "opt-che", "label": "Chennai Chargers" },
+          { "id": "opt-del", "label": "Delhi Dynamite" }
+        ]
+      },
+      "points": 10
+    }
+  ],
+  "picks": [
+    { "questionId": "q-champion", "memberId": "member-priya", "answer": { "teamId": "team-mum" } },
+    { "questionId": "q-champion", "memberId": "member-arjun", "answer": { "teamId": "team-che" } },
+    { "questionId": "q-champion", "memberId": "member-fatima", "answer": { "teamId": "team-mum" } },
+    { "questionId": "q-champion", "memberId": "member-devansh", "answer": { "teamId": "team-del" } },
+    { "questionId": "q-champion", "memberId": "member-oscar", "answer": { "teamId": "team-mum" } },
+
+    { "questionId": "q-runner-up", "memberId": "member-priya", "answer": { "teamId": "team-che" } },
+    { "questionId": "q-runner-up", "memberId": "member-arjun", "answer": { "teamId": "team-mum" } },
+    { "questionId": "q-runner-up", "memberId": "member-fatima", "answer": { "teamId": "team-del" } },
+    { "questionId": "q-runner-up", "memberId": "member-devansh", "answer": { "teamId": "team-che" } },
+    { "questionId": "q-runner-up", "memberId": "member-meera", "answer": { "teamId": "team-che" } },
+
+    {
+      "questionId": "q-top4",
+      "memberId": "member-priya",
+      "answer": { "teamIds": ["team-mum", "team-che", "team-del", "team-kol"] }
+    },
+    {
+      "questionId": "q-top4",
+      "memberId": "member-arjun",
+      "answer": { "teamIds": ["team-mum", "team-che", "team-del", "team-blr"] }
+    },
+    {
+      "questionId": "q-top4",
+      "memberId": "member-fatima",
+      "answer": { "teamIds": ["team-hyd", "team-pun", "team-raj", "team-guj"] }
+    },
+    {
+      "questionId": "q-top4",
+      "memberId": "member-devansh",
+      "answer": { "teamIds": ["team-mum", "team-che", "team-kol", "team-blr"] }
+    },
+    {
+      "questionId": "q-top4",
+      "memberId": "member-meera",
+      "answer": { "teamIds": ["team-mum", "team-del", "team-kol", "team-pun"] }
+    },
+
+    {
+      "questionId": "q-podium",
+      "memberId": "member-priya",
+      "answer": { "teamIds": ["team-mum", "team-che", "team-del"] }
+    },
+    {
+      "questionId": "q-podium",
+      "memberId": "member-arjun",
+      "answer": { "teamIds": ["team-mum", "team-del", "team-che"] }
+    },
+    {
+      "questionId": "q-podium",
+      "memberId": "member-fatima",
+      "answer": { "teamIds": ["team-che", "team-mum", "team-del"] }
+    },
+    {
+      "questionId": "q-podium",
+      "memberId": "member-devansh",
+      "answer": { "teamIds": ["team-mum", "team-che", "team-kol"] }
+    },
+    {
+      "questionId": "q-podium",
+      "memberId": "member-meera",
+      "answer": { "teamIds": ["team-hyd", "team-pun", "team-raj"] }
+    },
+
+    { "questionId": "q-wooden-spoon", "memberId": "member-priya", "answer": { "teamId": "team-lko" } },
+    { "questionId": "q-wooden-spoon", "memberId": "member-arjun", "answer": { "teamId": "team-guj" } },
+    { "questionId": "q-wooden-spoon", "memberId": "member-fatima", "answer": { "teamId": "team-lko" } },
+    { "questionId": "q-wooden-spoon", "memberId": "member-devansh", "answer": { "teamId": "team-raj" } },
+    { "questionId": "q-wooden-spoon", "memberId": "member-meera", "answer": { "teamId": "team-lko" } },
+
+    { "questionId": "q-orange-cap", "memberId": "member-priya", "answer": { "playerId": "player-mum-1" } },
+    { "questionId": "q-orange-cap", "memberId": "member-arjun", "answer": { "playerId": "player-che-1" } },
+    { "questionId": "q-orange-cap", "memberId": "member-fatima", "answer": { "playerId": "player-mum-1" } },
+    { "questionId": "q-orange-cap", "memberId": "member-devansh", "answer": { "playerId": "player-del-1" } },
+    { "questionId": "q-orange-cap", "memberId": "member-meera", "answer": { "playerId": "player-mum-1" } },
+
+    { "questionId": "q-guj-over-under", "memberId": "member-priya", "answer": { "bool": true } },
+    { "questionId": "q-guj-over-under", "memberId": "member-arjun", "answer": { "bool": false } },
+    { "questionId": "q-guj-over-under", "memberId": "member-fatima", "answer": { "bool": true } },
+    { "questionId": "q-guj-over-under", "memberId": "member-devansh", "answer": { "bool": false } },
+    { "questionId": "q-guj-over-under", "memberId": "member-oscar", "answer": { "bool": true } },
+
+    { "questionId": "q-total-sixes", "memberId": "member-priya", "answer": { "value": 1450 } },
+    { "questionId": "q-total-sixes", "memberId": "member-arjun", "answer": { "value": 1400 } },
+    { "questionId": "q-total-sixes", "memberId": "member-fatima", "answer": { "value": 1500 } },
+    { "questionId": "q-total-sixes", "memberId": "member-devansh", "answer": { "value": 1460 } },
+    { "questionId": "q-total-sixes", "memberId": "member-oscar", "answer": { "value": 2000 } },
+
+    { "questionId": "q-super-over-final", "memberId": "member-priya", "answer": { "bool": true } },
+    { "questionId": "q-super-over-final", "memberId": "member-arjun", "answer": { "bool": false } },
+    { "questionId": "q-super-over-final", "memberId": "member-fatima", "answer": { "bool": true } },
+    { "questionId": "q-super-over-final", "memberId": "member-devansh", "answer": { "bool": true } },
+    { "questionId": "q-super-over-final", "memberId": "member-meera", "answer": { "bool": false } },
+
+    { "questionId": "q-fair-play", "memberId": "member-priya", "answer": { "optionId": "opt-che" } },
+    { "questionId": "q-fair-play", "memberId": "member-arjun", "answer": { "optionId": "opt-mum" } },
+    { "questionId": "q-fair-play", "memberId": "member-fatima", "answer": { "optionId": "opt-che" } },
+    { "questionId": "q-fair-play", "memberId": "member-devansh", "answer": { "optionId": "opt-del" } },
+    { "questionId": "q-fair-play", "memberId": "member-meera", "answer": { "optionId": "opt-che" } }
+  ],
+  "results": {
+    "finalResult": {
+      "championTeamId": "team-mum",
+      "runnerUpTeamId": "team-che"
+    },
+    "finalTable": [
+      { "teamId": "team-mum", "position": 1 },
+      { "teamId": "team-che", "position": 2 },
+      { "teamId": "team-del", "position": 3 },
+      { "teamId": "team-kol", "position": 4 },
+      { "teamId": "team-blr", "position": 5 },
+      { "teamId": "team-hyd", "position": 6 },
+      { "teamId": "team-pun", "position": 7 },
+      { "teamId": "team-raj", "position": 8 },
+      { "teamId": "team-guj", "position": 9 },
+      { "teamId": "team-lko", "position": 10 }
+    ],
+    "statLeaders": {
+      "runs": [
+        { "playerId": "player-mum-1", "value": 612 },
+        { "playerId": "player-che-1", "value": 578 },
+        { "playerId": "player-del-1", "value": 544 },
+        { "playerId": "player-kol-1", "value": 510 },
+        { "playerId": "player-blr-1", "value": 476 }
+      ]
+    },
+    "questionResults": {
+      "q-total-sixes": { "value": 1450 },
+      "q-super-over-final": { "bool": true },
+      "q-fair-play": { "optionId": "opt-che" }
+    }
+  }
+}
