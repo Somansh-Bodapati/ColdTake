@@ -206,27 +206,36 @@ export interface MembershipCheck {
 // not be able to distinguish "group doesn't exist" from "you're not in it"
 // via a 403 (both already read as "you can't see this"), so 404 for the
 // former is fine and simpler than uniformly masking it as 403.
+//
+// One indexed left-join query rather than a "does the group exist" select
+// followed by a separate "is this user a member" select (Session 16's cost
+// audit, docs/DECISIONS.md's Neon-CU-hours constraint): this function sits
+// underneath nearly every group- and season-scoped read/write in the API
+// surface, so the second round trip it used to cost was paid on almost
+// every request in the app.
 export async function requireMembership(
   db: Db,
   groupId: string,
   userId: string
 ): Promise<MembershipCheck> {
-  const [groupRow] = await db.select({ id: group.id }).from(group).where(eq(group.id, groupId)).limit(1);
-  if (!groupRow) {
-    throw new AppError(404, "Group not found");
-  }
-
-  const [memberRow] = await db
-    .select({ id: member.id, role: member.role })
-    .from(member)
-    .where(and(eq(member.groupId, groupId), eq(member.userId, userId), isNull(member.removedAt)))
+  const [row] = await db
+    .select({ groupId: group.id, memberId: member.id, role: member.role })
+    .from(group)
+    .leftJoin(
+      member,
+      and(eq(member.groupId, group.id), eq(member.userId, userId), isNull(member.removedAt))
+    )
+    .where(eq(group.id, groupId))
     .limit(1);
 
-  if (!memberRow) {
+  if (!row) {
+    throw new AppError(404, "Group not found");
+  }
+  if (!row.memberId || !row.role) {
     throw new AppError(403, "You are not a member of this group");
   }
 
-  return { memberId: memberRow.id, role: memberRow.role };
+  return { memberId: row.memberId, role: row.role };
 }
 
 // Every admin endpoint must call this (this session's brief, task 6).
