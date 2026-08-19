@@ -464,13 +464,40 @@ export const liveStateRelations = relations(liveState, ({ one }) => ({
   }),
 }));
 
+// Same status vocabulary as src/lib/scoring/types.ts's `PickStatus` —
+// duplicated rather than imported, to keep the dependency direction the
+// scoring engine already establishes (src/lib/scoring/types.ts imports
+// PickAnswer/QuestionConfig/QuestionType *from* this file, never the
+// reverse — CLAUDE.md rule 1's scoring-engine purity extends to "the engine
+// owns its own types," so this file doesn't reach back into it).
+export type StandingsPickStatus =
+  | "correct"
+  | "partial"
+  | "incorrect"
+  | "pending"
+  | "no_pick";
+
+// The doc's own shape is just { questionId, points }; the extra fields
+// (maxPossible/status/boldnessMultiplier/explanation) are this session's
+// addition (Session 9 brief, task 4) so a member's breakdown view can be
+// rendered directly from the snapshot — the same shape
+// src/lib/scoring/types.ts's `QuestionBreakdown` already produces — without
+// the read path ever recomputing `score()`.
 export interface StandingsBreakdownEntry {
   questionId: string;
   points: number;
+  maxPossible: number;
+  status: StandingsPickStatus;
+  boldnessMultiplier: number;
+  explanation: string;
 }
 
 export interface StandingsEntry {
   memberId: string;
+  // Denormalized at write time (Session 9 brief, task 5): the leaderboard
+  // read path must stay a single query against this table alone, never a
+  // join out to member/user for display names.
+  displayName: string;
   rank: number;
   points: number;
   delta: number;

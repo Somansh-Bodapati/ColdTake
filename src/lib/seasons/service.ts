@@ -73,7 +73,11 @@ export async function loadSeason(db: Db, seasonId: string, now: Date) {
   return updated ?? { ...row, status: effective };
 }
 
-async function activeMemberIds(db: Db, groupId: string): Promise<string[]> {
+// Exported for src/lib/standings/service.ts: a recompute triggered before
+// lock (season still `open`, no member_snapshot frozen yet) needs the same
+// "who's actually in the group right now" set loadSeason itself falls back
+// to when it freezes the snapshot at lock.
+export async function activeMemberIds(db: Db, groupId: string): Promise<string[]> {
   const rows = await db
     .select({ id: member.id })
     .from(member)

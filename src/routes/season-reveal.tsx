@@ -93,7 +93,12 @@ export default function SeasonRevealPage() {
         ← Back to group
       </Link>
 
-      <h1 className="text-2xl font-semibold">{season.season.name} — reveal</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-semibold">{season.season.name} — reveal</h1>
+        <Link className="text-sm underline" to={`/groups/${groupId}/seasons/${seasonId}/standings`}>
+          Standings →
+        </Link>
+      </div>
 
       {notRevealedYet && (
         <p className="text-muted-foreground text-sm">
