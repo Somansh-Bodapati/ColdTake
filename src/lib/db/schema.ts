@@ -539,6 +539,41 @@ export const standingsSnapshotRelations = relations(
   })
 );
 
+// Same shape as scoring/types.ts's FinalResult, duplicated rather than
+// imported — this file never reaches into src/lib/scoring (see
+// StandingsPickStatus's comment above for why the dependency direction only
+// ever runs scoring -> schema, never the reverse).
+export interface ManualFinalResult {
+  championTeamId?: string;
+  runnerUpTeamId?: string;
+}
+
+// Session 10's admin-edited backing store for ManualProvider
+// (src/lib/providers/manual-provider.ts) — doc 02 §4.3: "ManualProvider
+// (reads from an admin-edited table)." One row per tournament, overwritten
+// on every admin save (POST /api/admin/manual-standings/:tournamentId, doc
+// 03 §3.6) — this is the *input* an admin types in; `live_state` below is
+// the *output* of running it (or any other provider) through ingestion.
+export const manualStandingsInput = pgTable("manual_standings_input", {
+  tournamentId: text("tournament_id")
+    .primaryKey()
+    .references(() => tournament.id, { onDelete: "cascade" }),
+  tableData: jsonb("table_data").$type<LiveStateTableRow[]>().notNull(),
+  statLeaders: jsonb("stat_leaders").$type<LiveStateStatLeaders>().notNull(),
+  finalResult: jsonb("final_result").$type<ManualFinalResult>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedBy: text("updated_by"), // user_id of the admin who last saved it
+});
+
+export const manualStandingsInputRelations = relations(manualStandingsInput, ({ one }) => ({
+  tournament: one(tournament, {
+    fields: [manualStandingsInput.tournamentId],
+    references: [tournament.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // 1.6 Social
 // ---------------------------------------------------------------------------

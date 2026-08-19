@@ -150,9 +150,17 @@ export default function SeasonStandingsPage() {
       )}
 
       {isAdmin && (
-        <Button type="button" size="sm" variant="outline" disabled={recomputing} onClick={() => void handleRecompute()}>
-          {recomputing ? "Recomputing…" : "Recompute standings"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" size="sm" variant="outline" disabled={recomputing} onClick={() => void handleRecompute()}>
+            {recomputing ? "Recomputing…" : "Recompute standings"}
+          </Button>
+          <Link
+            className="text-muted-foreground text-sm underline"
+            to={`/groups/${groupId}/seasons/${seasonId}/manual-standings`}
+          >
+            Enter standings manually
+          </Link>
+        </div>
       )}
 
       {!snapshot && (

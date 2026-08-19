@@ -7,4 +7,5 @@ export default [
   route("groups/:groupId/seasons/:seasonId/picks", "routes/season-picks.tsx"),
   route("groups/:groupId/seasons/:seasonId/reveal", "routes/season-reveal.tsx"),
   route("groups/:groupId/seasons/:seasonId/standings", "routes/season-standings.tsx"),
+  route("groups/:groupId/seasons/:seasonId/manual-standings", "routes/season-manual-standings.tsx"),
 ] satisfies RouteConfig;
