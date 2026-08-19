@@ -1,0 +1,7 @@
+{
+  "status": "success",
+  "data": [
+    { "playerId": "cricketdata-player-1", "playerName": "Rohit Sharma", "value": "312" },
+    { "playerId": "cricketdata-player-2", "playerName": "Ruturaj Gaikwad", "value": "289" }
+  ]
+}

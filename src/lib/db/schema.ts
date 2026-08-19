@@ -150,10 +150,19 @@ export type Sport = "cricket" | "football";
 // 'upcoming' | 'live' | 'completed' | 'abandoned'
 export type TournamentStatus = "upcoming" | "live" | "completed" | "abandoned";
 
+// Which StandingsProvider (src/lib/providers/types.ts) ingestion should use
+// for this tournament. Genuinely missing before Session 11 — ManualProvider
+// was the only implementation, so there was nothing to choose between.
+// Defaults to "manual" wherever unset (api/ingest/[tournamentId].ts), so
+// every tournament created before this field existed keeps behaving exactly
+// as it did.
+export type TournamentProviderKey = "manual" | "cricketdata";
+
 // Sport-specific: stat categories available, playoff format.
 export interface TournamentConfig {
   statCategories?: string[];
   playoffFormat?: string;
+  provider?: TournamentProviderKey;
   [key: string]: unknown;
 }
 

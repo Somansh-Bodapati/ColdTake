@@ -11,7 +11,7 @@ import type { Db } from "@/lib/auth/session";
 import { liveState, season, tournament, type LiveStateStatLeaders } from "@/lib/db/schema";
 import { AppError } from "@/lib/errors";
 import { recomputeStandings, type StandingsSnapshotRow } from "@/lib/standings/service";
-import type { StandingsProvider } from "@/lib/providers/types";
+import type { StandingsProvider, TeamStanding } from "@/lib/providers/types";
 
 export type LiveStateRow = typeof liveState.$inferSelect;
 
@@ -26,6 +26,54 @@ const ACTIVE_SEASON_STATUSES = ["open", "locked"] as const;
 export interface IngestResult {
   liveState: LiveStateRow;
   recomputedSnapshots: StandingsSnapshotRow[];
+}
+
+// This session's brief, task 3: "a data-provider failure must never surface
+// as an error page to end users." A live provider (CricketDataProvider) can
+// time out, return malformed JSON, or return a response missing fields it
+// needs — any of those throws out of provider.getTable/getStatLeaders.
+// Rather than letting that exception propagate (which would 500 the
+// ingestion endpoint and, transitively, whatever triggered it), this catches
+// it here — the one place shared by every provider — logs it, and returns
+// the tournament's existing live_state row untouched. No new snapshot is
+// computed in that case: nothing about the scored input changed, so there's
+// nothing new to recompute. If no live_state row exists yet at all (first
+// ingestion ever fails), there is no "last good" to fall back to; that's the
+// one case this still surfaces as an error, to whatever internal caller
+// triggered ingestion (never to an end user — the public standings read path
+// never calls this function, it only ever reads the live_state table
+// src/lib/standings/service.ts already wrote).
+async function fetchProviderData(
+  db: Db,
+  provider: StandingsProvider,
+  tournamentRow: typeof tournament.$inferSelect,
+  tournamentId: string
+): Promise<{ tableData: TeamStanding[]; statLeaders: LiveStateStatLeaders } | { fallback: LiveStateRow }> {
+  const statCategories = tournamentRow.config.statCategories ?? [];
+  try {
+    const tableData = await provider.getTable(tournamentId);
+    const statLeaders: LiveStateStatLeaders = {};
+    for (const category of statCategories) {
+      const entries = await provider.getStatLeaders(tournamentId, category);
+      if (entries.length > 0) {
+        statLeaders[category] = entries;
+      }
+    }
+    return { tableData, statLeaders };
+  } catch (error) {
+    console.error(
+      `ingestTournament: provider "${provider.source}" failed for tournament ${tournamentId}, keeping last good live_state`,
+      error
+    );
+    const [existing] = await db.select().from(liveState).where(eq(liveState.tournamentId, tournamentId)).limit(1);
+    if (!existing) {
+      throw new AppError(
+        502,
+        `Standings provider "${provider.source}" failed and no previous live_state exists for tournament ${tournamentId}`
+      );
+    }
+    return { fallback: existing };
+  }
 }
 
 // Idempotency (this session's brief, task 6): live_state is a single row
@@ -48,15 +96,14 @@ export async function ingestTournament(
     throw new AppError(404, "Tournament not found");
   }
 
-  const statCategories = tournamentRow.config.statCategories ?? [];
-  const tableData = await provider.getTable(tournamentId);
-  const statLeaders: LiveStateStatLeaders = {};
-  for (const category of statCategories) {
-    const entries = await provider.getStatLeaders(tournamentId, category);
-    if (entries.length > 0) {
-      statLeaders[category] = entries;
-    }
+  const providerData = await fetchProviderData(db, provider, tournamentRow, tournamentId);
+  if ("fallback" in providerData) {
+    // Provider failed and there's a previous good live_state: serve it
+    // unchanged, skip the write and the recompute fan-out below — nothing
+    // about the scored input actually changed.
+    return { liveState: providerData.fallback, recomputedSnapshots: [] };
   }
+  const { tableData, statLeaders } = providerData;
 
   const [liveStateRow] = await db
     .insert(liveState)

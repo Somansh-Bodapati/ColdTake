@@ -53,7 +53,12 @@ export async function makeGroupWithAdminAndMember(
 // each test run gets an isolated, disposable tournament row.
 export async function insertTestTournament(
   createdTournamentIds: string[],
-  overrides: { startsAt?: Date; statCategories?: string[] } = {}
+  overrides: {
+    startsAt?: Date;
+    statCategories?: string[];
+    providerKey?: string;
+    provider?: "manual" | "cricketdata";
+  } = {}
 ): Promise<string> {
   const id = `test-tournament-${createId()}`;
   await db.insert(tournament).values({
@@ -65,8 +70,11 @@ export async function insertTestTournament(
     endsAt: null,
     status: "upcoming",
     teamCount: 8,
-    providerKey: null,
-    config: { statCategories: overrides.statCategories ?? ["runs", "wickets", "sixes"] },
+    providerKey: overrides.providerKey ?? null,
+    config: {
+      statCategories: overrides.statCategories ?? ["runs", "wickets", "sixes"],
+      provider: overrides.provider,
+    },
   });
   createdTournamentIds.push(id);
   return id;
