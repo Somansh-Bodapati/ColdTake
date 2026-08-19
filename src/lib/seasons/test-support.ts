@@ -7,7 +7,7 @@
 
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { group, member, tournament, user } from "@/lib/db/schema";
+import { group, member, team, tournament, user } from "@/lib/db/schema";
 import { createAnonymousUser } from "@/lib/auth/session";
 import { createGroup, joinGroupByCode } from "@/lib/groups/service";
 import { createId } from "@/lib/db/id";
@@ -70,6 +70,35 @@ export async function insertTestTournament(
   });
   createdTournamentIds.push(id);
   return id;
+}
+
+// Team rows for a test tournament — needed by anything that exercises
+// team-shaped pick answers (champion, runner_up, wooden_spoon, top_n_*,
+// team_over_under), since src/lib/scoring/resolvers/*.ts's `validate`
+// checks the picked teamId against `tournament.teamIds`, which
+// src/lib/picks/service.ts builds from this table, not the tournament
+// catalogue row. Cleaned up automatically via team.tournament_id's
+// onDelete: "cascade" when insertTestTournament's caller deletes the
+// tournament row in cleanupSeasonFixtures — no separate cleanup list needed.
+//
+// `team.id` is a global primary key, not scoped per tournament, so plain
+// labels like "mi" would collide across concurrently-run test files; this
+// namespaces each id under the (already-unique) tournamentId and returns
+// the actual ids to use in assertions, keyed by the label passed in.
+export async function insertTestTeams(
+  tournamentId: string,
+  labels: string[]
+): Promise<Record<string, string>> {
+  const idByLabel = Object.fromEntries(labels.map((label) => [label, `${tournamentId}-${label}`]));
+  await db.insert(team).values(
+    labels.map((label) => ({
+      id: idByLabel[label] as string,
+      tournamentId,
+      name: label.toUpperCase(),
+      shortName: label.toUpperCase(),
+    }))
+  );
+  return idByLabel;
 }
 
 export async function cleanupSeasonFixtures(

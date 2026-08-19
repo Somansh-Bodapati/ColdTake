@@ -204,7 +204,10 @@ export default function SeasonNewPage() {
     try {
       const published = await publishSeason(season.season.id);
       setSeason({ ...season, season: published.season });
-      navigate(`/groups/${groupId}`);
+      // Publishing opens the pick window immediately (doc 01 §2.3 step 6),
+      // so the natural next stop is the admin's own pick sheet — same page
+      // every other member lands on for this season.
+      navigate(`/groups/${groupId}/seasons/${season.season.id}/picks`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not publish the season");
     } finally {

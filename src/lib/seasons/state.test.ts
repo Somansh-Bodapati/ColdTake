@@ -3,7 +3,14 @@
 // whole point: these must hold true "even if every scheduled job dies."
 
 import { describe, expect, it } from "vitest";
-import { canPublish, effectiveSeasonStatus, isMutableStatus, isTerminalStatus } from "./state";
+import {
+  canPublish,
+  effectiveSeasonStatus,
+  isMutableStatus,
+  isPickWindowOpen,
+  isRevealed,
+  isTerminalStatus,
+} from "./state";
 
 const LOCK_AT = new Date("2026-03-20T14:00:00.000Z");
 const BEFORE_LOCK = new Date("2026-03-20T13:59:59.000Z");
@@ -56,6 +63,31 @@ describe("isMutableStatus", () => {
     expect(isMutableStatus("locked")).toBe(false);
     expect(isMutableStatus("settled")).toBe(false);
     expect(isMutableStatus("voided")).toBe(false);
+  });
+});
+
+describe("isPickWindowOpen", () => {
+  it("is true only for open", () => {
+    expect(isPickWindowOpen("open")).toBe(true);
+    expect(isPickWindowOpen("draft")).toBe(false);
+    expect(isPickWindowOpen("locked")).toBe(false);
+    expect(isPickWindowOpen("settled")).toBe(false);
+    expect(isPickWindowOpen("voided")).toBe(false);
+  });
+});
+
+describe("isRevealed", () => {
+  // doc 01 §7.3 / §2.5: picks are invisible before lock, visible to every
+  // group member from the moment of lock onward.
+  it("is false for draft and open", () => {
+    expect(isRevealed("draft")).toBe(false);
+    expect(isRevealed("open")).toBe(false);
+  });
+
+  it("is true for locked, settled, and voided", () => {
+    expect(isRevealed("locked")).toBe(true);
+    expect(isRevealed("settled")).toBe(true);
+    expect(isRevealed("voided")).toBe(true);
   });
 });
 

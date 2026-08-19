@@ -66,6 +66,26 @@ export function canPublish({ questionCount, lockAt, now }: PublishCheck): boolea
   return questionCount >= 1 && lockAt.getTime() > now.getTime();
 }
 
+// Picks can be written only while the slate is live and unlocked — doc 01
+// §2.4 step 4 ("can revise freely until lock") and doc 03 §3.4 ("PUT
+// .../picks ... upsert, rejected after lock"). Deliberately narrower than
+// isMutableStatus: a *draft* season's questions can still change (so it
+// isn't "locked" in that sense) but it was never published, so members have
+// no slate to see or pick yet.
+export function isPickWindowOpen(status: SeasonStatus): boolean {
+  return status === "open";
+}
+
+// Picks become visible to every group member once lock_at has passed — doc
+// 01 §2.5.2 ("All picks become visible to all group members simultaneously")
+// and doc 03 §3.4 ("GET .../picks/all -> 403 before lock, full reveal
+// after"). This is the single security-critical predicate this session's
+// brief calls out: everything from `locked` onward reveals; `draft`/`open`
+// never do, regardless of who's asking.
+export function isRevealed(status: SeasonStatus): boolean {
+  return status !== "draft" && status !== "open";
+}
+
 // void/settle (locked -> settled, any -> voided) belong to the settlement
 // session (doc 03 §3.6) — out of scope here; this module only covers the
 // draft/open/locked edges this session's routes actually exercise.
