@@ -40,20 +40,37 @@ export const userRelations = relations(user, ({ many }) => ({
   createdGroups: many(group),
 }));
 
-// 'login' | 'claim'
-export type AuthTokenPurpose = "login" | "claim";
+// 'login' | 'claim' | 'session'. 'login' and 'claim' are single-use,
+// short-expiry magic-link tokens (doc 03 §5 security checklist); 'session'
+// is the long-lived cookie token for an ongoing signed-in session (Session
+// 5 — no dedicated session table exists, so it reuses this table rather
+// than adding one, per docs/DECISIONS.md).
+export type AuthTokenPurpose = "login" | "claim" | "session";
 
-// Magic link tokens for the claim/login flow.
-export const authToken = pgTable("auth_token", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull(), // store a hash, never the raw token
-  purpose: text("purpose").$type<AuthTokenPurpose>().notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  usedAt: timestamp("used_at", { withTimezone: true }),
-});
+// Magic-link and session tokens. Only ever stores a hash of the token —
+// never the raw value (doc 03 §5: "Magic-link tokens stored hashed,
+// single-use, short expiry").
+export const authToken = pgTable(
+  "auth_token",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(), // store a hash, never the raw token
+    purpose: text("purpose").$type<AuthTokenPurpose>().notNull(),
+    // Pending email for an in-flight 'claim' token — copied onto user.email
+    // only once the token is verified. Unused for 'login'/'session'.
+    email: text("email"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+  },
+  (table) => [
+    // Verify/session lookups go straight from raw token -> hash -> row.
+    unique("auth_token_token_hash_unique").on(table.tokenHash),
+    index("auth_token_user_id_purpose_idx").on(table.userId, table.purpose),
+  ]
+);
 
 export const authTokenRelations = relations(authToken, ({ one }) => ({
   user: one(user, { fields: [authToken.userId], references: [user.id] }),

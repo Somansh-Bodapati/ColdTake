@@ -8,6 +8,13 @@
       "when": 1787114083915,
       "tag": "0000_nebulous_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787144580309,
+      "tag": "0001_crazy_mentallo",
+      "breakpoints": true
     }
   ]
 }
