@@ -140,6 +140,15 @@ export default function GroupPage() {
         </p>
       </div>
 
+      {isAdmin && (
+        <Link
+          className="text-sm underline"
+          to={`/groups/${groupId}/seasons/new`}
+        >
+          + Set up a season
+        </Link>
+      )}
+
       <div>
         <h2 className="mb-2 font-medium">Members ({detail.members.length})</h2>
         <ul className="flex flex-col gap-2">
