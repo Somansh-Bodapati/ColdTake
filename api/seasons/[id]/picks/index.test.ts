@@ -9,6 +9,7 @@ import { db } from "@/lib/db/client";
 import { pickHistory, season } from "@/lib/db/schema";
 import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
 import { createSeason, getQuestions } from "@/lib/seasons/service";
+import { resetRateLimitForTests } from "@/lib/groups/rate-limit";
 import {
   cleanupSeasonFixtures,
   insertTestTeams,
@@ -22,6 +23,7 @@ const createdGroupIds: string[] = [];
 const createdTournamentIds: string[] = [];
 
 afterEach(async () => {
+  resetRateLimitForTests();
   await cleanupSeasonFixtures(createdGroupIds, createdUserIds, createdTournamentIds);
 });
 
@@ -181,5 +183,24 @@ describe("PUT /api/seasons/:id/picks", () => {
     expect(historyRows).toHaveLength(2);
     expect(historyRows[0]?.answer.teamId).toBe(teamIds.mi);
     expect(historyRows[1]?.answer.teamId).toBe(teamIds.rr);
+  });
+
+  // doc 03 §5 checklist: "Rate limiting on join, pick submission, and
+  // comment endpoints" — this was previously missing on this route.
+  it("rate-limits a member hammering pick submission with 429", async () => {
+    const fixture = await makeGroupWithAdminAndMember(createdUserIds, createdGroupIds);
+    const tournamentId = await insertTestTournament(createdTournamentIds);
+    const { seasonId, questionId, teamIds } = await makeOpenSeasonWithChampionQuestion(fixture.groupId, tournamentId);
+
+    let lastStatus = 200;
+    for (let i = 0; i < 61; i += 1) {
+      const response = await handler(
+        putPicksRequest(seasonId, fixture.memberSessionToken, {
+          picks: [{ questionId, answer: { teamId: i % 2 === 0 ? teamIds.mi : teamIds.rr } }],
+        })
+      );
+      lastStatus = response.status;
+    }
+    expect(lastStatus).toBe(429);
   });
 });
