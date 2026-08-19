@@ -41,6 +41,22 @@ export async function parseJsonBody<T>(
   return result.data;
 }
 
+// Pulls one path segment out of `request.url` by its position from the end
+// (0 = last segment). Used by dynamic routes under api/groups/[id]/... to
+// read :id/:memberId out of the URL directly, rather than relying on
+// Vercel's convention of also injecting bracket segments as query params —
+// parsing the pathname works identically against a real deployed request
+// and a `new Request(...)` built by hand in a test.
+export function pathSegment(request: Request, fromEnd: number): string {
+  const { pathname } = new URL(request.url);
+  const segments = pathname.split("/").filter(Boolean);
+  const value = segments[segments.length - 1 - fromEnd];
+  if (!value) {
+    throw new AppError(400, "Missing path parameter");
+  }
+  return decodeURIComponent(value);
+}
+
 // Wraps a handler so a thrown AppError (or unexpected error) becomes a JSON
 // error Response instead of an unhandled rejection reaching the runtime.
 export function withErrorHandling(
