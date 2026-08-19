@@ -5,23 +5,27 @@
 // way." This module is the caller-side half of that contract; the engine
 // itself never touches either table (CLAUDE.md rule 1).
 //
-// Neither table has a prior write path in this codebase yet — ingestion
-// (doc 03 §4.2/session 11) and settlement (session 12) haven't shipped —
-// so the exact JSON shape `result.payload` carries per `kind` is this
-// session's own decision, made to match the scoring engine's existing
-// structural types 1:1 rather than inventing a new intermediate shape:
+// Neither table had a prior write path before Session 11/12 shipped
+// ingestion/settlement — so the exact JSON shape `result.payload` carries
+// per `kind` was this session's own decision, made to match the scoring
+// engine's existing structural types 1:1 rather than inventing a new
+// intermediate shape:
 //   - kind 'final_table'  -> payload: { rows: FinalTableRow[] }
 //   - kind 'final_result' -> payload: FinalResult (championTeamId?,
 //                             runnerUpTeamId?), stored directly
 //   - kind 'stat_leaders' -> payload: Record<string, StatLeaderEntry[]>,
 //                             stored directly
-// A later ingestion session is free to change how these rows get written,
-// as long as it keeps writing this shape — or updates this module to match.
+// Session 12 (settlement) is the module that actually writes `result` rows
+// (src/lib/seasons/settlement.ts) and, separately, `question_result` rows
+// for the `boolean`/`custom`/`numeric` types and any admin override — this
+// module reads both back into one `ResultSet.questionResults`, keyed by
+// questionId (types.ts's own doc comment on that field).
 
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import type { Db } from "@/lib/auth/session";
-import { liveState, result } from "@/lib/db/schema";
+import { liveState, question, questionResult, result, type PickAnswer } from "@/lib/db/schema";
 import type {
+  Answer,
   FinalResult,
   FinalTableRow,
   ResultSet,
@@ -76,21 +80,60 @@ function readStatLeadersPayload(
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
-// Settled mode (season status 'settled'): builds the ResultSet from the
-// most recent `is_final` row of each kind. `questionResults` (the
-// admin-manual-settlement facts for boolean/custom/numeric) is left
-// undefined here — that's session 12's write path, out of this session's
-// scope; those question types simply resolve `pending` until it exists,
-// exactly like doc 03 §2.5's projected-mode "cannot be projected" case.
-export async function buildResultSetFromResults(
+// Latest (by settledAt) question_result row per questionId among this
+// season's questions — the "current value" of an append-only table, same
+// pattern `result` itself uses (latest is_final row per kind) and
+// pick_history's "history, current value is just the newest row" model.
+// An admin override simply inserts a newer row; nothing here ever needs to
+// know a question was overridden versus settled once, only what the value
+// is *now*.
+async function loadQuestionResults(
   db: Db,
-  tournamentId: string
-): Promise<ResultSet> {
+  seasonId: string
+): Promise<Record<string, Answer> | undefined> {
+  const questionRows = await db
+    .select({ id: question.id })
+    .from(question)
+    .where(eq(question.seasonId, seasonId));
+  const questionIds = questionRows.map((row) => row.id);
+  if (questionIds.length === 0) {
+    return undefined;
+  }
+
   const rows = await db
     .select()
-    .from(result)
-    .where(eq(result.tournamentId, tournamentId))
-    .orderBy(desc(result.recordedAt));
+    .from(questionResult)
+    .where(inArray(questionResult.questionId, questionIds))
+    .orderBy(desc(questionResult.settledAt));
+
+  const out: Record<string, PickAnswer> = {};
+  for (const row of rows) {
+    if (!(row.questionId in out)) {
+      out[row.questionId] = row.answer;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+// Settled mode (season status 'settled'): builds the ResultSet from the
+// most recent `is_final` row of each kind, plus (session 12) this season's
+// manually-settled/overridden `question_result` facts for `boolean`/
+// `custom`/`numeric` — those types simply resolve `pending` until a
+// settlement row exists, exactly like doc 03 §2.5's projected-mode "cannot
+// be projected" case.
+export async function buildResultSetFromResults(
+  db: Db,
+  tournamentId: string,
+  seasonId: string
+): Promise<ResultSet> {
+  const [rows, questionResults] = await Promise.all([
+    db
+      .select()
+      .from(result)
+      .where(eq(result.tournamentId, tournamentId))
+      .orderBy(desc(result.recordedAt)),
+    loadQuestionResults(db, seasonId),
+  ]);
 
   const out: ResultSet = {};
   for (const row of rows) {
@@ -102,6 +145,9 @@ export async function buildResultSetFromResults(
     } else if (row.kind === "stat_leaders" && out.statLeaders === undefined) {
       out.statLeaders = readStatLeadersPayload(row.payload);
     }
+  }
+  if (questionResults) {
+    out.questionResults = questionResults;
   }
   return out;
 }

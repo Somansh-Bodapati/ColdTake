@@ -267,6 +267,14 @@ export const season = pgTable(
       .notNull()
       .defaultNow(),
     settledAt: timestamp("settled_at", { withTimezone: true }),
+    // Session 12: the `voided` transition (doc 01 §4.3: "Team withdraws or
+    // tournament is abandoned — Admin can void the entire season; no scores
+    // recorded"). `voidReason` is required by the service layer, not the
+    // schema, so it doubles as this action's audit trail (who/when comes
+    // from the admin session that made the call and this timestamp).
+    voidedAt: timestamp("voided_at", { withTimezone: true }),
+    voidReason: text("void_reason"),
+    voidedBy: text("voided_by"), // user_id of the admin who voided it
   },
   (table) => [
     unique().on(table.groupId, table.tournamentId),
@@ -430,6 +438,50 @@ export const resultRelations = relations(result, ({ one }) => ({
   tournament: one(tournament, {
     fields: [result.tournamentId],
     references: [tournament.id],
+  }),
+}));
+
+// Session 12: settled facts for question types that aren't derivable from
+// `result`'s finalTable/finalResult/statLeaders — `boolean`, `custom`, and
+// `numeric` (src/lib/scoring/types.ts's ResultSet.questionResults doc
+// comment). Also the doc 01 §4.3 "data source disagrees with reality" escape
+// hatch for *every* type: an admin override on an already-settled question
+// is just another row here with source='override' and a required `note`.
+// Append-only like `result` and `pick_history` — "store this, don't just
+// silently overwrite" (this session's brief, task 3) — so the current
+// settled value for a question is simply its latest row by `settledAt`.
+export type QuestionResultSource = "manual" | "override";
+
+export const questionResult = pgTable(
+  "question_result",
+  {
+    id: text("id").primaryKey(),
+    questionId: text("question_id")
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
+    answer: jsonb("answer").$type<PickAnswer>().notNull(),
+    source: text("source").$type<QuestionResultSource>().notNull(),
+    // Required (enforced in src/lib/seasons/settlement.ts) when source is
+    // 'override' — the audit note doc 01 §4.3 calls for. Optional, usually
+    // omitted, for the first ('manual') settlement of a question.
+    note: text("note"),
+    settledBy: text("settled_by").notNull(), // user_id of the admin who settled/overrode it
+    settledAt: timestamp("settled_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("question_result_question_id_settled_at_idx").on(
+      table.questionId,
+      table.settledAt.desc()
+    ),
+  ]
+);
+
+export const questionResultRelations = relations(questionResult, ({ one }) => ({
+  question: one(question, {
+    fields: [questionResult.questionId],
+    references: [question.id],
   }),
 }));
 

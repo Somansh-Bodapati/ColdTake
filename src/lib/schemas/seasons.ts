@@ -167,6 +167,8 @@ export const seasonResponseSchema = z.object({
   scoringConfig: seasonScoringConfigSchema,
   createdAt: z.string(),
   settledAt: z.string().nullable(),
+  voidedAt: z.string().nullable(),
+  voidReason: z.string().nullable(),
 });
 export type SeasonResponse = z.infer<typeof seasonResponseSchema>;
 

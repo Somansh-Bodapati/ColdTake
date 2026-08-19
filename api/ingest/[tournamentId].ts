@@ -11,36 +11,18 @@
 // "manual" so every tournament created before this field existed keeps
 // behaving exactly as it did. Nothing else in the ingestion pipeline
 // (ingest.ts) needs to know or care which provider produced the data.
+// Session 12 lifted that provider-selection logic out into
+// src/lib/providers/resolve.ts, since api/seasons/[id]/settle.ts needs the
+// exact same lookup to fetch a tournament's final result.
 
-import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { tournament } from "@/lib/db/schema";
-import { ManualProvider } from "@/lib/providers/manual-provider";
-import { CricketDataProvider } from "@/lib/providers/cricketdata-provider";
 import { ingestTournament } from "@/lib/providers/ingest";
 import { isValidIngestSecret, readBearerToken } from "@/lib/providers/ingest-auth";
 import { toIngestResponse } from "@/lib/providers/dto";
-import type { StandingsProvider } from "@/lib/providers/types";
+import { resolveStandingsProvider } from "@/lib/providers/resolve";
 import type { IngestResponse } from "@/lib/schemas/providers";
 import { jsonResponse, pathSegment, withErrorHandling } from "@/lib/http";
 import { AppError } from "@/lib/errors";
-
-async function resolveProvider(tournamentId: string): Promise<StandingsProvider> {
-  const [tournamentRow] = await db.select().from(tournament).where(eq(tournament.id, tournamentId)).limit(1);
-  if (!tournamentRow) {
-    throw new AppError(404, "Tournament not found");
-  }
-
-  if (tournamentRow.config.provider === "cricketdata") {
-    const apiKey = process.env.CRICKETDATA_API_KEY;
-    if (!apiKey) {
-      throw new AppError(500, "CRICKETDATA_API_KEY is not configured");
-    }
-    return new CricketDataProvider(db, { apiKey });
-  }
-
-  return new ManualProvider(db);
-}
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {
@@ -57,7 +39,7 @@ async function handler(request: Request): Promise<Response> {
     throw new AppError(401, "Invalid or missing ingest secret");
   }
 
-  const provider = await resolveProvider(tournamentId);
+  const provider = await resolveStandingsProvider(db, tournamentId);
   const result = await ingestTournament(db, provider, tournamentId, new Date());
 
   const body: IngestResponse = toIngestResponse(result);

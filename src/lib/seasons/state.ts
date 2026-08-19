@@ -86,6 +86,21 @@ export function isRevealed(status: SeasonStatus): boolean {
   return status !== "draft" && status !== "open";
 }
 
-// void/settle (locked -> settled, any -> voided) belong to the settlement
-// session (doc 03 §3.6) — out of scope here; this module only covers the
-// draft/open/locked edges this session's routes actually exercise.
+// locked -> settled — doc 03 §4's diagram. Only reachable from `locked`:
+// `draft`/`open` haven't even been picked against yet, and `settled`/
+// `voided` are terminal (isTerminalStatus above), so re-settling an already
+// -settled season goes through the per-question settle/override path
+// instead (src/lib/seasons/settlement.ts), never back through this edge.
+export function canSettle(status: SeasonStatus): boolean {
+  return status === "locked";
+}
+
+// any non-terminal state -> voided, admin action with a reason (doc 01
+// §4.3: "Team withdraws or tournament is abandoned — Admin can void the
+// entire season; no scores recorded"). Deliberately excludes `settled` (and
+// `voided` itself) — the header diagram's underbrace only spans
+// draft/open/locked, and isTerminalStatus's own doc comment ("nothing can
+// leave") would stop being true if a settled season could still be voided.
+export function canVoid(status: SeasonStatus): boolean {
+  return !isTerminalStatus(status);
+}

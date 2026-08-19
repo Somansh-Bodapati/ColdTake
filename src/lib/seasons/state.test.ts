@@ -5,6 +5,8 @@
 import { describe, expect, it } from "vitest";
 import {
   canPublish,
+  canSettle,
+  canVoid,
   effectiveSeasonStatus,
   isMutableStatus,
   isPickWindowOpen,
@@ -100,5 +102,33 @@ describe("canPublish", () => {
   it("requires lock_at to be strictly in the future", () => {
     expect(canPublish({ questionCount: 1, lockAt: BEFORE_LOCK, now: AFTER_LOCK })).toBe(false);
     expect(canPublish({ questionCount: 1, lockAt: AT_LOCK, now: AT_LOCK })).toBe(false);
+  });
+});
+
+describe("canSettle", () => {
+  it("is true only for locked", () => {
+    expect(canSettle("locked")).toBe(true);
+    expect(canSettle("draft")).toBe(false);
+    expect(canSettle("open")).toBe(false);
+    expect(canSettle("settled")).toBe(false);
+    expect(canSettle("voided")).toBe(false);
+  });
+});
+
+describe("canVoid", () => {
+  // doc 01 §4.3: "Team withdraws or tournament is abandoned — Admin can
+  // void the entire season." Reachable from any pre-terminal status.
+  it("is true for draft, open, and locked", () => {
+    expect(canVoid("draft")).toBe(true);
+    expect(canVoid("open")).toBe(true);
+    expect(canVoid("locked")).toBe(true);
+  });
+
+  // A settled season's scores are final; a voided season can't be voided
+  // again — isTerminalStatus's own doc comment ("nothing can leave") would
+  // stop being true otherwise.
+  it("is false for settled and voided", () => {
+    expect(canVoid("settled")).toBe(false);
+    expect(canVoid("voided")).toBe(false);
   });
 });

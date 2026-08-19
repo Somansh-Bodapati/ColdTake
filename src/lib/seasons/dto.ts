@@ -19,6 +19,8 @@ export function toSeasonResponse(row: SeasonRow): SeasonResponse {
     scoringConfig: row.scoringConfig,
     createdAt: row.createdAt.toISOString(),
     settledAt: row.settledAt ? row.settledAt.toISOString() : null,
+    voidedAt: row.voidedAt ? row.voidedAt.toISOString() : null,
+    voidReason: row.voidReason,
   };
 }
 

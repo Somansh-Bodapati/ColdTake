@@ -106,6 +106,12 @@ export async function recomputeStandings(
   if (seasonRow.status === "draft") {
     throw new AppError(409, "Cannot compute standings before the season is published");
   }
+  // doc 01 §4.3: a voided season "records no scores" — recomputing against
+  // its live_state/result data would produce a snapshot that contradicts
+  // that, so this is refused the same way a still-draft season is.
+  if (seasonRow.status === "voided") {
+    throw new AppError(409, "Cannot compute standings for a voided season");
+  }
 
   const isSettled = seasonRow.status === "settled";
   const memberIds =
@@ -117,7 +123,7 @@ export async function recomputeStandings(
   const [questionRows, results] = await Promise.all([
     getQuestions(db, seasonId),
     isSettled
-      ? buildResultSetFromResults(db, seasonRow.tournamentId)
+      ? buildResultSetFromResults(db, seasonRow.tournamentId, seasonId)
       : buildResultSetFromLiveState(db, seasonRow.tournamentId),
   ]);
 
