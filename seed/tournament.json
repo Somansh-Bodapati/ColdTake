@@ -1,0 +1,365 @@
+{
+  "tournament": {
+    "id": "cpl-2026",
+    "sport": "cricket",
+    "name": "Cricket Premier League 2026",
+    "shortName": "CPL 2026",
+    "startsAt": "2026-03-20T14:00:00.000Z",
+    "endsAt": "2026-05-24T18:00:00.000Z",
+    "status": "live",
+    "teamCount": 10,
+    "providerKey": "cd-tournament-cpl2026",
+    "config": {
+      "statCategories": [
+        "runs",
+        "wickets",
+        "sixes"
+      ],
+      "playoffFormat": "top4-knockout"
+    }
+  },
+  "teams": [
+    {
+      "id": "team-mum",
+      "shortName": "MUM",
+      "name": "Mumbai Monsoons",
+      "color": "#005DAA"
+    },
+    {
+      "id": "team-che",
+      "shortName": "CHE",
+      "name": "Chennai Chargers",
+      "color": "#F9CD05"
+    },
+    {
+      "id": "team-del",
+      "shortName": "DEL",
+      "name": "Delhi Dynamite",
+      "color": "#ED1C24"
+    },
+    {
+      "id": "team-kol",
+      "shortName": "KOL",
+      "name": "Kolkata Krakens",
+      "color": "#3A225D"
+    },
+    {
+      "id": "team-blr",
+      "shortName": "BLR",
+      "name": "Bengaluru Blazers",
+      "color": "#EC1C24"
+    },
+    {
+      "id": "team-hyd",
+      "shortName": "HYD",
+      "name": "Hyderabad Hawks",
+      "color": "#F26522"
+    },
+    {
+      "id": "team-pun",
+      "shortName": "PUN",
+      "name": "Punjab Panthers",
+      "color": "#ED1B2F"
+    },
+    {
+      "id": "team-raj",
+      "shortName": "RAJ",
+      "name": "Rajasthan Rangers",
+      "color": "#EA1E92"
+    },
+    {
+      "id": "team-guj",
+      "shortName": "GUJ",
+      "name": "Gujarat Giants",
+      "color": "#1B2133"
+    },
+    {
+      "id": "team-lko",
+      "shortName": "LKO",
+      "name": "Lucknow Lions",
+      "color": "#00A9E0"
+    }
+  ],
+  "players": [
+    {
+      "id": "player-mum-1",
+      "teamId": "team-mum",
+      "name": "Rohan Sharma",
+      "role": "batter",
+      "providerKey": "cd-player-1000"
+    },
+    {
+      "id": "player-mum-2",
+      "teamId": "team-mum",
+      "name": "Aarav Verma",
+      "role": "bowler",
+      "providerKey": "cd-player-1001"
+    },
+    {
+      "id": "player-mum-3",
+      "teamId": "team-mum",
+      "name": "Vikram Patel",
+      "role": "allrounder",
+      "providerKey": "cd-player-1002"
+    },
+    {
+      "id": "player-mum-4",
+      "teamId": "team-mum",
+      "name": "Karan Reddy",
+      "role": "keeper",
+      "providerKey": "cd-player-1003"
+    },
+    {
+      "id": "player-che-1",
+      "teamId": "team-che",
+      "name": "Suresh Nair",
+      "role": "batter",
+      "providerKey": "cd-player-1004"
+    },
+    {
+      "id": "player-che-2",
+      "teamId": "team-che",
+      "name": "Arjun Iyer",
+      "role": "bowler",
+      "providerKey": "cd-player-1005"
+    },
+    {
+      "id": "player-che-3",
+      "teamId": "team-che",
+      "name": "Rahul Singh",
+      "role": "allrounder",
+      "providerKey": "cd-player-1006"
+    },
+    {
+      "id": "player-che-4",
+      "teamId": "team-che",
+      "name": "Dev Gupta",
+      "role": "keeper",
+      "providerKey": "cd-player-1007"
+    },
+    {
+      "id": "player-del-1",
+      "teamId": "team-del",
+      "name": "Sanjay Rao",
+      "role": "batter",
+      "providerKey": "cd-player-1008"
+    },
+    {
+      "id": "player-del-2",
+      "teamId": "team-del",
+      "name": "Ravi Menon",
+      "role": "bowler",
+      "providerKey": "cd-player-1009"
+    },
+    {
+      "id": "player-del-3",
+      "teamId": "team-del",
+      "name": "Aditya Joshi",
+      "role": "allrounder",
+      "providerKey": "cd-player-1010"
+    },
+    {
+      "id": "player-del-4",
+      "teamId": "team-del",
+      "name": "Nikhil Kulkarni",
+      "role": "keeper",
+      "providerKey": "cd-player-1011"
+    },
+    {
+      "id": "player-kol-1",
+      "teamId": "team-kol",
+      "name": "Manoj Chatterjee",
+      "role": "batter",
+      "providerKey": "cd-player-1012"
+    },
+    {
+      "id": "player-kol-2",
+      "teamId": "team-kol",
+      "name": "Vivek Bose",
+      "role": "bowler",
+      "providerKey": "cd-player-1013"
+    },
+    {
+      "id": "player-kol-3",
+      "teamId": "team-kol",
+      "name": "Kunal Pillai",
+      "role": "allrounder",
+      "providerKey": "cd-player-1014"
+    },
+    {
+      "id": "player-kol-4",
+      "teamId": "team-kol",
+      "name": "Rajesh Desai",
+      "role": "keeper",
+      "providerKey": "cd-player-1015"
+    },
+    {
+      "id": "player-blr-1",
+      "teamId": "team-blr",
+      "name": "Amit Kapoor",
+      "role": "batter",
+      "providerKey": "cd-player-1016"
+    },
+    {
+      "id": "player-blr-2",
+      "teamId": "team-blr",
+      "name": "Suraj Malhotra",
+      "role": "bowler",
+      "providerKey": "cd-player-1017"
+    },
+    {
+      "id": "player-blr-3",
+      "teamId": "team-blr",
+      "name": "Yash Bhatt",
+      "role": "allrounder",
+      "providerKey": "cd-player-1018"
+    },
+    {
+      "id": "player-blr-4",
+      "teamId": "team-blr",
+      "name": "Harsh Trivedi",
+      "role": "keeper",
+      "providerKey": "cd-player-1019"
+    },
+    {
+      "id": "player-hyd-1",
+      "teamId": "team-hyd",
+      "name": "Tarun Sharma",
+      "role": "batter",
+      "providerKey": "cd-player-1020"
+    },
+    {
+      "id": "player-hyd-2",
+      "teamId": "team-hyd",
+      "name": "Ajay Verma",
+      "role": "bowler",
+      "providerKey": "cd-player-1021"
+    },
+    {
+      "id": "player-hyd-3",
+      "teamId": "team-hyd",
+      "name": "Varun Patel",
+      "role": "allrounder",
+      "providerKey": "cd-player-1022"
+    },
+    {
+      "id": "player-hyd-4",
+      "teamId": "team-hyd",
+      "name": "Ankit Reddy",
+      "role": "keeper",
+      "providerKey": "cd-player-1023"
+    },
+    {
+      "id": "player-pun-1",
+      "teamId": "team-pun",
+      "name": "Prateek Nair",
+      "role": "batter",
+      "providerKey": "cd-player-1024"
+    },
+    {
+      "id": "player-pun-2",
+      "teamId": "team-pun",
+      "name": "Ishaan Iyer",
+      "role": "bowler",
+      "providerKey": "cd-player-1025"
+    },
+    {
+      "id": "player-pun-3",
+      "teamId": "team-pun",
+      "name": "Dhruv Singh",
+      "role": "allrounder",
+      "providerKey": "cd-player-1026"
+    },
+    {
+      "id": "player-pun-4",
+      "teamId": "team-pun",
+      "name": "Kabir Gupta",
+      "role": "keeper",
+      "providerKey": "cd-player-1027"
+    },
+    {
+      "id": "player-raj-1",
+      "teamId": "team-raj",
+      "name": "Aryan Rao",
+      "role": "batter",
+      "providerKey": "cd-player-1028"
+    },
+    {
+      "id": "player-raj-2",
+      "teamId": "team-raj",
+      "name": "Neel Menon",
+      "role": "bowler",
+      "providerKey": "cd-player-1029"
+    },
+    {
+      "id": "player-raj-3",
+      "teamId": "team-raj",
+      "name": "Om Joshi",
+      "role": "allrounder",
+      "providerKey": "cd-player-1030"
+    },
+    {
+      "id": "player-raj-4",
+      "teamId": "team-raj",
+      "name": "Siddharth Kulkarni",
+      "role": "keeper",
+      "providerKey": "cd-player-1031"
+    },
+    {
+      "id": "player-guj-1",
+      "teamId": "team-guj",
+      "name": "Uday Chatterjee",
+      "role": "batter",
+      "providerKey": "cd-player-1032"
+    },
+    {
+      "id": "player-guj-2",
+      "teamId": "team-guj",
+      "name": "Vishal Bose",
+      "role": "bowler",
+      "providerKey": "cd-player-1033"
+    },
+    {
+      "id": "player-guj-3",
+      "teamId": "team-guj",
+      "name": "Gaurav Pillai",
+      "role": "allrounder",
+      "providerKey": "cd-player-1034"
+    },
+    {
+      "id": "player-guj-4",
+      "teamId": "team-guj",
+      "name": "Deepak Desai",
+      "role": "keeper",
+      "providerKey": "cd-player-1035"
+    },
+    {
+      "id": "player-lko-1",
+      "teamId": "team-lko",
+      "name": "Mohit Kapoor",
+      "role": "batter",
+      "providerKey": "cd-player-1036"
+    },
+    {
+      "id": "player-lko-2",
+      "teamId": "team-lko",
+      "name": "Rohit Malhotra",
+      "role": "bowler",
+      "providerKey": "cd-player-1037"
+    },
+    {
+      "id": "player-lko-3",
+      "teamId": "team-lko",
+      "name": "Anand Bhatt",
+      "role": "allrounder",
+      "providerKey": "cd-player-1038"
+    },
+    {
+      "id": "player-lko-4",
+      "teamId": "team-lko",
+      "name": "Naveen Trivedi",
+      "role": "keeper",
+      "providerKey": "cd-player-1039"
+    }
+  ]
+}
