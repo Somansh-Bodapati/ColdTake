@@ -126,6 +126,14 @@ export default function GroupPage() {
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-6 p-4">
+      {/* Session 13, task 6: an admin previewing/copying this page's invite
+          link benefits from the same real preview a recipient would see —
+          React 19 hoists these into <head> (see src/routes/join.tsx's
+          longer comment on the same pattern). */}
+      <title>{`${detail.group.name} | ColdTake`}</title>
+      <meta property="og:title" content={`Join ${detail.group.name} on ColdTake`} />
+      <meta property="og:url" content={inviteUrl} />
+
       <Link className="text-muted-foreground text-sm underline" to="/">
         ← All groups
       </Link>

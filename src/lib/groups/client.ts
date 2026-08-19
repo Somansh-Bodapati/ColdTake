@@ -11,10 +11,12 @@ import {
   joinGroupRequestSchema,
   joinGroupResponseSchema,
   groupDetailResponseSchema,
+  groupPreviewResponseSchema,
   transferAdminRequestSchema,
   type CreateGroupResponse,
   type JoinGroupResponse,
   type GroupDetailResponse,
+  type GroupPreviewResponse,
 } from "@/lib/schemas/groups";
 
 async function errorMessage(response: Response, fallback: string): Promise<string> {
@@ -49,6 +51,16 @@ export async function joinGroupRequest(joinCode: string): Promise<JoinGroupRespo
     throw new Error(await errorMessage(response, "Could not join the group"));
   }
   return joinGroupResponseSchema.parse(await response.json());
+}
+
+// Public (no credentials): the join-preview lookup the /join landing page
+// uses before the visitor has a session at all.
+export async function fetchGroupPreviewByCode(joinCode: string): Promise<GroupPreviewResponse> {
+  const response = await fetch(`/api/groups/by-code/${encodeURIComponent(joinCode)}`);
+  if (!response.ok) {
+    throw new Error(await errorMessage(response, "That invite link doesn't look right"));
+  }
+  return groupPreviewResponseSchema.parse(await response.json());
 }
 
 export async function fetchGroupDetail(groupId: string): Promise<GroupDetailResponse> {

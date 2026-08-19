@@ -9,6 +9,8 @@ import type { SeasonDetailResponse } from "@/lib/schemas/seasons";
 import type { GroupDetailResponse } from "@/lib/schemas/groups";
 import type { StandingsBreakdownEntry, StandingsSnapshotResponse } from "@/lib/schemas/standings";
 import { Button } from "@/components/ui/button";
+import { ShareCardButton } from "@/components/share-card-button";
+import { buildCardUrl } from "@/lib/cards/client";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Standings | ColdTake" }];
@@ -138,6 +140,18 @@ export default function SeasonStandingsPage() {
           </p>
         )}
       </div>
+
+      {/* Share card (this session's brief, task 7): the immutable card URL
+          is built from the snapshot's own computedAt, already in hand from
+          the fetch above — never a freshly-minted "now". */}
+      {snapshot && (
+        <ShareCardButton
+          cardUrl={buildCardUrl("standings", seasonId, snapshot.computedAt)}
+          title={`${group.group.name} standings`}
+          text={`See where everyone stands in ${season.season.name} — join ${group.group.name} on ColdTake.`}
+          fileName={`${group.group.name}-standings.png`}
+        />
+      )}
 
       {/* doc 03 §2.5: "UI must label projected standings unambiguously.
           Never show a projected number in the same visual treatment as a

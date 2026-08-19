@@ -121,6 +121,46 @@ export async function joinGroupByCode(
   return row;
 }
 
+// Session 13's share cards (src/lib/cards/assemble.ts) and the public
+// join-preview endpoint (api/groups/by-code/[code].ts) both need just the
+// name/joinCode pair, not the full member list getGroupDetail assembles —
+// kept as its own query rather than reusing getGroupDetail and discarding
+// `members`, since a card is rendered per request and shouldn't pay for a
+// member-list join it never reads.
+export async function getGroupBranding(
+  db: Db,
+  groupId: string
+): Promise<{ name: string; joinCode: string }> {
+  const [row] = await db
+    .select({ name: group.name, joinCode: group.joinCode })
+    .from(group)
+    .where(eq(group.id, groupId))
+    .limit(1);
+  if (!row) {
+    throw new AppError(404, "Group not found");
+  }
+  return row;
+}
+
+// Public join-preview lookup (no auth, no membership check) — the join-by-
+// code landing page (this session's brief, task 6) needs the group's name
+// before the visitor has signed in or joined, same reasoning as
+// joinGroupByCode's own lookup but read-only.
+export async function getGroupByJoinCode(
+  db: Db,
+  joinCode: string
+): Promise<{ id: string; name: string }> {
+  const [row] = await db
+    .select({ id: group.id, name: group.name })
+    .from(group)
+    .where(and(eq(group.joinCode, joinCode), isNull(group.archivedAt)))
+    .limit(1);
+  if (!row) {
+    throw new AppError(404, "Invalid join code");
+  }
+  return row;
+}
+
 export interface GroupDetail {
   group: GroupSummary;
   members: GroupMember[];

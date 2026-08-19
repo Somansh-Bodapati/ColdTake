@@ -6,6 +6,8 @@ import { fetchSeasonDetail } from "@/lib/seasons/client";
 import { fetchAllPicks } from "@/lib/picks/client";
 import type { SeasonDetailResponse } from "@/lib/schemas/seasons";
 import type { AllPicksResponse, PickAnswerInput } from "@/lib/schemas/picks";
+import { ShareCardButton } from "@/components/share-card-button";
+import { buildCardUrl } from "@/lib/cards/client";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Reveal | ColdTake" }];
@@ -99,6 +101,20 @@ export default function SeasonRevealPage() {
           Standings →
         </Link>
       </div>
+
+      {/* Share card (this session's brief, task 7): reveal cards only exist
+          once picks are actually visible, so this only ever renders after
+          `reveal` has successfully loaded — mirrors the picks/all 403 gate
+          the card route itself enforces. lockAt is the reveal card's
+          canonical timestamp (src/lib/cards/assemble.ts). */}
+      {reveal && (
+        <ShareCardButton
+          cardUrl={buildCardUrl("reveal", seasonId, season.season.lockAt)}
+          title={`${season.season.name} — the picks are in`}
+          text={`Everyone's picks just got revealed for ${season.season.name}.`}
+          fileName={`${season.season.name}-reveal.png`}
+        />
+      )}
 
       {notRevealedYet && (
         <p className="text-muted-foreground text-sm">

@@ -77,3 +77,14 @@ export type TransferAdminRequest = z.infer<typeof transferAdminRequestSchema>;
 
 export const okResponseSchema = z.object({ ok: z.literal(true) });
 export type OkResponse = z.infer<typeof okResponseSchema>;
+
+// GET /api/groups/by-code/:code — the public join-preview lookup (this
+// session's brief, task 6). Deliberately narrower than groupSummarySchema:
+// a not-yet-a-member visitor gets just enough to render "You're invited to
+// join {name}," never the join code itself (that's only in the URL they
+// already have) or any member data.
+export const groupPreviewResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+export type GroupPreviewResponse = z.infer<typeof groupPreviewResponseSchema>;
