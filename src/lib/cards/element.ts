@@ -33,22 +33,26 @@ export function el(
 export const CARD_WIDTH = 1200;
 export const CARD_HEIGHT = 630;
 
-// Shared palette — no gambling-adjacent imagery, just a clean dark card
-// (CLAUDE.md rule 5 is about vocabulary, but the same restraint applies to
-// visuals: this is a scoreboard, not a betting slip).
+// Shared palette (Session 14 design system) — a deep navy-ink surface with a
+// warm scoreboard-gold accent, matching src/app.css's dark tokens rather
+// than a generic slate/sky pairing. No gambling-adjacent imagery: this is a
+// scoreboard, not a betting slip (CLAUDE.md rule 5 is about vocabulary, but
+// the same restraint applies to visuals).
 export const COLORS = {
-  background: "#0f172a", // slate-900
-  surface: "#1e293b", // slate-800
-  border: "#334155", // slate-700
-  text: "#f8fafc", // slate-50
-  muted: "#94a3b8", // slate-400
-  accent: "#38bdf8", // sky-400
-  positive: "#4ade80", // green-400
-  negative: "#f87171", // red-400
+  background: "#161f33", // matches --background (dark)
+  surface: "#1f2a42", // matches --card (dark)
+  border: "#33405c",
+  text: "#f7f2e4", // warm ivory, matches --foreground (dark)
+  muted: "#93a0b8", // matches --muted-foreground (dark)
+  accent: "#e2a53f", // matches --primary (dark) — scoreboard gold
+  positive: "#5fd97a",
+  negative: "#f2545b",
 } as const;
 
 // Every card's outer frame: fixed size, flex column, dark background — the
-// one piece of layout genuinely shared across all four card types.
+// one piece of layout genuinely shared across all four card types. A thin
+// top rule in the accent gold reads as "scoreboard bezel" even at thumbnail
+// size in a WhatsApp chat, without needing an image asset.
 export function cardFrame(children: CardElement["props"]["children"]): CardElement {
   return el(
     "div",
@@ -61,6 +65,7 @@ export function cardFrame(children: CardElement["props"]["children"]): CardEleme
       color: COLORS.text,
       padding: "48px",
       fontFamily: "Inter",
+      borderTop: `10px solid ${COLORS.accent}`,
     },
     children
   );

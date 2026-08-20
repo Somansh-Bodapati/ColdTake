@@ -11,6 +11,8 @@ import type { StandingsBreakdownEntry, StandingsSnapshotResponse } from "@/lib/s
 import { Button } from "@/components/ui/button";
 import { ShareCardButton } from "@/components/share-card-button";
 import { buildCardUrl } from "@/lib/cards/client";
+import { IdentityBadge } from "@/components/identity-badge";
+import { cn } from "@/lib/utils";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Standings | ColdTake" }];
@@ -109,7 +111,17 @@ export default function SeasonStandingsPage() {
     return <p className="p-4">Missing route parameters.</p>;
   }
   if (status === "loading" || loading) {
-    return <p className="text-muted-foreground p-4">Loading…</p>;
+    return (
+      <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
+        <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+        <div className="bg-muted h-8 w-56 animate-pulse rounded" />
+        <div className="flex flex-col gap-2 pt-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="bg-muted h-14 animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </main>
+    );
   }
   if (status === "signed-out") {
     return (
@@ -121,10 +133,20 @@ export default function SeasonStandingsPage() {
     );
   }
   if (error || !season || !group) {
-    return <p className="text-destructive p-4">{error ?? "Season not found"}</p>;
+    return (
+      <main className="mx-auto flex max-w-lg flex-col gap-3 p-4">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
+          {error ?? "Season not found"}
+        </p>
+        <p className="text-muted-foreground text-sm">
+          The last-known standings couldn't be loaded either. Try again shortly.
+        </p>
+      </main>
+    );
   }
 
   const isAdmin = group.members.find((m) => m.userId === user?.id)?.role === "admin";
+  const isFinal = snapshot ? !snapshot.isProjected : false;
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-6 p-4">
@@ -133,13 +155,36 @@ export default function SeasonStandingsPage() {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-semibold">{season.season.name} — standings</h1>
+        <h1 className="text-2xl font-bold">{season.season.name}</h1>
         {snapshot && (
           <p className="text-muted-foreground text-sm">
             As of {new Date(snapshot.computedAt).toLocaleString()}
           </p>
         )}
       </div>
+
+      {/* doc 03 §2.5: "UI must label projected standings unambiguously.
+          Never show a projected number in the same visual treatment as a
+          settled one." A full-width banner, distinct type colour, and a
+          per-row badge together — never relying on just one signal. */}
+      {snapshot && (
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-bold",
+            isFinal ? "bg-positive/15 text-positive" : "bg-primary/15 text-primary"
+          )}
+        >
+          <span
+            className={cn(
+              "size-2 shrink-0 rounded-full",
+              isFinal ? "bg-positive" : "bg-primary animate-pulse"
+            )}
+          />
+          {isFinal
+            ? "Final standings — the season is settled."
+            : "Projected standings — the season isn't settled yet. Points may still change."}
+        </div>
+      )}
 
       {/* Share card (this session's brief, task 7): the immutable card URL
           is built from the snapshot's own computedAt, already in hand from
@@ -151,16 +196,6 @@ export default function SeasonStandingsPage() {
           text={`See where everyone stands in ${season.season.name} — join ${group.group.name} on ColdTake.`}
           fileName={`${group.group.name}-standings.png`}
         />
-      )}
-
-      {/* doc 03 §2.5: "UI must label projected standings unambiguously.
-          Never show a projected number in the same visual treatment as a
-          settled one." — a persistent banner plus a per-row badge, not just
-          one or the other. */}
-      {snapshot?.isProjected && (
-        <p className="rounded-md border border-dashed px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-          Projected standings — the season isn't settled yet. Points may still change.
-        </p>
       )}
 
       {isAdmin && (
@@ -178,10 +213,12 @@ export default function SeasonStandingsPage() {
       )}
 
       {!snapshot && (
-        <p className="text-muted-foreground text-sm">
-          No standings have been computed yet.
-          {isAdmin ? " Use Recompute above to generate the first one." : ""}
-        </p>
+        <div className="border-border bg-card flex flex-col items-center gap-1 rounded-xl border border-dashed px-6 py-8 text-center">
+          <p className="font-medium">No standings yet</p>
+          <p className="text-muted-foreground text-sm">
+            {isAdmin ? "Use Recompute above to generate the first one." : "Check back once the season gets going."}
+          </p>
+        </div>
       )}
 
       {snapshot && snapshot.standings.length === 0 && (
@@ -192,45 +229,68 @@ export default function SeasonStandingsPage() {
         <ol className="flex flex-col gap-2">
           {snapshot.standings.map((entry) => {
             const expanded = expandedMemberId === entry.memberId;
+            const isTop = entry.rank === 1;
             return (
-              <li key={entry.memberId} className="rounded-md border">
+              <li
+                key={entry.memberId}
+                className={cn(
+                  "bg-card overflow-hidden rounded-xl border",
+                  isTop && isFinal ? "border-primary shadow-[0_0_0_1px_var(--primary)]" : "border-border"
+                )}
+              >
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left"
                   onClick={() => setExpandedMemberId(expanded ? null : entry.memberId)}
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="text-muted-foreground w-6 text-right font-mono">#{entry.rank}</span>
-                    <span className="font-medium">{entry.displayName}</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {entry.delta !== 0 && (
-                      <span className={entry.delta > 0 ? "text-xs text-emerald-600" : "text-xs text-destructive"}>
-                        {entry.delta > 0 ? `+${entry.delta}` : entry.delta}
-                      </span>
+                  <span
+                    className={cn(
+                      "font-score w-7 shrink-0 text-right text-lg",
+                      isTop ? "text-primary" : "text-muted-foreground"
                     )}
-                    <span className="font-mono">{entry.points} pts</span>
-                    {snapshot.isProjected && (
-                      <span className="text-muted-foreground rounded border px-1 text-[10px] uppercase">
-                        Projected
-                      </span>
-                    )}
+                  >
+                    {entry.rank}
                   </span>
+                  <IdentityBadge seed={entry.displayName} />
+                  <span className="flex-1 truncate font-medium">{entry.displayName}</span>
+                  {entry.delta !== 0 && (
+                    <span
+                      className={cn(
+                        "font-score text-xs",
+                        entry.delta > 0 ? "text-positive" : "text-destructive"
+                      )}
+                    >
+                      {entry.delta > 0 ? `▲ ${entry.delta}` : `▼ ${Math.abs(entry.delta)}`}
+                    </span>
+                  )}
+                  <span className="font-score text-base">{entry.points}</span>
+                  {snapshot.isProjected && (
+                    <span className="bg-primary/15 text-primary rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase">
+                      Proj
+                    </span>
+                  )}
                 </button>
 
                 {expanded && (
-                  <ul className="flex flex-col gap-1 border-t px-3 py-2">
+                  <ul className="border-border flex flex-col gap-1 border-t px-4 py-3">
                     {entry.breakdown.map((item) => (
                       <li key={item.questionId} className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground truncate pr-2">
                           {season.questions.find((q) => q.id === item.questionId)?.prompt ?? item.questionId}
                         </span>
-                        <span className="flex items-center gap-2">
-                          <span>{STATUS_LABEL[item.status]}</span>
+                        <span className="flex shrink-0 items-center gap-2">
+                          <span
+                            className={cn(
+                              item.status === "correct" && "text-positive",
+                              item.status === "incorrect" && "text-destructive"
+                            )}
+                          >
+                            {STATUS_LABEL[item.status]}
+                          </span>
                           {item.boldnessMultiplier !== 1 && (
                             <span className="text-muted-foreground">×{item.boldnessMultiplier.toFixed(2)}</span>
                           )}
-                          <span className="font-mono">
+                          <span className="font-score">
                             {item.points}/{item.maxPossible}
                           </span>
                         </span>
