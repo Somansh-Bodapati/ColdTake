@@ -3,47 +3,77 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ColdTake design system (Session 14).
+ *
+ * Direction: "floodlit scoreboard" — a bold, high-contrast dark surface
+ * (deep navy-ink, never pure black or neon green) with a warm scoreboard-
+ * gold accent standing in for the trophy/coin-toss moment, plus an editorial
+ * touch of warmth (ivory text, not clinical white) so it reads as a game
+ * between friends rather than a betting terminal. Dark is the default
+ * (src/root.tsx sets the `dark` class on <html>) since most play happens
+ * during evening matches; light mode swaps to a warm parchment surface
+ * rather than stark white, keeping the same "cricket almanac" warmth.
+ *
+ * No new font dependency: the system stack (`ui-sans-serif` etc.) is used
+ * for both text and numerals — the distinctive "scoreboard numeral"
+ * treatment (docs/05-DESIGN-PROMPT.md's "distinctive numeral treatment for
+ * scores/rankings") comes from weight, tabular figures, and tight tracking
+ * (see `.font-score` below and `--font-display`), not a second typeface.
+ * This keeps the app dependency-free per CLAUDE.md ("no new dependency
+ * without asking first") while still giving scores and ranks a real, load-
+ * bearing identity.
+ */
+
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 0.5rem;
+
+  /* Light mode: warm parchment, not clinical white — an editorial surface
+     that still reads as a scoreboard when the accent gold is applied. */
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.19 0.03 55);
+  --card: oklch(0.995 0.004 85);
+  --card-foreground: oklch(0.19 0.03 55);
+  --popover: oklch(0.995 0.004 85);
+  --popover-foreground: oklch(0.19 0.03 55);
+  --primary: oklch(0.58 0.15 60);
+  --primary-foreground: oklch(0.99 0.01 90);
+  --secondary: oklch(0.93 0.02 75);
+  --secondary-foreground: oklch(0.22 0.03 55);
+  --muted: oklch(0.93 0.02 75);
+  --muted-foreground: oklch(0.46 0.03 60);
+  --accent: oklch(0.93 0.02 75);
+  --accent-foreground: oklch(0.42 0.13 55);
+  --destructive: oklch(0.52 0.19 25);
+  --destructive-foreground: oklch(0.99 0.01 90);
+  --positive: oklch(0.55 0.15 145);
+  --border: oklch(0.87 0.02 75);
+  --input: oklch(0.87 0.02 75);
+  --ring: oklch(0.58 0.15 60);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Deep navy-ink, not black — avoids the neon-on-black betting-app
+     silhouette the brief warns against twice. */
+  --background: oklch(0.17 0.028 260);
+  --foreground: oklch(0.95 0.02 85);
+  --card: oklch(0.22 0.03 260);
+  --card-foreground: oklch(0.95 0.02 85);
+  --popover: oklch(0.22 0.03 260);
+  --popover-foreground: oklch(0.95 0.02 85);
+  --primary: oklch(0.78 0.15 70);
+  --primary-foreground: oklch(0.16 0.03 60);
+  --secondary: oklch(0.27 0.03 260);
+  --secondary-foreground: oklch(0.95 0.02 85);
+  --muted: oklch(0.27 0.03 260);
+  --muted-foreground: oklch(0.68 0.03 260);
+  --accent: oklch(0.27 0.03 260);
+  --accent-foreground: oklch(0.78 0.15 70);
+  --destructive: oklch(0.65 0.19 25);
+  --destructive-foreground: oklch(0.16 0.03 60);
+  --positive: oklch(0.75 0.16 145);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.78 0.15 70);
 }
 
 @theme inline {
@@ -66,9 +96,13 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-positive: var(--positive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer base {
@@ -76,6 +110,20 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  /* The scoreboard numeral treatment: heavy weight, tabular figures, tight
+     tracking. Used for ranks, points, countdowns — anywhere a number is the
+     point of the row, per docs/05-DESIGN-PROMPT.md's call for "a
+     distinctive numeral treatment for scores/rankings." */
+  .font-score {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-family: var(--font-display);
   }
 }
