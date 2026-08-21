@@ -8,6 +8,7 @@ import { fetchGroupDetail } from "@/lib/groups/client";
 import { fetchMyPicks, fetchReadiness, putPicks } from "@/lib/picks/client";
 import type { QuestionResponse, SeasonDetailResponse, TeamSummary } from "@/lib/schemas/seasons";
 import type { PickAnswerInput, ReadinessResponse } from "@/lib/schemas/picks";
+import { customQuestionOptions } from "@/lib/seasons/question-config";
 import { IdentityBadge } from "@/components/identity-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -515,28 +516,6 @@ function TeamSelect({
   );
 }
 
-interface CustomOption {
-  id: string;
-  label: string;
-}
-
-// question.config is typed as z.record(z.string(), z.unknown()) at the API
-// boundary (src/lib/schemas/seasons.ts's questionResponseSchema) since its
-// shape depends on question.type — this narrows just the `custom` case back
-// to the { id, label }[] shape src/lib/scoring/resolvers/custom.ts requires.
-function customOptions(value: unknown): CustomOption[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  return value.filter(
-    (entry): entry is CustomOption =>
-      typeof entry === "object" &&
-      entry !== null &&
-      typeof (entry as { id?: unknown }).id === "string" &&
-      typeof (entry as { label?: unknown }).label === "string"
-  );
-}
-
 // One control per question type, each producing exactly the PickAnswer
 // shape that type's resolver in src/lib/scoring/resolvers/*.ts validates
 // (this session's brief, task 2). Team-referencing types (champion,
@@ -668,7 +647,7 @@ function QuestionInput({ question, answer, teams, disabled, onChange }: Question
         </div>
       );
     case "custom": {
-      const options = customOptions(question.config.options);
+      const options = customQuestionOptions(question.config.options);
       return (
         <div className="flex flex-wrap gap-2">
           {options.map((option) => {
