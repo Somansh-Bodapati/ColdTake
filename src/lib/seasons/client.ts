@@ -25,7 +25,15 @@ async function errorMessage(response: Response, fallback: string): Promise<strin
 }
 
 export async function fetchTournamentCatalogue(): Promise<TournamentSummary[]> {
-  const response = await fetch("/api/tournaments", { credentials: "include" });
+  // The server sets Cache-Control: public, max-age=300 on this response
+  // (it's a cheap full-table read on a tiny table, safe to cache briefly
+  // for casual repeat visits) -- but that means a browser can silently
+  // serve a 5-minute-stale list right after an admin creates a new
+  // tournament and navigates straight to season setup, making the one
+  // thing they just created look like it never happened. Season setup is
+  // exactly the place freshness matters more than shaving a trivial DB
+  // read, so this specific caller always bypasses the cache.
+  const response = await fetch("/api/tournaments", { credentials: "include", cache: "no-store" });
   if (!response.ok) {
     throw new Error(await errorMessage(response, "Could not load tournaments"));
   }
