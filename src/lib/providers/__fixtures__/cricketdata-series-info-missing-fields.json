@@ -1,0 +1,23 @@
+{
+  "data": {
+    "info": {
+      "id": "4f8f04e8-0000-0000-0000-000000000000",
+      "name": "Test League 2026"
+    },
+    "matchList": [
+      {
+        "id": "match-1-missing-status",
+        "name": "Mumbai Indians vs Chennai Super Kings, 1st Match",
+        "matchType": "t20",
+        "venue": "Wankhede Stadium, Mumbai",
+        "date": "2026-08-13",
+        "dateTimeGMT": "2026-08-13T14:00:00",
+        "teams": ["Mumbai Indians", "Chennai Super Kings"],
+        "matchStarted": true,
+        "matchEnded": true
+      }
+    ]
+  },
+  "status": "success",
+  "info": { "hitsToday": 7, "hitsUsed": 1, "hitsLimit": 100, "credits": 0 }
+}

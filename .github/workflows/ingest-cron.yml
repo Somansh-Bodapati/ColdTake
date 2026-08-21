@@ -6,25 +6,30 @@ name: Ingest cron
 # (Session 0) — this one runs on a schedule against the deployed app, not on
 # every PR against the repo's own code.
 #
-# Interval: every 30 minutes. Doc 02 §4.1's own framing is "one poll per day,
-# not thousands" for a season-slate game (league table + stat leaders, not
-# ball-by-ball), so this is already generous, not minimal — 30 minutes keeps
-# the table and stat leaders reasonably current during a live match without
-# meaningfully denting either the sports-data provider's free-tier rate limit
-# or Neon's compute budget (CLAUDE.md rule 2), since ingestTournament writes
-# one upserted live_state row and a handful of standings_snapshot rows per
-# active season, not a scan. Runs across all 24 hours rather than a narrower
-# "match hours" window because match times vary by tournament/timezone and
-# there's no per-tournament schedule metadata to key a narrower cron off of;
-# an idle ingest during off-hours is a no-op write, not meaningful cost.
+# Interval: every 3 hours (8 calls/day), NOT every 30 minutes. This changed
+# once a real CricketData.org (api.cricapi.com) account existed and its real
+# constraint became known: 100 requests/day, hard, shared across every
+# tournament this app ingests (docs/DECISIONS.md). The math the interval is
+# chosen against: 24h / 3h = 8 calls/day for ONE tournament scheduled here,
+# leaving ~92 of the daily 100 as headroom for (a) more than one tournament
+# eventually running through this same workflow/secret, (b) manual/admin-
+# triggered ingestion and settlement (each also spends a real call), and (c)
+# CricketDataProvider itself only ever spending one call per getTable
+# (series_info embeds the full match list — see that file's doc comment), so
+# 8 scheduled calls really is ~8 hits, not a multiple of it. The previous
+# 30-minute interval (48 calls/day for a single tournament) would have
+# exhausted almost half the account's entire daily budget on its own, before
+# counting any other tournament or manual trigger — a real risk of an outage
+# on a live app, not a theoretical one.
 #
 # workflow_dispatch is added so a poll can be triggered by hand (verifying
 # the secret/URL are wired up, or catching up after the 60-day scheduled-
 # Actions-on-inactive-repos disable doc 02 §4.4 warns about) without waiting
-# for the next scheduled tick.
+# for the next scheduled tick — each manual trigger spends one real call too,
+# so use it deliberately, not for routine polling.
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
     inputs:
       tournamentId:

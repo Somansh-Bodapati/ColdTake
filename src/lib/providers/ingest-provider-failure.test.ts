@@ -19,7 +19,7 @@ import { saveManualStandings } from "@/lib/providers/manual-input";
 import { CricketDataProvider, type FetchLike } from "@/lib/providers/cricketdata-provider";
 import { ingestTournament } from "@/lib/providers/ingest";
 import { cleanupSeasonFixtures, insertTestTournament } from "@/lib/seasons/test-support";
-import seriesPointsMissingFieldsFixture from "@/lib/providers/__fixtures__/cricketdata-series-points-missing-fields.json";
+import seriesInfoMissingFieldsFixture from "@/lib/providers/__fixtures__/cricketdata-series-info-missing-fields.json";
 
 const createdUserIds: string[] = [];
 const createdGroupIds: string[] = [];
@@ -95,7 +95,7 @@ describe("ingestTournament — provider failure keeps last good live_state", () 
     const tournamentId = await seedGoodLiveState();
 
     const missingFieldsFetch: FetchLike = async () =>
-      new Response(JSON.stringify(seriesPointsMissingFieldsFixture), {
+      new Response(JSON.stringify(seriesInfoMissingFieldsFixture), {
         status: 200,
         headers: { "content-type": "application/json" },
       });

@@ -56,7 +56,7 @@ import { topNOrderedResolver } from "../scoring/resolvers/top-n-ordered.js";
 import { topNUnorderedResolver } from "../scoring/resolvers/top-n-unordered.js";
 import { woodenSpoonResolver } from "../scoring/resolvers/wooden-spoon.js";
 import type { Question as ScoringQuestion, Tournament } from "../scoring/types.js";
-import type { StandingsProvider } from "../providers/types.js";
+import { ProviderUnsupportedError, type StandingsProvider, type TournamentResult } from "../providers/types.js";
 import { AppError } from "../errors.js";
 
 // Same registry construction as src/lib/picks/service.ts and
@@ -124,10 +124,26 @@ export async function settleSeason(
   const tournamentRow = await getTournament(db, seasonRow.tournamentId);
   const statCategories = tournamentRow.config.statCategories ?? [];
 
-  const [tableData, finalResult] = await Promise.all([
-    provider.getTable(seasonRow.tournamentId),
-    provider.getFinalResult(seasonRow.tournamentId),
-  ]);
+  const tableData = await provider.getTable(seasonRow.tournamentId);
+  // ProviderUnsupportedError (types.ts) signals a provider tier that
+  // structurally can't determine a champion/runner-up (e.g.
+  // CricketDataProvider — see that file's getFinalResult doc comment), not a
+  // transient failure. Treated here as "no final result from the provider,"
+  // not as a reason to abort settlement: the final table below is still
+  // written, and an admin settles champion/runner-up questions manually via
+  // settleQuestion's override path (this module's other export) — exactly
+  // the escape hatch Session 12 built for this.
+  let finalResult: TournamentResult = {};
+  try {
+    finalResult = await provider.getFinalResult(seasonRow.tournamentId);
+  } catch (error) {
+    if (!(error instanceof ProviderUnsupportedError)) {
+      throw error;
+    }
+    console.info(
+      `settleSeason: provider "${provider.source}" does not support automatic final-result determination for tournament ${seasonRow.tournamentId}; settle champion/runner-up manually`
+    );
+  }
   const statLeaders: Record<string, { playerId: string; value: number }[]> = {};
   for (const category of statCategories) {
     const entries = await provider.getStatLeaders(seasonRow.tournamentId, category);
