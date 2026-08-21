@@ -36,7 +36,7 @@ export default function Home() {
   // your name" prompt can render immediately, without a second round trip.
   // Read once on mount — this is a one-time signal, not something that
   // should reappear on every re-render of this route.
-  const [showWelcomeParam] = React.useState(
+  const [showWelcomeParam, setShowWelcomeParam] = React.useState(
     () => new URLSearchParams(window.location.search).get("welcome") === "1"
   );
   const [googleError] = React.useState(
@@ -63,6 +63,12 @@ export default function Home() {
     setConfirmingName(true);
     try {
       await confirmName(confirmNameInput);
+      // showWelcomeParam is a one-time signal from the ?welcome=1 redirect
+      // (set once, on mount, so the prompt renders on first paint before
+      // /api/me resolves) — without clearing it here, it stays true forever
+      // and keeps forcing the prompt open even after the server-side
+      // needsNamePrompt flips to false, since showNamePrompt ORs the two.
+      setShowWelcomeParam(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
