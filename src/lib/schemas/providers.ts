@@ -5,6 +5,7 @@
 // (and the response shape of) src/lib/providers/ingest.ts.
 
 import { z } from "zod";
+import { tournamentSummarySchema } from "./seasons.js";
 
 export const teamStandingSchema = z
   .object({
@@ -58,3 +59,45 @@ export const ingestResponseSchema = z.object({
   recomputedSeasonIds: z.array(z.string()),
 });
 export type IngestResponse = z.infer<typeof ingestResponseSchema>;
+
+// POST /api/admin/cricketdata/search-series — proxies GET /v1/series on
+// CricketData.org (real, verified shape; see cricketdata-dto.ts's header).
+// `query` mirrors that endpoint's own `search` param name loosely rather
+// than exactly, since this is our request shape, not a passthrough of theirs.
+export const searchCricketDataSeriesRequestSchema = z.object({
+  query: z.string().trim().min(2, "Search query must be at least 2 characters"),
+});
+export type SearchCricketDataSeriesRequest = z.infer<typeof searchCricketDataSeriesRequestSchema>;
+
+export const cricketDataSeriesSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  matches: z.number().int().nonnegative().nullable(),
+});
+export type CricketDataSeriesSummary = z.infer<typeof cricketDataSeriesSummarySchema>;
+
+export const searchCricketDataSeriesResponseSchema = z.object({
+  series: z.array(cricketDataSeriesSummarySchema),
+});
+export type SearchCricketDataSeriesResponse = z.infer<typeof searchCricketDataSeriesResponseSchema>;
+
+// POST /api/admin/tournaments — creates a real `tournament` row (plus its
+// `team` rows) from an admin-chosen CricketData series. `seriesName` is
+// carried from the search step (task 2's UI already has it in hand) so the
+// tournament's `name`/`shortName` don't depend on series_info's own
+// `data.info.name` being present (verified live tonight: it sometimes is,
+// but the top-level `series` search result's `name` is the more reliable
+// source since it's what the admin actually picked).
+export const createTournamentFromSeriesRequestSchema = z.object({
+  seriesId: z.string().trim().min(1),
+  seriesName: z.string().trim().min(1),
+});
+export type CreateTournamentFromSeriesRequest = z.infer<typeof createTournamentFromSeriesRequestSchema>;
+
+export const createTournamentFromSeriesResponseSchema = z.object({
+  tournament: tournamentSummarySchema,
+  teamsCreated: z.number().int().nonnegative(),
+});
+export type CreateTournamentFromSeriesResponse = z.infer<typeof createTournamentFromSeriesResponseSchema>;

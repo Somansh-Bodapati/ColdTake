@@ -5,6 +5,7 @@ export default [
   route("join", "routes/join.tsx"),
   route("groups/:groupId", "routes/group.tsx"),
   route("groups/:groupId/seasons/new", "routes/season-new.tsx"),
+  route("groups/:groupId/tournaments/new", "routes/tournament-new.tsx"),
   route("groups/:groupId/seasons/:seasonId/picks", "routes/season-picks.tsx"),
   route("groups/:groupId/seasons/:seasonId/reveal", "routes/season-reveal.tsx"),
   route("groups/:groupId/seasons/:seasonId/standings", "routes/season-standings.tsx"),

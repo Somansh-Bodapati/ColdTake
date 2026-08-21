@@ -2,7 +2,7 @@
 // both the production catch-all Vercel Function (api/gateway.ts) and the
 // local dev middleware (vite-plugins/api-dev-server.ts). Exists because
 // Vercel's Hobby plan caps a deployment at 12 Serverless Functions, and this
-// project has 32 route handlers under src/server/ — every file under api/
+// project has 34 route handlers under src/server/ — every file under api/
 // becomes its own Function, so all 32 handlers are consolidated behind the
 // one catch-all file and dispatched internally via this static table
 // instead.
@@ -18,6 +18,8 @@ import authClaimHandler from "./auth/claim.js";
 import authLogoutHandler from "./auth/logout.js";
 import authVerifyHandler from "./auth/verify.js";
 import adminManualStandingsHandler from "./admin/manual-standings/[tournamentId].js";
+import adminCricketDataSearchSeriesHandler from "./admin/cricketdata/search-series.js";
+import adminTournamentsHandler from "./admin/tournaments.js";
 import cardsRecapHandler from "./cards/recap/[seasonId]/[timestamp].js";
 import cardsRevealHandler from "./cards/reveal/[seasonId]/[timestamp].js";
 import cardsStandingsHandler from "./cards/standings/[seasonId]/[timestamp].js";
@@ -63,6 +65,8 @@ export const routes: Route[] = [
   { pattern: "/api/auth/logout", handler: authLogoutHandler },
   { pattern: "/api/auth/verify", handler: authVerifyHandler },
   { pattern: "/api/admin/manual-standings/:tournamentId", handler: adminManualStandingsHandler },
+  { pattern: "/api/admin/cricketdata/search-series", handler: adminCricketDataSearchSeriesHandler },
+  { pattern: "/api/admin/tournaments", handler: adminTournamentsHandler },
   { pattern: "/api/cards/recap/:seasonId/:timestamp", handler: cardsRecapHandler },
   { pattern: "/api/cards/reveal/:seasonId/:timestamp", handler: cardsRevealHandler },
   { pattern: "/api/cards/standings/:seasonId/:timestamp", handler: cardsStandingsHandler },

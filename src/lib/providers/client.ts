@@ -1,12 +1,20 @@
-// Thin fetch wrapper around the manual-standings admin endpoint, parsed with
-// the shared Zod schema — same shape as src/lib/seasons/client.ts /
-// src/lib/groups/client.ts.
+// Thin fetch wrappers around the provider-facing admin API — manual
+// standings, CricketData series search, and CricketData-backed tournament
+// creation — parsed with the shared Zod schemas, same shape as
+// src/lib/seasons/client.ts / src/lib/groups/client.ts.
 
 import {
   ingestResponseSchema,
   manualStandingsRequestSchema,
+  searchCricketDataSeriesRequestSchema,
+  searchCricketDataSeriesResponseSchema,
+  createTournamentFromSeriesRequestSchema,
+  createTournamentFromSeriesResponseSchema,
   type IngestResponse,
   type ManualStandingsRequest,
+  type CricketDataSeriesSummary,
+  type CreateTournamentFromSeriesRequest,
+  type CreateTournamentFromSeriesResponse,
 } from "@/lib/schemas/providers";
 
 async function errorMessage(response: Response, fallback: string): Promise<string> {
@@ -31,4 +39,32 @@ export async function saveManualStandings(
     throw new Error(await errorMessage(response, "Could not save manual standings"));
   }
   return ingestResponseSchema.parse(await response.json());
+}
+
+export async function searchCricketDataSeries(query: string): Promise<CricketDataSeriesSummary[]> {
+  const response = await fetch("/api/admin/cricketdata/search-series", {
+    method: "POST",
+    credentials: "include",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(searchCricketDataSeriesRequestSchema.parse({ query })),
+  });
+  if (!response.ok) {
+    throw new Error(await errorMessage(response, "Could not search CricketData"));
+  }
+  return searchCricketDataSeriesResponseSchema.parse(await response.json()).series;
+}
+
+export async function createTournamentFromSeries(
+  input: CreateTournamentFromSeriesRequest
+): Promise<CreateTournamentFromSeriesResponse> {
+  const response = await fetch("/api/admin/tournaments", {
+    method: "POST",
+    credentials: "include",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(createTournamentFromSeriesRequestSchema.parse(input)),
+  });
+  if (!response.ok) {
+    throw new Error(await errorMessage(response, "Could not create the tournament"));
+  }
+  return createTournamentFromSeriesResponseSchema.parse(await response.json());
 }
