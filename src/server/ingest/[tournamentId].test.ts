@@ -5,15 +5,15 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { liveState, season } from "@/lib/db/schema";
-import { createSeason } from "@/lib/seasons/service";
-import { saveManualStandings } from "@/lib/providers/manual-input";
+import { db } from "../../lib/db/client";
+import { liveState, season } from "../../lib/db/schema";
+import { createSeason } from "../../lib/seasons/service";
+import { saveManualStandings } from "../../lib/providers/manual-input";
 import {
   cleanupSeasonFixtures,
   insertTestTournament,
   makeGroupWithAdminAndMember,
-} from "@/lib/seasons/test-support";
+} from "../../lib/seasons/test-support";
 import handler from "./[tournamentId]";
 
 const createdUserIds: string[] = [];

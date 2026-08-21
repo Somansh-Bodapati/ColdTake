@@ -4,13 +4,13 @@
 // src/lib/groups/rate-limit.ts for the exact mechanism and its known
 // limitation under serverless.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { joinGroupByCode } from "@/lib/groups/service";
-import { hitRateLimit } from "@/lib/groups/rate-limit";
-import { joinGroupRequestSchema, type JoinGroupResponse } from "@/lib/schemas/groups";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { requireUser } from "../../lib/auth/session";
+import { joinGroupByCode } from "../../lib/groups/service";
+import { hitRateLimit } from "../../lib/groups/rate-limit";
+import { joinGroupRequestSchema, type JoinGroupResponse } from "../../lib/schemas/groups";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
+import { AppError } from "../../lib/errors";
 
 // Generous enough that a real user re-entering a mistyped code a few times
 // never hits it, tight enough to blunt a script trying to brute-force

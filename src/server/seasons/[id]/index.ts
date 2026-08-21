@@ -4,13 +4,13 @@
 // draft/open]. GET is membership-scoped, PATCH is admin-scoped (this
 // session's brief, task 6).
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { requireSeasonAdmin, requireSeasonMembership, getQuestions, updateSeason } from "@/lib/seasons/service";
-import { toQuestionResponse, toSeasonResponse } from "@/lib/seasons/dto";
-import { updateSeasonRequestSchema, type SeasonDetailResponse } from "@/lib/schemas/seasons";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../../lib/db/client";
+import { requireUser } from "../../../lib/auth/session";
+import { requireSeasonAdmin, requireSeasonMembership, getQuestions, updateSeason } from "../../../lib/seasons/service";
+import { toQuestionResponse, toSeasonResponse } from "../../../lib/seasons/dto";
+import { updateSeasonRequestSchema, type SeasonDetailResponse } from "../../../lib/schemas/seasons";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http";
+import { AppError } from "../../../lib/errors";
 
 async function handleGet(request: Request): Promise<Response> {
   const seasonId = pathSegment(request, 0);

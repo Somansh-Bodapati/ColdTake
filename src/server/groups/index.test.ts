@@ -3,10 +3,10 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { and, eq, inArray, isNull } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { group, member, user } from "@/lib/db/schema";
-import { createAnonymousUser, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { JOIN_CODE_PATTERN } from "@/lib/groups/join-code";
+import { db } from "../../lib/db/client";
+import { group, member, user } from "../../lib/db/schema";
+import { createAnonymousUser, SESSION_COOKIE_NAME } from "../../lib/auth/session";
+import { JOIN_CODE_PATTERN } from "../../lib/groups/join-code";
 import handler from "./index";
 
 const createdUserIds: string[] = [];

@@ -15,19 +15,19 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { group, member, season } from "@/lib/db/schema";
-import { SESSION_COOKIE_NAME, createAnonymousUser } from "@/lib/auth/session";
-import { createSeason, getQuestions } from "@/lib/seasons/service";
-import { joinGroupByCode } from "@/lib/groups/service";
-import { upsertPicks } from "@/lib/picks/service";
+import { db } from "../../../../lib/db/client";
+import { group, member, season } from "../../../../lib/db/schema";
+import { SESSION_COOKIE_NAME, createAnonymousUser } from "../../../../lib/auth/session";
+import { createSeason, getQuestions } from "../../../../lib/seasons/service";
+import { joinGroupByCode } from "../../../../lib/groups/service";
+import { upsertPicks } from "../../../../lib/picks/service";
 import {
   cleanupSeasonFixtures,
   findActiveMemberId,
   insertTestTeams,
   insertTestTournament,
   makeGroupWithAdminAndMember,
-} from "@/lib/seasons/test-support";
+} from "../../../../lib/seasons/test-support";
 import handler from "./all";
 
 const createdUserIds: string[] = [];

@@ -2,11 +2,11 @@
 // Consumes a single-use magic-link token (claim, or a future login link),
 // attaches the pending email if applicable, and issues a fresh session.
 
-import { db } from "@/lib/db/client";
-import { verifyRequestSchema } from "@/lib/schemas/auth";
-import { verifyMagicLinkToken, createSessionForUser, buildSessionCookie } from "@/lib/auth/session";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { verifyRequestSchema } from "../../lib/schemas/auth";
+import { verifyMagicLinkToken, createSessionForUser, buildSessionCookie } from "../../lib/auth/session";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
+import { AppError } from "../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

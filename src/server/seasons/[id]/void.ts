@@ -3,13 +3,13 @@
 // src/lib/seasons/settlement.ts's voidSeason writes it onto the season row
 // as the audit trail for an otherwise-silent "no scores recorded" action.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { voidSeason } from "@/lib/seasons/settlement";
-import { toSeasonResponse } from "@/lib/seasons/dto";
-import { voidSeasonRequestSchema, type VoidSeasonResponse } from "@/lib/schemas/settlement";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../../lib/db/client";
+import { requireUser } from "../../../lib/auth/session";
+import { voidSeason } from "../../../lib/seasons/settlement";
+import { toSeasonResponse } from "../../../lib/seasons/dto";
+import { voidSeasonRequestSchema, type VoidSeasonResponse } from "../../../lib/schemas/settlement";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http";
+import { AppError } from "../../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

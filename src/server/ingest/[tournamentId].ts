@@ -15,14 +15,14 @@
 // src/lib/providers/resolve.ts, since api/seasons/[id]/settle.ts needs the
 // exact same lookup to fetch a tournament's final result.
 
-import { db } from "@/lib/db/client";
-import { ingestTournament } from "@/lib/providers/ingest";
-import { isValidIngestSecret, readBearerToken } from "@/lib/providers/ingest-auth";
-import { toIngestResponse } from "@/lib/providers/dto";
-import { resolveStandingsProvider } from "@/lib/providers/resolve";
-import type { IngestResponse } from "@/lib/schemas/providers";
-import { jsonResponse, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { ingestTournament } from "../../lib/providers/ingest";
+import { isValidIngestSecret, readBearerToken } from "../../lib/providers/ingest-auth";
+import { toIngestResponse } from "../../lib/providers/dto";
+import { resolveStandingsProvider } from "../../lib/providers/resolve";
+import type { IngestResponse } from "../../lib/schemas/providers";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../lib/http";
+import { AppError } from "../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

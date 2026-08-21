@@ -3,14 +3,14 @@
 // task 6): verifies the caller is an admin of `groupId` before creating
 // anything.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { requireAdmin } from "@/lib/groups/service";
-import { createSeason, getQuestions } from "@/lib/seasons/service";
-import { createSeasonRequestSchema, type SeasonDetailResponse } from "@/lib/schemas/seasons";
-import { toQuestionResponse, toSeasonResponse } from "@/lib/seasons/dto";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { requireUser } from "../../lib/auth/session";
+import { requireAdmin } from "../../lib/groups/service";
+import { createSeason, getQuestions } from "../../lib/seasons/service";
+import { createSeasonRequestSchema, type SeasonDetailResponse } from "../../lib/schemas/seasons";
+import { toQuestionResponse, toSeasonResponse } from "../../lib/seasons/dto";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
+import { AppError } from "../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { inArray } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { user } from "@/lib/db/schema";
-import { createAnonymousUser, requireUser, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { user } from "../../lib/db/schema";
+import { createAnonymousUser, requireUser, SESSION_COOKIE_NAME } from "../../lib/auth/session";
+import { AppError } from "../../lib/errors";
 import handler from "./logout";
 
 const createdUserIds: string[] = [];
