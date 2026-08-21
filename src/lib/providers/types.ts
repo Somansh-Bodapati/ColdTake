@@ -30,3 +30,21 @@ export interface StandingsProvider {
   getStatLeaders(tournamentId: string, category: string): Promise<PlayerStat[]>;
   getFinalResult(tournamentId: string): Promise<TournamentResult>;
 }
+
+// A StandingsProvider implementation's method can permanently, structurally
+// not answer a question for a given tier/account (e.g. CricketDataProvider's
+// getFinalResult — see cricketdata-provider.ts's doc comment for why champion
+// determination isn't attempted). Living here, on the shared contract,
+// rather than on any one concrete provider, is what lets a
+// provider-agnostic caller like src/lib/seasons/settlement.ts recognize it
+// without importing a specific provider class. Deliberately a different
+// class from CricketDataProvider's ProviderFetchError: this signals "will
+// never succeed," not "failed this time, might succeed on retry" — callers
+// should treat it as "no data from this provider for this," never as a
+// reason to fall back to stale data or retry.
+export class ProviderUnsupportedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProviderUnsupportedError";
+  }
+}
