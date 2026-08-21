@@ -37,7 +37,7 @@ export function meta(_: Route.MetaArgs) {
 export default function JoinPage() {
   const [searchParams] = useSearchParams();
   const code = (searchParams.get("code") ?? "").trim().toUpperCase();
-  const { status } = useSession();
+  const { status, refresh } = useSession();
 
   const [groupName, setGroupName] = React.useState<string | null>(null);
   const [loadError, setLoadError] = React.useState<string | null>(null);
@@ -65,6 +65,12 @@ export default function JoinPage() {
     setJoining(true);
     try {
       await joinGroupRequest(code);
+      // Same pattern as home.tsx's join-by-code form: the session's group
+      // list lives in SessionProvider state, fetched once on mount, so a
+      // join anywhere else in the app has to explicitly refresh it — a bare
+      // navigate("/") to the home route would otherwise show the stale
+      // (pre-join) list until something else happens to call refresh().
+      await refresh();
       setJoined(true);
     } catch (err) {
       setJoinError(err instanceof Error ? err.message : "Could not join the group");
