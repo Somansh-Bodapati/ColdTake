@@ -20,8 +20,7 @@ export function meta(_: Route.MetaArgs) {
 // name entry -> anonymous session -> optional email claim. No group/season
 // UI yet — that's Milestone 2+.
 export default function Home() {
-  const { status, user, groups, refresh, signInAnonymous, confirmName, claimEmail, logout } = useSession();
-  const [displayName, setDisplayName] = React.useState("");
+  const { status, user, groups, refresh, confirmName, claimEmail, logout } = useSession();
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [claimUrl, setClaimUrl] = React.useState<string | null>(null);
@@ -57,19 +56,6 @@ export default function Home() {
   // the query param just lets the prompt render on the very first paint
   // after the redirect, before the first /api/me round trip resolves.
   const showNamePrompt = status === "signed-in" && user !== null && (user.needsNamePrompt || showWelcomeParam);
-
-  async function handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await signInAnonymous(displayName);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
-    }
-  }
 
   async function handleConfirmNameSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -141,45 +127,24 @@ export default function Home() {
           </div>
         )}
 
-        {/* Name entry (docs/05-DESIGN-PROMPT.md §2): "a single field, a
-            single button. The lowest-friction screen in the product." */}
+        {/* Google is now the only entry path (product owner's decision,
+            2026-08-21: anonymous name-only entry was a real liability — a
+            lost session cookie meant a permanently orphaned account with no
+            recovery path). POST /api/auth/anonymous itself is untouched —
+            existing accounts created before this change keep working via
+            their existing session cookie — this only removes the
+            *new-signup* UI path, not the backend endpoint. */}
         {status === "signed-out" && (
-          <form onSubmit={handleNameSubmit} className="flex flex-col gap-4 text-center">
+          <div className="flex flex-col gap-4 text-center">
             <div>
-              <h1 className="font-score text-3xl">What should we call you?</h1>
+              <h1 className="font-score text-3xl">Welcome to ColdTake</h1>
               <p className="text-muted-foreground mt-1 text-sm">
-                No password, no email required to start.
+                Sign in with Google to make your picks.
               </p>
-            </div>
-            <input
-              id="displayName"
-              name="displayName"
-              className={`${fieldClass} text-center text-lg`}
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="Your name"
-              autoComplete="nickname"
-              required
-            />
-            <Button
-              type="submit"
-              size="lg"
-              className="h-14 text-base font-bold shadow-lg"
-              disabled={submitting || displayName.trim().length === 0}
-            >
-              {submitting ? "Joining…" : "Start playing"}
-            </Button>
-
-            <div className="flex items-center gap-3 text-xs">
-              <span className="bg-border h-px flex-1" />
-              <span className="text-muted-foreground">or</span>
-              <span className="bg-border h-px flex-1" />
             </div>
 
             {/* Real top-level navigation, not a fetch — Google's own
-                consent screen has to load (docs/DECISIONS.md: anonymous
-                entry stays exactly as-is, this is an additional option on
-                the same screen, per the product owner). */}
+                consent screen has to load. */}
             <a
               href="/api/auth/google"
               className="border-input bg-card hover:bg-accent flex h-14 items-center justify-center gap-2 rounded-lg border text-base font-bold shadow-xs transition-colors"
@@ -189,10 +154,10 @@ export default function Home() {
 
             {googleError && (
               <p className="text-muted-foreground text-sm">
-                Google sign-in didn&apos;t go through. You can try again, or enter a name above.
+                Google sign-in didn&apos;t go through. Please try again.
               </p>
             )}
-          </form>
+          </div>
         )}
 
         {/* One-time name prompt (product owner's decision, this session's
