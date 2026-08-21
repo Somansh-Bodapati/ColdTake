@@ -28,7 +28,7 @@ import { inArray } from "drizzle-orm";
 import { db } from "../src/lib/db/client";
 import { user } from "../src/lib/db/schema";
 import { SESSION_COOKIE_NAME } from "../src/lib/auth/session";
-import apiFunction from "./[...slug]";
+import apiFunction from "./gateway";
 
 const createdUserIds: string[] = [];
 
@@ -39,7 +39,7 @@ afterEach(async () => {
   }
 });
 
-describe("api/[...slug].ts default export contract", () => {
+describe("api/gateway.ts default export contract", () => {
   it("is the 'fetch Web Standard export' shape Vercel requires for a Web Request, not a bare default function", () => {
     // A bare `export default function handler(request)` is exactly what
     // broke production: Vercel's Node runtime interprets that shape as its
@@ -50,7 +50,7 @@ describe("api/[...slug].ts default export contract", () => {
   });
 });
 
-describe("api/[...slug].ts fetch handler (end-to-end)", () => {
+describe("api/gateway.ts fetch handler (end-to-end)", () => {
   it("routes a GET request to its handler and returns a real JSON Response", async () => {
     // Exercises requestUrl()'s absolute-URL path (what the fetch export
     // actually receives from Vercel) rather than its relative-path

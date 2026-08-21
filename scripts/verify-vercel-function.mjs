@@ -1,17 +1,17 @@
-// Reproduces Vercel's actual deploy/runtime behavior for the api/[...slug].ts
+// Reproduces Vercel's actual deploy/runtime behavior for the api/gateway.ts
 // Serverless Function, which Vite/Vitest/tsx never do: Vercel transpiles each
 // .ts file to .js individually (types stripped, import specifiers left
 // untouched) and lets Node's native ESM loader resolve the result under
 // /var/task — and that loader requires explicit file extensions on relative
 // specifiers. This script:
 //
-//   1. Walks the import graph starting at api/[...slug].ts (relative imports
+//   1. Walks the import graph starting at api/gateway.ts (relative imports
 //      only, exactly like Vercel sees it) and collects every reachable file.
 //   2. Transpiles each one (types stripped only, via the TypeScript compiler
 //      API's transpileModule — no bundling, no path rewriting) into a scratch
 //      directory, preserving the relative directory structure, mirroring
 //      Vercel's per-file compilation.
-//   3. Actually `import()`s the compiled api/[...slug].js under plain Node
+//   3. Actually `import()`s the compiled api/gateway.js under plain Node
 //      and fails loudly on ERR_MODULE_NOT_FOUND (or any other resolution
 //      error) — the only way to catch what static/type checks and bundler
 //      based tools (which auto-resolve extensionless specifiers) cannot.
@@ -27,7 +27,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const SCRATCH_DIR = path.join(ROOT, "node_modules", ".verify-vercel-function");
-const ENTRY = path.join(ROOT, "api/[...slug].ts");
+const ENTRY = path.join(ROOT, "api/gateway.ts");
 
 const IMPORT_RE =
   /(?:import|export)\s+(?:[^'"]*?\s+from\s+)?["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)/g;
@@ -128,12 +128,12 @@ async function runEntryPoint() {
   // harness instead of only surfacing on a real Vercel deploy.
   if (typeof mod.default !== "object" || mod.default === null) {
     throw new Error(
-      "api/[...slug].js's default export must be an object ({ fetch }), not a bare function — " +
+      "api/gateway.js's default export must be an object ({ fetch }), not a bare function — " +
         "a bare default function is Vercel's legacy (req, res) handler contract, not a Web handler.",
     );
   }
   if (typeof mod.default.fetch !== "function") {
-    throw new Error("api/[...slug].js's default export is missing a `fetch` function");
+    throw new Error("api/gateway.js's default export is missing a `fetch` function");
   }
   return mod;
 }
@@ -144,7 +144,7 @@ async function main() {
   console.log(`Found ${files.size} reachable files. Transpiling (types stripped only)...`);
   transpileTree(files);
 
-  console.log("Importing compiled api/[...slug].js under plain Node (real ESM resolution)...");
+  console.log("Importing compiled api/gateway.js under plain Node (real ESM resolution)...");
   await runEntryPoint();
   console.log("OK: module graph resolved and imported with zero ERR_MODULE_NOT_FOUND errors.");
 }

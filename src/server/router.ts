@@ -1,5 +1,5 @@
 // Single source of truth for the API's URL -> handler mapping, shared by
-// both the production catch-all Vercel Function (api/[...slug].ts) and the
+// both the production catch-all Vercel Function (api/gateway.ts) and the
 // local dev middleware (vite-plugins/api-dev-server.ts). Exists because
 // Vercel's Hobby plan caps a deployment at 12 Serverless Functions, and this
 // project has 32 route handlers under src/server/ — every file under api/
