@@ -5,7 +5,7 @@ import { db } from "../../lib/db/client.js";
 import { requireUser } from "../../lib/auth/session.js";
 import { createGroup } from "../../lib/groups/service.js";
 import { createGroupRequestSchema, type CreateGroupResponse } from "../../lib/schemas/groups.js";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
+import { appUrl, jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
 import { AppError } from "../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
@@ -18,8 +18,7 @@ async function handler(request: Request): Promise<Response> {
 
   const created = await createGroup(db, { name, creatorUserId: currentUser.id });
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:5173";
-  const inviteUrl = `${appUrl}/join?code=${encodeURIComponent(created.joinCode)}`;
+  const inviteUrl = `${appUrl()}/join?code=${encodeURIComponent(created.joinCode)}`;
 
   const body: CreateGroupResponse = { group: created, inviteUrl };
   return jsonResponse(body, { status: 201 });

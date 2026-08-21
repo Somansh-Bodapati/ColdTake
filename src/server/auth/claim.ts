@@ -12,7 +12,7 @@ import { db } from "../../lib/db/client.js";
 import { user } from "../../lib/db/schema.js";
 import { claimRequestSchema, type ClaimResponse } from "../../lib/schemas/auth.js";
 import { createClaimToken, requireUser } from "../../lib/auth/session.js";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
+import { appUrl, jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
 import { AppError } from "../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
@@ -37,8 +37,7 @@ async function handler(request: Request): Promise<Response> {
   }
 
   const claim = await createClaimToken(db, currentUser.id, email);
-  const appUrl = process.env.APP_URL ?? "http://localhost:5173";
-  const claimUrl = `${appUrl}/claim?token=${encodeURIComponent(claim.rawToken)}`;
+  const claimUrl = `${appUrl()}/claim?token=${encodeURIComponent(claim.rawToken)}`;
 
   // Stand-in for the email provider (see TODO above).
   console.log(`[auth/claim] magic link for ${email}: ${claimUrl}`);

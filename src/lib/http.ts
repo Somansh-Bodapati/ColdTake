@@ -16,6 +16,19 @@ import { AppError } from "./errors.js";
 // which supplies a base from the Host header when `.url` isn't absolute
 // already (the value of the base is irrelevant beyond that — only the
 // resulting `.pathname` is ever read).
+// Every place that builds a link from APP_URL (Google OAuth's redirect_uri,
+// the magic-link claim URL, share-card/invite links) was doing its own
+// `${process.env.APP_URL}/...` concatenation — a trailing slash on the env
+// var (e.g. "https://example.vercel.app/") silently produced a double slash
+// ("https://example.vercel.app//api/..."), which Google's OAuth rejects
+// outright as redirect_uri_mismatch since it must byte-for-byte match a
+// registered URI. One normalized helper, used everywhere, so a
+// misconfigured env var can't cause this again.
+export function appUrl(): string {
+  const raw = process.env.APP_URL ?? "http://localhost:5173";
+  return raw.replace(/\/+$/, "");
+}
+
 export function requestUrl(request: Request): URL {
   try {
     return new URL(request.url);
