@@ -20,7 +20,7 @@ export function meta(_: Route.MetaArgs) {
 // name entry -> anonymous session -> optional email claim. No group/season
 // UI yet — that's Milestone 2+.
 export default function Home() {
-  const { status, user, groups, refresh, signInAnonymous, claimEmail, logout } = useSession();
+  const { status, user, groups, refresh, signInAnonymous, confirmName, claimEmail, logout } = useSession();
   const [displayName, setDisplayName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -29,6 +29,34 @@ export default function Home() {
   const [groupName, setGroupName] = React.useState("");
   const [joinCode, setJoinCode] = React.useState("");
   const [groupSubmitting, setGroupSubmitting] = React.useState(false);
+  const [confirmNameInput, setConfirmNameInput] = React.useState("");
+  const [confirmingName, setConfirmingName] = React.useState(false);
+
+  // Signal from GET /api/auth/google/callback (task 3's brief): a brand-new
+  // Google sign-in redirects here with ?welcome=1 so the one-time "what's
+  // your name" prompt can render immediately, without a second round trip.
+  // Read once on mount — this is a one-time signal, not something that
+  // should reappear on every re-render of this route.
+  const [showWelcomeParam] = React.useState(
+    () => new URLSearchParams(window.location.search).get("welcome") === "1"
+  );
+  const [googleError] = React.useState(
+    () => new URLSearchParams(window.location.search).get("google_error") === "1"
+  );
+  React.useEffect(() => {
+    if (showWelcomeParam || googleError) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("welcome");
+      url.searchParams.delete("google_error");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  }, [showWelcomeParam, googleError]);
+
+  // /api/me's own needsNamePrompt is the source of truth (it survives a
+  // refresh even after the one-time ?welcome=1 query param is stripped);
+  // the query param just lets the prompt render on the very first paint
+  // after the redirect, before the first /api/me round trip resolves.
+  const showNamePrompt = status === "signed-in" && user !== null && (user.needsNamePrompt || showWelcomeParam);
 
   async function handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,6 +68,19 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleConfirmNameSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setConfirmingName(true);
+    try {
+      await confirmName(confirmNameInput);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setConfirmingName(false);
     }
   }
 
@@ -128,10 +169,68 @@ export default function Home() {
             >
               {submitting ? "Joining…" : "Start playing"}
             </Button>
+
+            <div className="flex items-center gap-3 text-xs">
+              <span className="bg-border h-px flex-1" />
+              <span className="text-muted-foreground">or</span>
+              <span className="bg-border h-px flex-1" />
+            </div>
+
+            {/* Real top-level navigation, not a fetch — Google's own
+                consent screen has to load (docs/DECISIONS.md: anonymous
+                entry stays exactly as-is, this is an additional option on
+                the same screen, per the product owner). */}
+            <a
+              href="/api/auth/google"
+              className="border-input bg-card hover:bg-accent flex h-14 items-center justify-center gap-2 rounded-lg border text-base font-bold shadow-xs transition-colors"
+            >
+              Sign in with Google
+            </a>
+
+            {googleError && (
+              <p className="text-muted-foreground text-sm">
+                Google sign-in didn&apos;t go through. You can try again, or enter a name above.
+              </p>
+            )}
           </form>
         )}
 
-        {status === "signed-in" && user && (
+        {/* One-time name prompt (product owner's decision, this session's
+            brief): a brand-new Google sign-in has no chosen name yet — just
+            a placeholder derived from their Google profile — so ask once,
+            immediately after the redirect, before showing the rest of the
+            app. */}
+        {status === "signed-in" && user && showNamePrompt && (
+          <form onSubmit={handleConfirmNameSubmit} className="flex flex-col gap-4 text-center">
+            <div>
+              <h1 className="font-score text-3xl">What should we call you?</h1>
+              <p className="text-muted-foreground mt-1 text-sm">
+                You&apos;re signed in with Google — just pick the name your groups will see.
+              </p>
+            </div>
+            <input
+              id="confirmDisplayName"
+              name="confirmDisplayName"
+              className={`${fieldClass} text-center text-lg`}
+              value={confirmNameInput}
+              onChange={(event) => setConfirmNameInput(event.target.value)}
+              placeholder={user.displayName}
+              autoComplete="nickname"
+              autoFocus
+              required
+            />
+            <Button
+              type="submit"
+              size="lg"
+              className="h-14 text-base font-bold shadow-lg"
+              disabled={confirmingName || confirmNameInput.trim().length === 0}
+            >
+              {confirmingName ? "Saving…" : "Continue"}
+            </Button>
+          </form>
+        )}
+
+        {status === "signed-in" && user && !showNamePrompt && (
           <div className="flex flex-col gap-8">
             <div className="flex items-center gap-3">
               <IdentityBadge seed={user.displayName} size="lg" />

@@ -38,6 +38,24 @@ export function jsonResponse(
   });
 }
 
+// A genuine HTTP redirect (302) — used by the Google OAuth handlers, which
+// need the browser to actually navigate (to Google's consent screen, then
+// back to the app), not a JSON body a fetch() caller would have to act on.
+export function redirectResponse(location: string, init: { headers?: HeadersInit } = {}): Response {
+  // Built via the Headers constructor + explicit `.append`s rather than
+  // object-spreading `init.headers` into a headers literal: a HeadersInit
+  // can be a real `Headers` instance (e.g. the Google callback handler,
+  // which needs two separate Set-Cookie headers — one for the session, one
+  // to clear the oauth state cookie), and spreading a Headers instance into
+  // a plain object copies none of its entries, since Headers stores them
+  // internally rather than as enumerable own properties. `new Headers(init)`
+  // is the spec-correct way to accept any HeadersInit shape (Headers,
+  // [][], or Record<string,string>) and keep multi-value headers intact.
+  const headers = new Headers(init.headers);
+  headers.set("location", location);
+  return new Response(null, { status: 302, headers });
+}
+
 // Parses and Zod-validates a JSON request body. Throws AppError(400) on
 // malformed JSON or a schema mismatch — every API boundary parses with Zod
 // (CLAUDE.md code standards).

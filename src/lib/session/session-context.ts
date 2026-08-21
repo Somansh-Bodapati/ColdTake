@@ -14,6 +14,7 @@ export interface SessionContextValue {
   groups: MeGroup[];
   refresh: () => Promise<void>;
   signInAnonymous: (displayName: string) => Promise<void>;
+  confirmName: (displayName: string) => Promise<void>;
   claimEmail: (email: string) => Promise<ClaimResponse>;
   logout: () => Promise<void>;
 }

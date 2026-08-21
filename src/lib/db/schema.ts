@@ -32,6 +32,16 @@ export const user = pgTable("user", {
     .notNull()
     .defaultNow(),
   claimedAt: timestamp("claimed_at", { withTimezone: true }), // set when they attach an email
+  // Google's `sub` claim (stable, unique per Google account). Nullable:
+  // anonymous and not-yet-linked accounts have none. `displayName` stays
+  // NOT NULL (it's read as a plain string in ~10 places — group rosters,
+  // pick attribution, /api/me — none of which are prepared for null), so a
+  // brand-new Google sign-in is seeded with a placeholder name derived from
+  // the Google profile instead of a null one; `displayNameConfirmedAt`
+  // tracks whether the one-time "what's your name" prompt has been
+  // completed and gates whether the client shows it.
+  googleId: text("google_id").unique(),
+  displayNameConfirmedAt: timestamp("display_name_confirmed_at", { withTimezone: true }),
 });
 
 export const userRelations = relations(user, ({ many }) => ({

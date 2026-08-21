@@ -48,12 +48,32 @@ export const verifyResponseSchema = z.object({
 });
 export type VerifyResponse = z.infer<typeof verifyResponseSchema>;
 
+// GET /api/auth/google/callback?code=...&state=... — Google redirects back
+// with either `code`+`state` (consent granted) or an `error` (the user
+// declined, or something else went wrong on Google's side).
+export const googleCallbackQuerySchema = z.object({
+  code: z.string().min(1).optional(),
+  state: z.string().min(1).optional(),
+  error: z.string().optional(),
+});
+export type GoogleCallbackQuery = z.infer<typeof googleCallbackQuerySchema>;
+
+export const confirmNameRequestSchema = z.object({
+  displayName: displayNameSchema,
+});
+export type ConfirmNameRequest = z.infer<typeof confirmNameRequestSchema>;
+
 export const meUserSchema = z.object({
   id: z.string(),
   displayName: z.string(),
   email: z.string().nullable(),
   avatarSeed: z.string(),
   claimedAt: z.string().nullable(),
+  // True only for a brand-new Google sign-in that hasn't completed the
+  // one-time name prompt yet (src/lib/auth/google.ts's needsNamePrompt).
+  // Anonymous/claimed users are always false — they chose their name
+  // up front.
+  needsNamePrompt: z.boolean().default(false),
 });
 export type MeUser = z.infer<typeof meUserSchema>;
 

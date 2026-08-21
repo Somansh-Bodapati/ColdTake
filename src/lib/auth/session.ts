@@ -59,6 +59,10 @@ export async function createAnonymousUser(
     id: userId,
     displayName,
     avatarSeed: userId, // deterministic: derived from the id itself
+    // Chose their name up front (this whole flow IS the name prompt) — never
+    // needs the one-time Google-sign-in name prompt (src/lib/auth/google.ts's
+    // needsNamePrompt).
+    displayNameConfirmedAt: new Date(),
   });
   const session = await insertAuthToken(db, {
     userId,
@@ -142,6 +146,7 @@ export interface SessionUser {
   email: string | null;
   avatarSeed: string;
   claimedAt: Date | null;
+  displayNameConfirmedAt: Date | null;
 }
 
 // Reads the session cookie off `request`, validates it against `auth_token`,
@@ -164,6 +169,7 @@ export async function requireUser(db: Db, request: Request): Promise<SessionUser
       email: user.email,
       avatarSeed: user.avatarSeed,
       claimedAt: user.claimedAt,
+      displayNameConfirmedAt: user.displayNameConfirmedAt,
     })
     .from(authToken)
     .innerJoin(user, eq(authToken.userId, user.id))

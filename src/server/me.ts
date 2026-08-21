@@ -6,6 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db } from "../lib/db/client.js";
 import { group, member } from "../lib/db/schema.js";
 import { requireUser } from "../lib/auth/session.js";
+import { needsNamePrompt } from "../lib/auth/google.js";
 import type { MeResponse } from "../lib/schemas/auth.js";
 import { jsonResponse, withErrorHandling } from "../lib/http.js";
 import { AppError } from "../lib/errors.js";
@@ -35,6 +36,7 @@ async function handler(request: Request): Promise<Response> {
       email: currentUser.email,
       avatarSeed: currentUser.avatarSeed,
       claimedAt: currentUser.claimedAt ? currentUser.claimedAt.toISOString() : null,
+      needsNamePrompt: needsNamePrompt(currentUser.displayNameConfirmedAt),
     },
     groups: rows,
   };
