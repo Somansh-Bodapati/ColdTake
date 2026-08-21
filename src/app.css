@@ -126,4 +126,19 @@
     letter-spacing: -0.03em;
     font-family: var(--font-display);
   }
+
+  /* IdentityBadge's theme-aware colour (this session's brief, real IPL
+     franchise brand colours). The badge hands both a light and a dark value
+     down as CSS custom properties (src/components/identity-badge.tsx); which
+     one actually paints is decided here, by the same `.dark` ancestor class
+     every other theme swap in this file uses — never in JS, so no re-render
+     is needed on a theme change. */
+  .identity-badge {
+    background-color: var(--identity-bg-light);
+    color: var(--identity-fg-light);
+  }
+  .dark .identity-badge {
+    background-color: var(--identity-bg-dark);
+    color: var(--identity-fg-dark);
+  }
 }

@@ -4,23 +4,128 @@ import type { Route } from "./+types/season-reveal";
 import { useSession } from "@/lib/session/use-session";
 import { fetchSeasonDetail } from "@/lib/seasons/client";
 import { fetchAllPicks } from "@/lib/picks/client";
-import type { SeasonDetailResponse } from "@/lib/schemas/seasons";
+import type { QuestionResponse, SeasonDetailResponse, TeamSummary } from "@/lib/schemas/seasons";
 import type { AllPicksResponse, PickAnswerInput } from "@/lib/schemas/picks";
+import { customQuestionOptions } from "@/lib/seasons/question-config";
 import { ShareCardButton } from "@/components/share-card-button";
 import { buildCardUrl } from "@/lib/cards/client";
+import { IdentityBadge } from "@/components/identity-badge";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Reveal | ColdTake" }];
 }
 
-function formatAnswer(answer: PickAnswerInput): string {
-  if (answer.teamId) return answer.teamId;
-  if (answer.teamIds && answer.teamIds.length > 0) return answer.teamIds.join(", ");
-  if (answer.playerId) return answer.playerId;
-  if (typeof answer.value === "number") return String(answer.value);
-  if (typeof answer.bool === "boolean") return answer.bool ? "Yes" : "No";
-  if (answer.optionId) return answer.optionId;
-  return "—";
+// Resolves a `teamId` (the raw internal team.id every team-referencing
+// resolver in src/lib/scoring/resolvers/*.ts stores — see champion.ts,
+// runner-up.ts, wooden-spoon.ts, top-n-{un,}ordered.ts) to the team's real
+// name, via `season.teams` (the same `TeamSummary[]` src/routes/season-picks.tsx
+// already looks up teamBadgeSeed/TeamSelect against). A pick's teamId should
+// always match a season team — src/lib/picks/service.ts validates every pick
+// against the season's Tournament.teamIds before it's ever stored — but a
+// season's roster is theoretically still just app-level data, not an FK
+// constraint, so this stays defensive: show the raw id rather than an empty
+// label or a crash if a match somehow isn't found.
+function resolveTeam(teamId: string, teams: readonly TeamSummary[]): TeamSummary | undefined {
+  return teams.find((t) => t.id === teamId);
+}
+
+// Resolves a `custom` question's `optionId` (src/lib/scoring/resolvers/custom.ts)
+// to that specific question's option label, via `question.config.options`
+// (the `{ id, label }[]` src/lib/schemas/seasons.ts's `customConfigSchema`
+// requires at creation time). Same defensive fallback as `teamDisplayName`:
+// an option should always exist for a stored pick, but show the raw id
+// rather than crash if the season's question config ever gets edited out
+// from under an already-submitted pick.
+function customOptionLabel(question: QuestionResponse, optionId: string): string {
+  const options = customQuestionOptions(question.config.options);
+  return options.find((o) => o.id === optionId)?.label ?? optionId;
+}
+
+// Every question type gets its own small answer renderer rather than one
+// `formatAnswer(): string` — team-based answers need a colored IdentityBadge
+// next to the resolved name (this session's "modern beauty" ask), which a
+// plain string return can't carry. `playerId` (stat_leader) is rendered
+// as-is: it's already human-typed free text, with no player-pool lookup to
+// resolve against (src/routes/season-picks.tsx's stat_leader input has the
+// same documented limitation) — not this bug, out of scope here.
+function AnswerValue({
+  question,
+  answer,
+  teams,
+}: {
+  question: QuestionResponse;
+  answer: PickAnswerInput;
+  teams: readonly TeamSummary[];
+}) {
+  switch (question.type) {
+    case "champion":
+    case "runner_up":
+    case "wooden_spoon": {
+      if (!answer.teamId) return <span className="text-muted-foreground">—</span>;
+      return <TeamChip teamId={answer.teamId} teams={teams} />;
+    }
+    case "top_n_unordered":
+    case "top_n_ordered": {
+      if (!answer.teamIds || answer.teamIds.length === 0) {
+        return <span className="text-muted-foreground">—</span>;
+      }
+      return (
+        <div className="flex flex-col items-end gap-1.5">
+          {answer.teamIds.map((teamId, i) => (
+            <div key={`${teamId}-${i}`} className="flex items-center gap-1.5">
+              {question.type === "top_n_ordered" && (
+                <span className="font-score text-muted-foreground text-[11px]">{i + 1}.</span>
+              )}
+              <TeamChip teamId={teamId} teams={teams} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+    case "custom":
+      return answer.optionId ? (
+        <span className="font-medium">{customOptionLabel(question, answer.optionId)}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    case "stat_leader":
+      return answer.playerId ? (
+        <span className="font-medium">{answer.playerId}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    case "numeric":
+      return typeof answer.value === "number" ? (
+        <span className="font-score">{answer.value}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    case "boolean":
+    case "team_over_under":
+      return typeof answer.bool === "boolean" ? (
+        <span className="font-bold">{answer.bool ? "Yes" : "No"}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    default:
+      return <span className="text-muted-foreground">—</span>;
+  }
+}
+
+// A team's resolved name plus a colored IdentityBadge — real IPL brand
+// colors where `identity-colors.ts`'s franchise table recognizes the name,
+// the existing hash-based fallback otherwise (a group running a non-IPL
+// tournament). `shortName` seeds the badge's initials, same pattern as
+// season-picks.tsx's `teamBadgeSeed`.
+function TeamChip({ teamId, teams }: { teamId: string; teams: readonly TeamSummary[] }) {
+  const team = resolveTeam(teamId, teams);
+  const seed = team ? team.shortName || team.name : teamId;
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <IdentityBadge seed={seed} teamName={team?.name} size="sm" shape="square" />
+      <span className="text-sm font-medium">{team ? team.name : teamId}</span>
+    </span>
+  );
 }
 
 // Reveal view (this session's brief, task 5): everyone's picks, visible to
@@ -74,7 +179,17 @@ export default function SeasonRevealPage() {
     return <p className="p-4">Missing route parameters.</p>;
   }
   if (status === "loading" || loading) {
-    return <p className="text-muted-foreground p-4">Loading…</p>;
+    return (
+      <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
+        <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+        <div className="bg-muted h-8 w-56 animate-pulse rounded" />
+        <div className="flex flex-col gap-3 pt-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="bg-muted h-24 animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </main>
+    );
   }
   if (status === "signed-out") {
     return (
@@ -86,7 +201,13 @@ export default function SeasonRevealPage() {
     );
   }
   if (error || !season) {
-    return <p className="text-destructive p-4">{error ?? "Season not found"}</p>;
+    return (
+      <main className="mx-auto flex max-w-lg flex-col gap-3 p-4">
+        <p className="border-destructive/40 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
+          {error ?? "Season not found"}
+        </p>
+      </main>
+    );
   }
 
   return (
@@ -96,8 +217,14 @@ export default function SeasonRevealPage() {
       </Link>
 
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{season.season.name} — reveal</h1>
-        <Link className="text-sm underline" to={`/groups/${groupId}/seasons/${seasonId}/standings`}>
+        <div>
+          <p className="text-accent-foreground text-[10px] font-bold tracking-widest uppercase">Reveal</p>
+          <h1 className="text-2xl font-bold">{season.season.name}</h1>
+        </div>
+        <Link
+          className="text-muted-foreground text-sm underline"
+          to={`/groups/${groupId}/seasons/${seasonId}/standings`}
+        >
           Standings →
         </Link>
       </div>
@@ -117,37 +244,70 @@ export default function SeasonRevealPage() {
       )}
 
       {notRevealedYet && (
-        <p className="text-muted-foreground text-sm">
-          Picks are hidden until the season locks at{" "}
-          {new Date(season.season.lockAt).toLocaleString()}. Everyone will see everyone's picks at once —
-          no early peeking, not even for you.
-        </p>
+        <div className="border-border bg-card flex flex-col items-center gap-1 rounded-xl border border-dashed px-6 py-8 text-center">
+          <p className="font-medium">Picks are still under wraps</p>
+          <p className="text-muted-foreground text-sm">
+            Hidden until the season locks at {new Date(season.season.lockAt).toLocaleString()}. Everyone
+            will see everyone's picks at once — no early peeking, not even for you.
+          </p>
+        </div>
       )}
 
       {reveal && (
         <div className="flex flex-col gap-4">
           {reveal.members.map((member) => (
-            <div key={member.memberId} className="rounded-md border p-3">
-              <p className="mb-2 text-sm font-medium">{member.displayName}</p>
-              {member.picks.length === 0 ? (
-                <p className="text-muted-foreground text-xs">No slate — scores zero.</p>
-              ) : (
-                <ul className="flex flex-col gap-1">
-                  {season.questions.map((question) => {
-                    const memberPick = member.picks.find((p) => p.questionId === question.id);
-                    return (
-                      <li key={question.id} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{question.prompt}</span>
-                        <span>{memberPick ? formatAnswer(memberPick.answer) : "—"}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
+            <MemberSlate key={member.memberId} member={member} season={season} />
           ))}
         </div>
       )}
     </main>
+  );
+}
+
+function MemberSlate({
+  member,
+  season,
+}: {
+  member: AllPicksResponse["members"][number];
+  season: SeasonDetailResponse;
+}) {
+  return (
+    <div className="border-border bg-card overflow-hidden rounded-xl border shadow-sm">
+      <div className="border-border bg-secondary/40 flex items-center gap-3 border-b px-4 py-3">
+        <IdentityBadge seed={member.displayName} />
+        <span className="flex-1 truncate font-bold">{member.displayName}</span>
+        <span className="text-muted-foreground font-score text-xs">
+          {member.picks.length}/{season.questions.length}
+        </span>
+      </div>
+      {member.picks.length === 0 ? (
+        <p className="text-muted-foreground px-4 py-4 text-sm">No slate — scores zero.</p>
+      ) : (
+        <ul className="flex flex-col">
+          {season.questions.map((question, i) => {
+            const memberPick = member.picks.find((p) => p.questionId === question.id);
+            return (
+              <li
+                key={question.id}
+                className={
+                  i === 0
+                    ? "flex items-start justify-between gap-3 px-4 py-3"
+                    : "border-border flex items-start justify-between gap-3 border-t px-4 py-3"
+                }
+              >
+                <span className="text-muted-foreground pt-0.5 text-sm leading-snug">{question.prompt}</span>
+                <div className="shrink-0 text-right">
+                  {memberPick ? (
+                    <AnswerValue question={question} answer={memberPick.answer} teams={season.teams} />
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
