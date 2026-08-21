@@ -5,12 +5,12 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { season } from "@/lib/db/schema";
-import { createAnonymousUser, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { createGroup } from "@/lib/groups/service";
-import { createSeason } from "@/lib/seasons/service";
-import { cleanupSeasonFixtures, insertTestTournament } from "@/lib/seasons/test-support";
+import { db } from "../../../lib/db/client";
+import { season } from "../../../lib/db/schema";
+import { createAnonymousUser, SESSION_COOKIE_NAME } from "../../../lib/auth/session";
+import { createGroup } from "../../../lib/groups/service";
+import { createSeason } from "../../../lib/seasons/service";
+import { cleanupSeasonFixtures, insertTestTournament } from "../../../lib/seasons/test-support";
 import handler from "./index";
 
 const createdUserIds: string[] = [];

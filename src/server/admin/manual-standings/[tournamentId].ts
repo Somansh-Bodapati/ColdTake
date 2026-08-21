@@ -10,16 +10,16 @@
 // stored) — everything downstream of "provider produced this data" is
 // identical.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { requireTournamentAdmin } from "@/lib/providers/admin";
-import { saveManualStandings } from "@/lib/providers/manual-input";
-import { ManualProvider } from "@/lib/providers/manual-provider";
-import { ingestTournament } from "@/lib/providers/ingest";
-import { toIngestResponse } from "@/lib/providers/dto";
-import { manualStandingsRequestSchema, type IngestResponse } from "@/lib/schemas/providers";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../../lib/db/client";
+import { requireUser } from "../../../lib/auth/session";
+import { requireTournamentAdmin } from "../../../lib/providers/admin";
+import { saveManualStandings } from "../../../lib/providers/manual-input";
+import { ManualProvider } from "../../../lib/providers/manual-provider";
+import { ingestTournament } from "../../../lib/providers/ingest";
+import { toIngestResponse } from "../../../lib/providers/dto";
+import { manualStandingsRequestSchema, type IngestResponse } from "../../../lib/schemas/providers";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http";
+import { AppError } from "../../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

@@ -10,14 +10,14 @@
 // second copy — this route isn't group-scoped, but the limiter itself never
 // was either; only its one existing call site (api/groups/join.ts) is.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { requireStandingsAdmin, recomputeStandings } from "@/lib/standings/service";
-import { toStandingsSnapshotResponse } from "@/lib/standings/dto";
-import { hitRateLimit } from "@/lib/groups/rate-limit";
-import type { RecomputeResponse } from "@/lib/schemas/standings";
-import { jsonResponse, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../../lib/db/client";
+import { requireUser } from "../../../lib/auth/session";
+import { requireStandingsAdmin, recomputeStandings } from "../../../lib/standings/service";
+import { toStandingsSnapshotResponse } from "../../../lib/standings/dto";
+import { hitRateLimit } from "../../../lib/groups/rate-limit";
+import type { RecomputeResponse } from "../../../lib/schemas/standings";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http";
+import { AppError } from "../../../lib/errors";
 
 // Recompute is meant to follow a real data change (an ingestion poll, doc
 // 02 §4.1: "one poll per day"), not to be hammered — this just stops one

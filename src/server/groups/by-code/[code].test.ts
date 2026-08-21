@@ -4,10 +4,10 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { inArray } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { group, user } from "@/lib/db/schema";
-import { createAnonymousUser } from "@/lib/auth/session";
-import { createGroup } from "@/lib/groups/service";
+import { db } from "../../../lib/db/client";
+import { group, user } from "../../../lib/db/schema";
+import { createAnonymousUser } from "../../../lib/auth/session";
+import { createGroup } from "../../../lib/groups/service";
 import handler from "./[code]";
 
 const createdUserIds: string[] = [];

@@ -3,12 +3,12 @@
 // on load to find out who's signed in and which groups they belong to.
 
 import { and, eq, isNull } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { group, member } from "@/lib/db/schema";
-import { requireUser } from "@/lib/auth/session";
-import type { MeResponse } from "@/lib/schemas/auth";
-import { jsonResponse, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../lib/db/client";
+import { group, member } from "../lib/db/schema";
+import { requireUser } from "../lib/auth/session";
+import type { MeResponse } from "../lib/schemas/auth";
+import { jsonResponse, withErrorHandling } from "../lib/http";
+import { AppError } from "../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

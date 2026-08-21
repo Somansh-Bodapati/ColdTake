@@ -4,18 +4,18 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { season } from "@/lib/db/schema";
-import { createSeason } from "@/lib/seasons/service";
-import { settleSeason } from "@/lib/seasons/settlement";
-import { ManualProvider } from "@/lib/providers/manual-provider";
-import { saveManualStandings } from "@/lib/providers/manual-input";
+import { db } from "../../../../lib/db/client";
+import { season } from "../../../../lib/db/schema";
+import { createSeason } from "../../../../lib/seasons/service";
+import { settleSeason } from "../../../../lib/seasons/settlement";
+import { ManualProvider } from "../../../../lib/providers/manual-provider";
+import { saveManualStandings } from "../../../../lib/providers/manual-input";
 import {
   cleanupSeasonFixtures,
   insertTestTeams,
   insertTestTournament,
   makeGroupWithAdminAndMember,
-} from "@/lib/seasons/test-support";
+} from "../../../../lib/seasons/test-support";
 import handler from "./[timestamp]";
 
 const createdUserIds: string[] = [];

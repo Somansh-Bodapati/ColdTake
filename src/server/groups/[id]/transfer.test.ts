@@ -5,10 +5,10 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { and, eq, inArray, isNull } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { group, member, user } from "@/lib/db/schema";
-import { createAnonymousUser, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { createGroup, joinGroupByCode } from "@/lib/groups/service";
+import { db } from "../../../lib/db/client";
+import { group, member, user } from "../../../lib/db/schema";
+import { createAnonymousUser, SESSION_COOKIE_NAME } from "../../../lib/auth/session";
+import { createGroup, joinGroupByCode } from "../../../lib/groups/service";
 import handler from "./transfer";
 
 const createdUserIds: string[] = [];

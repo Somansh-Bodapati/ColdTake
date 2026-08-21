@@ -5,15 +5,15 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db/client";
-import { question, season } from "@/lib/db/schema";
-import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { buildDefaultQuestionTemplates } from "@/lib/seasons/templates";
+import { db } from "../../lib/db/client";
+import { question, season } from "../../lib/db/schema";
+import { SESSION_COOKIE_NAME } from "../../lib/auth/session";
+import { buildDefaultQuestionTemplates } from "../../lib/seasons/templates";
 import {
   cleanupSeasonFixtures,
   insertTestTournament,
   makeGroupWithAdminAndMember,
-} from "@/lib/seasons/test-support";
+} from "../../lib/seasons/test-support";
 import handler from "./index";
 
 const createdUserIds: string[] = [];

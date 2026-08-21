@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { db } from "@/lib/db/client";
-import { createAnonymousUser, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { insertTestTournament, cleanupSeasonFixtures } from "@/lib/seasons/test-support";
+import { db } from "../../lib/db/client";
+import { createAnonymousUser, SESSION_COOKIE_NAME } from "../../lib/auth/session";
+import { insertTestTournament, cleanupSeasonFixtures } from "../../lib/seasons/test-support";
 import handler from "./index";
 
 const createdUserIds: string[] = [];

@@ -10,14 +10,14 @@
 // effectiveSeasonStatus, CLAUDE.md rule 3) using this handler's own
 // `new Date()` — never a client-supplied timestamp, never a cron.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { requireSeasonMember, getAllPicks } from "@/lib/picks/service";
-import { isRevealed } from "@/lib/seasons/state";
-import { toMemberPicksResponse } from "@/lib/picks/dto";
-import type { AllPicksResponse } from "@/lib/schemas/picks";
-import { jsonResponse, pathSegment, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../../../lib/db/client";
+import { requireUser } from "../../../../lib/auth/session";
+import { requireSeasonMember, getAllPicks } from "../../../../lib/picks/service";
+import { isRevealed } from "../../../../lib/seasons/state";
+import { toMemberPicksResponse } from "../../../../lib/picks/dto";
+import type { AllPicksResponse } from "../../../../lib/schemas/picks";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http";
+import { AppError } from "../../../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

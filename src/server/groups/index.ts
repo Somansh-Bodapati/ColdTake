@@ -1,12 +1,12 @@
 // POST /api/groups — doc 03 §3.2: { name } -> { group, joinCode, inviteUrl }
 // Doc 01 §2.1: group creation, authenticated user becomes admin.
 
-import { db } from "@/lib/db/client";
-import { requireUser } from "@/lib/auth/session";
-import { createGroup } from "@/lib/groups/service";
-import { createGroupRequestSchema, type CreateGroupResponse } from "@/lib/schemas/groups";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { db } from "../../lib/db/client";
+import { requireUser } from "../../lib/auth/session";
+import { createGroup } from "../../lib/groups/service";
+import { createGroupRequestSchema, type CreateGroupResponse } from "../../lib/schemas/groups";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
+import { AppError } from "../../lib/errors";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {
