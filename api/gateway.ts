@@ -1,10 +1,24 @@
-// The only file left under api/ — Vercel's catch-all Serverless Function
-// convention (`[...slug].ts`, not the Next.js-only "optional catch-all"
-// `[[...slug]].ts`) matches every request under /api/* to this one Function
-// and hands it the full request, so we can dispatch internally via
-// src/server/router.ts instead of letting Vercel turn each of the 32
-// handlers under src/server/ into its own Function (Hobby plan caps a
-// deployment at 12).
+// The only file left under api/ — every request under /api/* is funneled
+// here by vercel.json's rewrite ({ "source": "/api/(.*)", "destination":
+// "/api/gateway" }), which hands the full original request to this one
+// Function so we can dispatch internally via src/server/router.ts instead of
+// letting Vercel turn each of the 32 handlers under src/server/ into its own
+// Function (Hobby plan caps a deployment at 12).
+//
+// IMPORTANT — this file is NOT named api/[...slug].ts on purpose. That
+// bracket catch-all syntax is a Next.js-only convention; plain (non-Next.js)
+// Vercel Serverless Functions only match a SINGLE path segment per dynamic
+// file (confirmed via Vercel's own maintainers, August 2026 — see
+// github.com/vercel/vercel/discussions/8343). A file named api/[...slug].ts
+// deployed exactly like this one silently only matched one-segment paths
+// (/api/me, /api/tournaments) and 404'd at Vercel's platform level — before
+// ever reaching this code — for anything nested (/api/auth/anonymous,
+// /api/groups/join). The vercel.json rewrite above is what actually captures
+// every depth; this file's own name is otherwise arbitrary (it's never
+// reached by Vercel's own filesystem routing, only via that rewrite).
+// Rewrites are transparent to the destination function — request.url still
+// reflects the ORIGINAL requested path, which is what requestUrl()/
+// matchRoute() below rely on.
 //
 // IMPORTANT — Vercel's Node.js runtime has THREE distinct handler contracts
 // for a file under api/*, and picks between them based on what the file

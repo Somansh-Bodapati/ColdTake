@@ -20,7 +20,7 @@ describe("requestUrl", () => {
     // Simulate what Vercel's runtime actually hands the handler: a Request
     // whose .url is relative. The global Request constructor won't accept a
     // relative first argument, so this reassigns .url the way our own
-    // Request-shape assumptions must tolerate — see api/[...slug].ts.
+    // Request-shape assumptions must tolerate — see api/gateway.ts.
     Object.defineProperty(request, "url", { value: "/api/me?...slug=me" });
     expect(requestUrl(request).pathname).toBe("/api/me");
   });

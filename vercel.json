@@ -3,5 +3,8 @@
   "framework": null,
   "outputDirectory": "build/client",
   "buildCommand": "pnpm build",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/gateway" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }

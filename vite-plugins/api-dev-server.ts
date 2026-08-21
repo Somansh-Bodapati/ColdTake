@@ -9,7 +9,7 @@
 // production build output.
 //
 // Routing comes from src/server/router.ts's `matchRoute` — the exact same
-// route table the production catch-all Function (api/[...slug].ts) uses, so
+// route table the production catch-all Function (api/gateway.ts) uses, so
 // local dev and production share one single source of truth and can't
 // drift apart. The module is loaded once via `server.ssrLoadModule` (Vite's
 // own module graph, so the `@/*` -> `./src/*` tsconfig path alias resolves
