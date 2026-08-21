@@ -6,7 +6,7 @@
 import { db } from "../../lib/db/client.js";
 import { requireUser } from "../../lib/auth/session.js";
 import { requireAdmin } from "../../lib/groups/service.js";
-import { createSeason, getQuestions } from "../../lib/seasons/service.js";
+import { createSeason, getQuestions, getSeasonTeams } from "../../lib/seasons/service.js";
 import { createSeasonRequestSchema, type SeasonDetailResponse } from "../../lib/schemas/seasons.js";
 import { toQuestionResponse, toSeasonResponse } from "../../lib/seasons/dto.js";
 import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
@@ -22,11 +22,15 @@ async function handler(request: Request): Promise<Response> {
   await requireAdmin(db, body.groupId, currentUser.id);
 
   const seasonRow = await createSeason(db, body);
-  const questionRows = await getQuestions(db, seasonRow.id);
+  const [questionRows, teamRows] = await Promise.all([
+    getQuestions(db, seasonRow.id),
+    getSeasonTeams(db, seasonRow.tournamentId),
+  ]);
 
   const responseBody: SeasonDetailResponse = {
     season: toSeasonResponse(seasonRow),
     questions: questionRows.map(toQuestionResponse),
+    teams: teamRows,
   };
   return jsonResponse(responseBody, { status: 201 });
 }

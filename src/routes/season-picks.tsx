@@ -4,9 +4,16 @@ import type { Route } from "./+types/season-picks";
 import { useSession } from "@/lib/session/use-session";
 import { fetchSeasonDetail } from "@/lib/seasons/client";
 import { fetchMyPicks, putPicks } from "@/lib/picks/client";
-import type { QuestionResponse, SeasonDetailResponse } from "@/lib/schemas/seasons";
+import type { QuestionResponse, SeasonDetailResponse, TeamSummary } from "@/lib/schemas/seasons";
 import type { PickAnswerInput } from "@/lib/schemas/picks";
 import { IdentityBadge } from "@/components/identity-badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export function meta(_: Route.MetaArgs) {
@@ -234,6 +241,7 @@ export default function SeasonPicksPage() {
             index={index}
             question={question}
             answer={answers[question.id] ?? {}}
+            teams={season.teams}
             saveState={saveState[question.id] ?? "idle"}
             disabled={locked}
             onChange={(answer) => updateAnswer(question.id, answer)}
@@ -277,12 +285,13 @@ interface QuestionCardProps {
   index: number;
   question: QuestionResponse;
   answer: PickAnswerInput;
+  teams: TeamSummary[];
   saveState: SaveState;
   disabled: boolean;
   onChange: (answer: PickAnswerInput) => void;
 }
 
-function QuestionCard({ index, question, answer, saveState, disabled, onChange }: QuestionCardProps) {
+function QuestionCard({ index, question, answer, teams, saveState, disabled, onChange }: QuestionCardProps) {
   return (
     <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -301,7 +310,7 @@ function QuestionCard({ index, question, answer, saveState, disabled, onChange }
           {question.points} pts
         </span>
       </div>
-      <QuestionInput question={question} answer={answer} disabled={disabled} onChange={onChange} />
+      <QuestionInput question={question} answer={answer} teams={teams} disabled={disabled} onChange={onChange} />
       <SaveStatus state={saveState} />
     </div>
   );
@@ -318,8 +327,56 @@ function SaveStatus({ state }: { state: SaveState }) {
 interface QuestionInputProps {
   question: QuestionResponse;
   answer: PickAnswerInput;
+  teams: TeamSummary[];
   disabled: boolean;
   onChange: (answer: PickAnswerInput) => void;
+}
+
+// A team's label in every dropdown this file renders: full name plus its
+// shortName/abbreviation ("Royal Challengers Bengaluru (RCB)") so an entry
+// like the product owner's "RCB" is recognizable at a glance even though the
+// stored value is always the real team.id (this session's bug fix — see the
+// note on QuestionInput below).
+function teamLabel(t: TeamSummary): string {
+  return `${t.name} (${t.shortName})`;
+}
+
+// One team dropdown, backed by the season's real team catalogue
+// (season.teams, from GET /api/seasons/:id — src/lib/seasons/service.ts's
+// getSeasonTeams). `excludeIds` keeps a top-N slot's remaining options from
+// re-offering a team already chosen in a sibling slot; the resolvers in
+// src/lib/scoring/resolvers/top-n-*.ts still reject a duplicate server-side
+// regardless, this just makes it hard to attempt one.
+function TeamSelect({
+  teams,
+  value,
+  excludeIds,
+  placeholder,
+  disabled,
+  onChange,
+}: {
+  teams: TeamSummary[];
+  value: string | undefined;
+  excludeIds?: ReadonlySet<string>;
+  placeholder: string;
+  disabled: boolean;
+  onChange: (teamId: string) => void;
+}) {
+  const options = excludeIds ? teams.filter((t) => !excludeIds.has(t.id) || t.id === value) : teams;
+  return (
+    <Select value={value ?? ""} disabled={disabled} onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((t) => (
+          <SelectItem key={t.id} value={t.id}>
+            {teamLabel(t)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }
 
 interface CustomOption {
@@ -346,11 +403,20 @@ function customOptions(value: unknown): CustomOption[] {
 
 // One control per question type, each producing exactly the PickAnswer
 // shape that type's resolver in src/lib/scoring/resolvers/*.ts validates
-// (this session's brief, task 2) — a free-text team/player ID rather than a
-// picker backed by a team/player catalogue, since no such catalogue is
-// exposed to the client by any endpoint yet (out of scope for this
-// session's API surface, doc 03 §3.4).
-function QuestionInput({ question, answer, disabled, onChange }: QuestionInputProps) {
+// (this session's brief, task 2). Team-referencing types (champion,
+// runner_up, wooden_spoon, top_n_unordered, top_n_ordered) get a dropdown
+// over the season's real team catalogue (season.teams) instead of a
+// free-text box: a free-typed value like "RCB" is never a real team.id, so
+// it always failed src/lib/picks/service.ts's per-resolver `validate()` call
+// against Tournament.teamIds — this is that bug's fix. `stat_leader` stays
+// free text on purpose: its resolver (src/lib/scoring/resolvers/stat-leader.ts)
+// has no player-pool check at all (the comment there says the DB layer is
+// responsible, and it isn't yet), so an unrecognized player name doesn't
+// fail validation the way an unrecognized team does — a different, separate
+// gap, not this bug, and out of scope here. `team_over_under`'s teamId is
+// fixed by the admin in the question's config when it's created (doc 03
+// §3.3), not chosen by the member — the member's answer here is just yes/no.
+function QuestionInput({ question, answer, teams, disabled, onChange }: QuestionInputProps) {
   switch (question.type) {
     case "champion":
     case "runner_up":
@@ -358,51 +424,53 @@ function QuestionInput({ question, answer, disabled, onChange }: QuestionInputPr
       return (
         <div className="flex items-center gap-2">
           {answer.teamId && <IdentityBadge seed={answer.teamId} shape="square" />}
-          <input
-            className={cn(inputClass, "flex-1")}
-            placeholder="Team ID"
-            value={answer.teamId ?? ""}
-            disabled={disabled}
-            onChange={(event) => onChange({ teamId: event.target.value })}
-          />
+          <div className="flex-1">
+            <TeamSelect
+              teams={teams}
+              value={answer.teamId}
+              placeholder="Select a team"
+              disabled={disabled}
+              onChange={(teamId) => onChange({ teamId })}
+            />
+          </div>
         </div>
       );
     case "top_n_unordered":
-    case "top_n_ordered":
+    case "top_n_ordered": {
+      const n = typeof question.config.n === "number" ? question.config.n : 0;
+      const picked = answer.teamIds ?? [];
+      const slots = Array.from({ length: n }, (_, i) => picked[i]);
+      const excludeIds = new Set(picked.filter((id): id is string => Boolean(id)));
+
+      function setSlot(i: number, teamId: string) {
+        const next = [...slots];
+        next[i] = teamId;
+        onChange({ teamIds: next.filter((id): id is string => Boolean(id)) });
+      }
+
       return (
         <div className="flex flex-col gap-2">
-          <input
-            className={inputClass}
-            placeholder={question.type === "top_n_ordered" ? "Team IDs, in order, comma-separated" : "Team IDs, comma-separated"}
-            value={(answer.teamIds ?? []).join(", ")}
-            disabled={disabled}
-            onChange={(event) =>
-              onChange({
-                teamIds: event.target.value
-                  .split(",")
-                  .map((v) => v.trim())
-                  .filter((v) => v.length > 0),
-              })
-            }
-          />
-          {(answer.teamIds ?? []).length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {(answer.teamIds ?? []).map((teamId, i) => (
-                <span
-                  key={`${teamId}-${i}`}
-                  className="bg-secondary flex items-center gap-1.5 rounded-full py-1 pr-3 pl-1.5 text-xs font-medium"
-                >
-                  <IdentityBadge seed={teamId} size="sm" shape="square" />
-                  {question.type === "top_n_ordered" && (
-                    <span className="font-score text-muted-foreground">{i + 1}.</span>
-                  )}
-                  {teamId}
-                </span>
-              ))}
+          {slots.map((teamId, i) => (
+            <div key={i} className="flex items-center gap-2">
+              {question.type === "top_n_ordered" && (
+                <span className="font-score text-muted-foreground w-5 shrink-0 text-sm">{i + 1}.</span>
+              )}
+              {teamId && <IdentityBadge seed={teamId} size="sm" shape="square" />}
+              <div className="flex-1">
+                <TeamSelect
+                  teams={teams}
+                  value={teamId}
+                  excludeIds={excludeIds}
+                  placeholder={`Team ${i + 1}`}
+                  disabled={disabled}
+                  onChange={(nextTeamId) => setSlot(i, nextTeamId)}
+                />
+              </div>
             </div>
-          )}
+          ))}
         </div>
       );
+    }
     case "stat_leader":
       return (
         <input
