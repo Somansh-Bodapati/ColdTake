@@ -18,16 +18,13 @@ import { createId } from "../db/id.js";
 import { generateRawToken, hashToken, hashesEqual } from "./tokens.js";
 import { createSessionForUser, type IssuedToken } from "./session.js";
 import { AppError } from "../errors.js";
+import { appUrl } from "../http.js";
 
 export type Db = typeof dbClient;
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
 export const GOOGLE_STATE_COOKIE_NAME = "ct_oauth_state";
 const STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes — just long enough for the consent screen
-
-function appUrl(): string {
-  return process.env.APP_URL ?? "http://localhost:5173";
-}
 
 // Must exactly match one of the URIs registered on the Google Cloud OAuth
 // app (authorize step and token-exchange step both send this, and Google

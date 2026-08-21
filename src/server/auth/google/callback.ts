@@ -16,12 +16,8 @@ import {
 import { buildSessionCookie } from "../../../lib/auth/session.js";
 import { db } from "../../../lib/db/client.js";
 import { googleCallbackQuerySchema } from "../../../lib/schemas/auth.js";
-import { requestUrl, redirectResponse, withErrorHandling } from "../../../lib/http.js";
+import { appUrl, requestUrl, redirectResponse, withErrorHandling } from "../../../lib/http.js";
 import { AppError } from "../../../lib/errors.js";
-
-function appUrl(): string {
-  return process.env.APP_URL ?? "http://localhost:5173";
-}
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

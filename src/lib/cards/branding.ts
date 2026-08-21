@@ -4,8 +4,11 @@
 // hands back as `inviteUrl` (this session just gives that a real
 // destination page, task 6).
 
+// Trailing slash on the env var must not produce a double slash when
+// concatenated below — see src/lib/http.ts's appUrl() for the same fix
+// applied to Google OAuth's redirect_uri.
 export function resolveAppUrl(): string {
-  return process.env.APP_URL ?? "http://localhost:5173";
+  return (process.env.APP_URL ?? "http://localhost:5173").replace(/\/+$/, "");
 }
 
 export function buildJoinUrl(joinCode: string): string {
