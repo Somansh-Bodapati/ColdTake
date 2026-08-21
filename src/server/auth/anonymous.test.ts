@@ -35,6 +35,24 @@ describe("POST /api/auth/anonymous", () => {
     const setCookie = response.headers.get("set-cookie");
     expect(setCookie).toContain(`${SESSION_COOKIE_NAME}=`);
     expect(setCookie).toContain("HttpOnly");
+
+    // Regression test for the production bug (Session 16): a `Path`
+    // narrower than `/` (or absent, which browsers default to the
+    // *directory* of the request that set it — here that would be
+    // "/api/auth", not "/") means the cookie stops being sent on any route
+    // outside that prefix, which looks exactly like "worked once, then
+    // silently vanished on the next page load". Must be an exact `Path=/`
+    // segment, not merely a header that happens to contain that substring
+    // (a wrong `Path=/api/auth` also contains the text "Path=/").
+    expect(setCookie?.split(";").map((s) => s.trim())).toContain("Path=/");
+    expect(setCookie).toContain("SameSite=Lax");
+    // Must carry a real expiry far in the future, not be a bare session
+    // cookie with none at all.
+    const expiresMatch = setCookie?.match(/Expires=([^;]+)/);
+    expect(expiresMatch).toBeTruthy();
+    const daysUntilExpiry =
+      (new Date(String(expiresMatch?.[1])).getTime() - Date.now()) / (24 * 60 * 60 * 1000);
+    expect(daysUntilExpiry).toBeGreaterThan(25);
   });
 
   it("rejects an empty display name with 400", async () => {
