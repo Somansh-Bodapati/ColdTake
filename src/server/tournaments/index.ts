@@ -1,9 +1,18 @@
 // GET /api/tournaments — doc 03 §3.3: "catalogue, cacheable". Not
 // group-scoped (the tournament catalogue is system-owned, doc 03 §1.3), just
 // authenticated — this is step 1 of season setup (doc 01 §2.3: "Admin
-// selects a tournament from the catalogue"). Cache-Control per CLAUDE.md
-// rule 2 ("Add Cache-Control to public GET endpoints") — a plain full-table
-// read with no per-user data, safe to cache briefly.
+// selects a tournament from the catalogue").
+//
+// No Cache-Control here anymore. It originally had `public, max-age=300`
+// per CLAUDE.md rule 2 — but "public" is honored by Vercel's edge/CDN cache,
+// not just the requesting browser, and a client-side `cache: "no-store"` on
+// the fetch call (added earlier tonight to fix "my new tournament doesn't
+// show up") only ever bypasses the browser's *local* cache — it can't force
+// a shared edge cache to revalidate. Confirmed live: an admin created a
+// real tournament (201), immediately reopened season setup, and still saw
+// the pre-creation list. This is a tiny full-table read on a table with a
+// handful of rows — the Neon-cost case for caching it at all is weak next
+// to the correctness cost of an admin not seeing what they just created.
 
 import { db } from "../../lib/db/client.js";
 import { requireUser } from "../../lib/auth/session.js";
@@ -33,7 +42,7 @@ async function handler(request: Request): Promise<Response> {
       config: row.config,
     })),
   };
-  return jsonResponse(body, { headers: { "Cache-Control": "public, max-age=300" } });
+  return jsonResponse(body);
 }
 
 export default withErrorHandling(handler);

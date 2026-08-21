@@ -175,13 +175,40 @@ export function deriveTeamNamesFromMatchList(matchList: CricketDataMatchListEntr
   return names;
 }
 
+// The real, widely-recognized IPL abbreviations don't all follow a
+// mechanical "first letter of each word" rule (Sunrisers Hyderabad -> SRH,
+// not SH; Punjab Kings -> PBKS, not PK, a holdover from the franchise's
+// pre-2021 "Punjab Kings XI" branding) -- checked first, before falling
+// back to the generic initials derivation for any team CricketData returns
+// that isn't in this known list. Keyed by CricketData's exact name string
+// (case-insensitive) as observed live; a franchise rename upstream just
+// falls through to the generic fallback rather than breaking.
+const KNOWN_ABBREVIATIONS: Record<string, string> = {
+  "sunrisers hyderabad": "SRH",
+  "royal challengers bengaluru": "RCB",
+  "royal challengers bangalore": "RCB",
+  "chennai super kings": "CSK",
+  "mumbai indians": "MI",
+  "rajasthan royals": "RR",
+  "punjab kings": "PBKS",
+  "lucknow super giants": "LSG",
+  "gujarat titans": "GT",
+  "delhi capitals": "DC",
+  "kolkata knight riders": "KKR",
+};
+
 // CricketData's series/series_info responses never carry a team short code
-// (e.g. "MI") — only the full name. Derives a readable stand-in: initials
-// of up to 4 words for a multi-word name, or the first 3 letters uppercased
-// for a single-word name. Cosmetic only (schema.ts's team.shortName has no
+// (e.g. "MI") — only the full name. Checks the known-abbreviation table
+// above first (real cricket abbreviations aren't all mechanically
+// derivable); otherwise derives a readable stand-in: initials of up to 4
+// words for a multi-word name, or the first 3 letters uppercased for a
+// single-word name. Cosmetic only (schema.ts's team.shortName has no
 // uniqueness constraint and nothing in scoring reads it structurally) — a
 // group admin can rename it later if it collides or reads oddly.
 export function deriveShortName(teamName: string): string {
+  const known = KNOWN_ABBREVIATIONS[teamName.trim().toLowerCase()];
+  if (known) return known;
+
   const words = teamName.trim().split(/\s+/).filter(Boolean);
   if (words.length > 1) {
     return words

@@ -136,13 +136,35 @@ describe("deriveTeamNamesFromMatchList", () => {
 });
 
 describe("deriveShortName", () => {
-  it("uses initials for a multi-word name", () => {
-    expect(deriveShortName("Mumbai Indians")).toBe("MI");
-    expect(deriveShortName("Royal Challengers Bengaluru")).toBe("RCB");
+  it("uses initials for a multi-word name not in the known-abbreviation table", () => {
+    expect(deriveShortName("Some New Franchise")).toBe("SNF");
   });
 
   it("uses the first 3 letters for a single-word name", () => {
     expect(deriveShortName("Gladiators")).toBe("GLA");
+  });
+
+  // Real bug, reported by the product owner: the mechanical "first letter
+  // of each word" rule gets these two IPL teams wrong (Sunrisers Hyderabad
+  // -> "SH" instead of the real "SRH"; Punjab Kings -> "PK" instead of the
+  // real "PBKS", a holdover from the franchise's earlier branding) — both
+  // must come from the known-abbreviation table, not the generic fallback.
+  it("uses the real known abbreviation for every current IPL franchise", () => {
+    expect(deriveShortName("Sunrisers Hyderabad")).toBe("SRH");
+    expect(deriveShortName("Royal Challengers Bengaluru")).toBe("RCB");
+    expect(deriveShortName("Chennai Super Kings")).toBe("CSK");
+    expect(deriveShortName("Mumbai Indians")).toBe("MI");
+    expect(deriveShortName("Rajasthan Royals")).toBe("RR");
+    expect(deriveShortName("Punjab Kings")).toBe("PBKS");
+    expect(deriveShortName("Lucknow Super Giants")).toBe("LSG");
+    expect(deriveShortName("Gujarat Titans")).toBe("GT");
+    expect(deriveShortName("Delhi Capitals")).toBe("DC");
+    expect(deriveShortName("Kolkata Knight Riders")).toBe("KKR");
+  });
+
+  it("matches the known-abbreviation table case-insensitively", () => {
+    expect(deriveShortName("sunrisers hyderabad")).toBe("SRH");
+    expect(deriveShortName("PUNJAB KINGS")).toBe("PBKS");
   });
 });
 

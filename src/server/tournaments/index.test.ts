@@ -24,16 +24,31 @@ describe("GET /api/tournaments", () => {
     expect(response.status).toBe(401);
   });
 
-  it("returns the tournament catalogue with a Cache-Control header", async () => {
+  it("returns the tournament catalogue", async () => {
     const tournamentId = await insertTestTournament(createdTournamentIds);
     const { userId, session } = await createAnonymousUser(db, "Catalogue Viewer");
     createdUserIds.push(userId);
 
     const response = await handler(catalogueRequest(session.rawToken));
     expect(response.status).toBe(200);
-    expect(response.headers.get("Cache-Control")).toContain("max-age");
 
     const body = (await response.json()) as { tournaments: Array<{ id: string }> };
     expect(body.tournaments.some((t) => t.id === tournamentId)).toBe(true);
+  });
+
+  // Real bug, reported live: an admin created a tournament (201), reopened
+  // season setup immediately, and still saw the pre-creation list. Root
+  // cause was this endpoint's own `Cache-Control: public, max-age=300` --
+  // "public" is honored by Vercel's shared edge cache, not just the
+  // requesting browser, so a client-side `cache: "no-store"` fetch option
+  // (which only bypasses the *browser's* local cache) couldn't force a
+  // fresh read. No Cache-Control at all now, on purpose.
+  it("sets no Cache-Control header, so no shared cache can serve a stale list", async () => {
+    await insertTestTournament(createdTournamentIds);
+    const { userId, session } = await createAnonymousUser(db, "Catalogue Viewer");
+    createdUserIds.push(userId);
+
+    const response = await handler(catalogueRequest(session.rawToken));
+    expect(response.headers.get("Cache-Control")).toBeNull();
   });
 });
