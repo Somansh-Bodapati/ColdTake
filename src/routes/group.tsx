@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 import type { Route } from "./+types/group";
 import { useSession, useUser } from "@/lib/session/use-session";
 import {
@@ -14,9 +15,19 @@ import { Button } from "@/components/ui/button";
 // status (src/lib/seasons/state.ts) — this hardening session's fix: before
 // this, a group's seasons weren't listed anywhere in the UI at all, so
 // there was no way back into a season page except the moment right after
-// creating it. draft has no member-facing page yet (only the admin's
-// season-new flow writes it), so it isn't linked here.
-function seasonLinkPath(groupId: string, seasonRow: GroupSeasonSummary): string | null {
+// creating it.
+//
+// Bug fix (tonight): `draft` used to return null here, which the caller
+// rendered as inert "Not published yet" text — clicking a draft season did
+// nothing, and there was no route at all for a draft anyway (season-picks
+// is for `open`/post-publish seasons, reveal/standings are for
+// locked/settled/voided). src/routes/season-new.tsx now has an edit mode
+// (`/groups/:groupId/seasons/:seasonId/edit`) that loads an existing draft
+// instead of only creating new ones, so a draft can link straight there —
+// but only for the group admin, since editing (and even just loading) a
+// draft requires admin (season-new.tsx blocks non-admins outright, and
+// there's nothing useful for a member to do with an unpublished slate yet).
+export function seasonLinkPath(groupId: string, seasonRow: GroupSeasonSummary, isAdmin: boolean): string | null {
   switch (seasonRow.status) {
     case "open":
       return `/groups/${groupId}/seasons/${seasonRow.id}/picks`;
@@ -26,7 +37,7 @@ function seasonLinkPath(groupId: string, seasonRow: GroupSeasonSummary): string 
     case "voided":
       return `/groups/${groupId}/seasons/${seasonRow.id}/standings`;
     case "draft":
-      return null;
+      return isAdmin ? `/groups/${groupId}/seasons/${seasonRow.id}/edit` : null;
   }
 }
 
@@ -124,15 +135,21 @@ export default function GroupPage() {
   const appUrl = typeof window !== "undefined" ? window.location.origin : "";
   const inviteUrl = `${appUrl}/join?code=${detail.group.joinCode}`;
 
+  // These two used to report failure via the same buried inline <p> at the
+  // bottom of the page as everything else here (bug 1's report, same
+  // pattern as season-new.tsx's publish flow) — for a destructive/admin
+  // action below a long member list, that error was easy to scroll past
+  // entirely. Toasts with a retry action fix that the same way.
   async function handleRemove(memberId: string) {
     if (!groupId) return;
     setBusyMemberId(memberId);
-    setError(null);
     try {
       await removeGroupMember(groupId, memberId);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not remove that member");
+      toast.error(err instanceof Error ? err.message : "Could not remove that member", {
+        action: { label: "Retry", onClick: () => void handleRemove(memberId) },
+      });
     } finally {
       setBusyMemberId(null);
     }
@@ -141,12 +158,13 @@ export default function GroupPage() {
   async function handleTransfer(memberId: string) {
     if (!groupId) return;
     setBusyMemberId(memberId);
-    setError(null);
     try {
       await transferGroupAdmin(groupId, memberId);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not transfer the admin role");
+      toast.error(err instanceof Error ? err.message : "Could not transfer the admin role", {
+        action: { label: "Retry", onClick: () => void handleTransfer(memberId) },
+      });
     } finally {
       setBusyMemberId(null);
     }
@@ -200,7 +218,7 @@ export default function GroupPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {detail.seasons.map((seasonRow) => {
-              const path = seasonLinkPath(groupId, seasonRow);
+              const path = seasonLinkPath(groupId, seasonRow, isAdmin);
               return (
                 <li
                   key={seasonRow.id}
@@ -214,10 +232,12 @@ export default function GroupPage() {
                   </span>
                   {path ? (
                     <Link className="underline" to={path}>
-                      Open →
+                      {seasonRow.status === "draft" ? "Continue setup →" : "Open →"}
                     </Link>
                   ) : (
-                    <span className="text-muted-foreground text-xs">Not published yet</span>
+                    <span className="text-muted-foreground text-xs">
+                      {seasonRow.status === "draft" ? "Not published yet" : "Not available"}
+                    </span>
                   )}
                 </li>
               );
@@ -266,8 +286,6 @@ export default function GroupPage() {
           ))}
         </ul>
       </div>
-
-      {error && <p className="text-destructive text-sm">{error}</p>}
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 import type { Route } from "./+types/tournament-new";
 import { useSession } from "@/lib/session/use-session";
 import { createTournamentFromSeries, searchCricketDataSeries } from "@/lib/providers/client";
@@ -43,7 +44,13 @@ export default function TournamentNewPage() {
       setResults(series);
       setSearched(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not search CricketData");
+      // The search-result list can grow long, pushing a bottom-of-page
+      // inline error below the fold — same buried-error pattern as
+      // season-new.tsx's publish flow (bug 1), so this critical action gets
+      // the same toast treatment with a retry action.
+      toast.error(err instanceof Error ? err.message : "Could not search CricketData", {
+        action: { label: "Retry", onClick: () => void handleSearch(event) },
+      });
     } finally {
       setSearching(false);
     }
@@ -51,7 +58,6 @@ export default function TournamentNewPage() {
 
   async function handleCreate(series: CricketDataSeriesSummary) {
     setCreatingId(series.id);
-    setError(null);
     try {
       const created = await createTournamentFromSeries({ seriesId: series.id, seriesName: series.name });
       // Hands the new tournament straight to season setup, same page every
@@ -59,7 +65,9 @@ export default function TournamentNewPage() {
       // it from this query param.
       navigate(`/groups/${groupId}/seasons/new?tournamentId=${encodeURIComponent(created.tournament.id)}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create the tournament");
+      toast.error(err instanceof Error ? err.message : "Could not create the tournament", {
+        action: { label: "Retry", onClick: () => void handleCreate(series) },
+      });
       setCreatingId(null);
     }
   }

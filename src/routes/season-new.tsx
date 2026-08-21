@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import type { Route } from "./+types/season-new";
 import { useSession, useUser } from "@/lib/session/use-session";
 import { fetchGroupDetail } from "@/lib/groups/client";
@@ -7,8 +8,10 @@ import {
   addQuestion,
   createSeason,
   deleteQuestion,
+  fetchSeasonDetail,
   fetchTournamentCatalogue,
   publishSeason,
+  updateSeason,
 } from "@/lib/seasons/client";
 import { buildDefaultQuestionTemplates, type QuestionTemplate } from "@/lib/seasons/templates";
 import type { QuestionInput, QuestionResponse, SeasonDetailResponse, TournamentSummary } from "@/lib/schemas/seasons";
@@ -34,13 +37,40 @@ function toLocalDatetimeInputValue(iso: string): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-// Season creation flow (this session's brief, task 7): pick a tournament,
-// review/edit the default question set (doc 01 §2.3 steps 1-2), add custom
-// questions (task 4's builder), set the lock time, publish (step 6). Plain
-// shadcn/native form elements, no visual design pass (docs/DECISIONS.md,
-// session 14 deferred).
+// datetime-local values have no timezone; `new Date(...)` parses them as
+// local time, which is exactly what the admin typed/saw, so comparing
+// against `Date.now()` here is the same "is this actually in the future"
+// check the server re-derives in canPublish (src/lib/seasons/state.ts).
+export function isLockAtInFuture(lockAt: string): boolean {
+  const parsed = new Date(lockAt);
+  return !Number.isNaN(parsed.getTime()) && parsed.getTime() > Date.now();
+}
+
+// Extracted so both the manual-test "publish with a bad lock time" path and
+// the normal flow show the exact same toast — bug 1's brief: publish
+// failures need to be "impossible to miss and, where sensible, actionable."
+function toastError(message: string, retry?: () => void) {
+  toast.error(message, retry ? { action: { label: "Retry", onClick: retry } } : undefined);
+}
+
+// Season creation/edit flow (this session's brief, task 7, extended by
+// tonight's hardening pass): pick a tournament, review/edit the default
+// question set (doc 01 §2.3 steps 1-2), add custom questions (task 4's
+// builder), set the lock time, publish (step 6).
+//
+// Bug fix (tonight): this component used to only support creating a brand
+// new draft — there was no way back into an *existing* draft season once
+// you navigated away (e.g. from src/routes/group.tsx's season list), so a
+// mistake in the question set meant abandoning and recreating the season
+// (blocked anyway by the group+tournament uniqueness constraint). It now
+// also handles `/groups/:groupId/seasons/:seasonId/edit` (src/routes.ts) by
+// loading the existing draft via fetchSeasonDetail and skipping straight to
+// the question/lock-time review step below, which is also where the lock
+// time is now visible and editable right up until publish (previously it
+// was only set once, before any questions existed, and never shown again).
 export default function SeasonNewPage() {
-  const { groupId } = useParams();
+  const { groupId, seasonId } = useParams();
+  const isEditMode = Boolean(seasonId);
   const navigate = useNavigate();
   const user = useUser();
   const { status } = useSession();
@@ -59,33 +89,47 @@ export default function SeasonNewPage() {
 
   const [season, setSeason] = React.useState<SeasonDetailResponse | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [savingLockAt, setSavingLockAt] = React.useState(false);
 
   React.useEffect(() => {
     if (status !== "signed-in" || !groupId || !user) {
       return;
     }
+    const currentGroupId = groupId;
+    const currentUserId = user.id;
     let cancelled = false;
-    Promise.all([fetchGroupDetail(groupId), fetchTournamentCatalogue()])
-      .then(([group, catalogue]) => {
+    async function load() {
+      try {
+        const group = await fetchGroupDetail(currentGroupId);
         if (cancelled) return;
-        const membership = group.members.find((m) => m.userId === user.id);
+        const membership = group.members.find((m) => m.userId === currentUserId);
         setIsAdmin(membership?.role === "admin");
-        setTournaments(catalogue);
-        // Lands here with ?tournamentId=... straight from tournament-new.tsx
-        // right after that flow created it — preselect it so the admin
-        // doesn't have to re-find it in the (now-longer) catalogue dropdown.
-        if (preselectTournamentId && catalogue.some((t) => t.id === preselectTournamentId)) {
-          handleSelectTournament(preselectTournamentId);
+
+        if (seasonId) {
+          const detail = await fetchSeasonDetail(seasonId);
+          if (cancelled) return;
+          setSeason(detail);
+          setLockAt(toLocalDatetimeInputValue(detail.season.lockAt));
+        } else {
+          const catalogue = await fetchTournamentCatalogue();
+          if (cancelled) return;
+          setTournaments(catalogue);
+          // Lands here with ?tournamentId=... straight from tournament-new.tsx
+          // right after that flow created it — preselect it so the admin
+          // doesn't have to re-find it in the (now-longer) catalogue dropdown.
+          if (preselectTournamentId && catalogue.some((t) => t.id === preselectTournamentId)) {
+            handleSelectTournament(preselectTournamentId, catalogue);
+          }
         }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not load setup data");
-      })
-      .finally(() => {
+      } catch (err) {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Could not load setup data");
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    }
+    void load();
     return () => {
       cancelled = true;
     };
@@ -93,7 +137,7 @@ export default function SeasonNewPage() {
     // declaration (not a prop/state-derived closure), so including it would
     // just re-run this effect on every render for no behavioral difference.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, groupId, user, preselectTournamentId]);
+  }, [status, groupId, user, seasonId, preselectTournamentId]);
 
   const selectedTournament = tournaments.find((t) => t.id === tournamentId) ?? null;
   const templates: QuestionTemplate[] = React.useMemo(
@@ -101,9 +145,9 @@ export default function SeasonNewPage() {
     [selectedTournament]
   );
 
-  function handleSelectTournament(id: string) {
+  function handleSelectTournament(id: string, catalogue: TournamentSummary[] = tournaments) {
     setTournamentId(id);
-    const tournament = tournaments.find((t) => t.id === id);
+    const tournament = catalogue.find((t) => t.id === id);
     if (tournament) {
       setLockAt(toLocalDatetimeInputValue(tournament.startsAt));
       const nextTemplates = buildDefaultQuestionTemplates(tournament);
@@ -114,10 +158,9 @@ export default function SeasonNewPage() {
   function handleAddCustomQuestion() {
     const options = newCustomOptions.map((o) => o.trim()).filter((o) => o.length > 0);
     if (newCustomPrompt.trim().length === 0 || options.length < 2) {
-      setError("A custom question needs a prompt and at least 2 non-empty options");
+      toastError("A custom question needs a prompt and at least 2 non-empty options");
       return;
     }
-    setError(null);
     setCustomQuestions((prev) => [
       ...prev,
       {
@@ -151,7 +194,6 @@ export default function SeasonNewPage() {
   async function handleCreateSeason() {
     if (!groupId || !tournamentId || !lockAt) return;
     setSubmitting(true);
-    setError(null);
     try {
       const created = await createSeason({
         groupId,
@@ -160,10 +202,29 @@ export default function SeasonNewPage() {
         questions: draftQuestionInputs(),
       });
       setSeason(created);
+      toast.success("Draft season created — add questions and set a lock time before publishing.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create the season");
+      toastError(err instanceof Error ? err.message : "Could not create the season", () => void handleCreateSeason());
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleSaveLockAt() {
+    if (!season || !lockAt) return;
+    if (!isLockAtInFuture(lockAt)) {
+      toastError("Lock time must be in the future");
+      return;
+    }
+    setSavingLockAt(true);
+    try {
+      const updated = await updateSeason(season.season.id, { lockAt: new Date(lockAt).toISOString() });
+      setSeason(updated);
+      toast.success("Lock time updated");
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : "Could not update the lock time", () => void handleSaveLockAt());
+    } finally {
+      setSavingLockAt(false);
     }
   }
 
@@ -171,11 +232,10 @@ export default function SeasonNewPage() {
     if (!season) return;
     const options = newCustomOptions.map((o) => o.trim()).filter((o) => o.length > 0);
     if (newCustomPrompt.trim().length === 0 || options.length < 2) {
-      setError("A custom question needs a prompt and at least 2 non-empty options");
+      toastError("A custom question needs a prompt and at least 2 non-empty options");
       return;
     }
     setSubmitting(true);
-    setError(null);
     try {
       const inserted: QuestionResponse = await addQuestion(season.season.id, {
         type: "custom",
@@ -189,7 +249,10 @@ export default function SeasonNewPage() {
       setNewCustomPoints(10);
       setNewCustomOptions(["", ""]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not add the question");
+      toastError(
+        err instanceof Error ? err.message : "Could not add the question",
+        () => void handleAddQuestionToDraft()
+      );
     } finally {
       setSubmitting(false);
     }
@@ -198,12 +261,14 @@ export default function SeasonNewPage() {
   async function handleRemoveQuestion(questionId: string) {
     if (!season) return;
     setSubmitting(true);
-    setError(null);
     try {
       await deleteQuestion(season.season.id, questionId);
       setSeason({ ...season, questions: season.questions.filter((q) => q.id !== questionId) });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not remove the question");
+      toastError(
+        err instanceof Error ? err.message : "Could not remove the question",
+        () => void handleRemoveQuestion(questionId)
+      );
     } finally {
       setSubmitting(false);
     }
@@ -212,16 +277,21 @@ export default function SeasonNewPage() {
   async function handlePublish() {
     if (!season || !groupId) return;
     setSubmitting(true);
-    setError(null);
     try {
       const published = await publishSeason(season.season.id);
       setSeason({ ...season, season: published.season });
+      toast.success("Season published — picks are open.");
       // Publishing opens the pick window immediately (doc 01 §2.3 step 6),
       // so the natural next stop is the admin's own pick sheet — same page
       // every other member lands on for this season.
       navigate(`/groups/${groupId}/seasons/${season.season.id}/picks`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not publish the season");
+      // Bug 1's report: this used to be an inline <p> below the fold that
+      // was easy to miss entirely. A toast can't be missed, and a bad
+      // lock time (the most likely publish failure — canPublish in
+      // src/lib/seasons/state.ts requires one in the future) is directly
+      // actionable from here via the lock-time field above.
+      toastError(err instanceof Error ? err.message : "Could not publish the season", () => void handlePublish());
     } finally {
       setSubmitting(false);
     }
@@ -245,13 +315,16 @@ export default function SeasonNewPage() {
   if (isAdmin === false) {
     return <p className="text-destructive p-4">Only a group admin can set up a season.</p>;
   }
+  if (loadError || (isEditMode && !season)) {
+    return <p className="text-destructive p-4">{loadError ?? "Season not found"}</p>;
+  }
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-6 p-4">
       <Link className="text-muted-foreground text-sm underline" to={`/groups/${groupId}`}>
         ← Back to group
       </Link>
-      <h1 className="text-2xl font-semibold">New season</h1>
+      <h1 className="text-2xl font-semibold">{isEditMode ? "Edit draft season" : "New season"}</h1>
 
       {!season && (
         <>
@@ -290,6 +363,9 @@ export default function SeasonNewPage() {
                   value={lockAt}
                   onChange={(event) => setLockAt(event.target.value)}
                 />
+                <p className="text-muted-foreground text-xs">
+                  You can change this any time before publishing.
+                </p>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -361,6 +437,38 @@ export default function SeasonNewPage() {
             <strong>{season.season.status}</strong>
           </p>
 
+          {/* Lock time — bug fix: previously this was only settable once,
+              before the season existed, and never shown again. Now it's
+              editable here for as long as the season stays draft/open
+              (src/lib/seasons/state.ts's isMutableStatus, enforced
+              server-side by PATCH /api/seasons/:id). */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="lockAt" className="text-sm font-medium">
+              Lock time
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="lockAt"
+                type="datetime-local"
+                className={`${inputClass} flex-1`}
+                value={lockAt}
+                onChange={(event) => setLockAt(event.target.value)}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={savingLockAt || !lockAt || lockAt === toLocalDatetimeInputValue(season.season.lockAt)}
+                onClick={() => void handleSaveLockAt()}
+              >
+                {savingLockAt ? "Saving…" : "Save"}
+              </Button>
+            </div>
+            {lockAt && !isLockAtInFuture(lockAt) && (
+              <p className="text-destructive text-xs">Lock time must be in the future to publish.</p>
+            )}
+          </div>
+
           <div>
             <h2 className="mb-2 text-sm font-medium">Questions ({season.questions.length})</h2>
             <ul className="flex flex-col gap-1">
@@ -405,8 +513,6 @@ export default function SeasonNewPage() {
           </Button>
         </div>
       )}
-
-      {error && <p className="text-destructive text-sm">{error}</p>}
     </main>
   );
 }
