@@ -8,7 +8,7 @@ import type { Db } from "../auth/session.js";
 import { member, pick, pickHistory, team, user, type PickAnswer } from "../db/schema.js";
 import { createId } from "../db/id.js";
 import { requireMembership } from "../groups/service.js";
-import { loadSeason, getQuestions } from "../seasons/service.js";
+import { loadSeason, getQuestions, activeMemberIds } from "../seasons/service.js";
 import { isPickWindowOpen } from "../seasons/state.js";
 import { createResolverRegistry } from "../scoring/registry.js";
 import { booleanResolver } from "../scoring/resolvers/boolean.js";
@@ -149,6 +149,79 @@ export async function getAllPicks(
     // renders that state rather than the API inventing a separate flag.
     picks: picksByMember.get(row.id) ?? [],
   }));
+}
+
+export interface MissingQuestion {
+  id: string;
+  prompt: string;
+}
+
+export interface MemberReadiness {
+  memberId: string;
+  displayName: string;
+  // Empty means the member has answered every question in the season's
+  // CURRENT question set — "complete". Non-empty lists exactly which
+  // questions they still need to answer, by id and display prompt, so an
+  // admin ("Lock now" readiness check, this session's brief) can text a
+  // straggler exactly what they're missing.
+  missingQuestions: MissingQuestion[];
+}
+
+// GET /api/seasons/:id/readiness [admin] — the "lock now" readiness check:
+// for every currently-active group member, either "complete" (empty
+// missingQuestions) or the list of questions they haven't answered yet.
+// Deliberately compares against getQuestions' CURRENT result and
+// activeMemberIds' CURRENT roster, not any frozen snapshot — member_snapshot
+// is only frozen at lock (src/lib/seasons/service.ts's loadSeason), and this
+// endpoint only makes sense to call *before* that happens, so a member who
+// joined after some questions existed but before lock is still evaluated
+// against every question that exists right now, not a stale set.
+export async function getPickReadiness(db: Db, seasonId: string, now: Date): Promise<MemberReadiness[]> {
+  const seasonRow = await loadSeason(db, seasonId, now);
+  const [questionRows, memberIds] = await Promise.all([
+    getQuestions(db, seasonId),
+    activeMemberIds(db, seasonRow.groupId),
+  ]);
+
+  if (memberIds.length === 0) {
+    return [];
+  }
+
+  const memberRows = await db
+    .select({ id: member.id, displayName: user.displayName })
+    .from(member)
+    .innerJoin(user, eq(member.userId, user.id))
+    .where(inArray(member.id, memberIds));
+
+  const questionIds = questionRows.map((row) => row.id);
+  const pickRows =
+    questionIds.length > 0
+      ? await db
+          .select({ memberId: pick.memberId, questionId: pick.questionId })
+          .from(pick)
+          .where(and(inArray(pick.questionId, questionIds), inArray(pick.memberId, memberIds)))
+      : [];
+
+  const answeredByMember = new Map<string, Set<string>>();
+  for (const row of pickRows) {
+    const existing = answeredByMember.get(row.memberId);
+    if (existing) {
+      existing.add(row.questionId);
+    } else {
+      answeredByMember.set(row.memberId, new Set([row.questionId]));
+    }
+  }
+
+  return memberRows.map((row) => {
+    const answered = answeredByMember.get(row.id) ?? new Set<string>();
+    return {
+      memberId: row.id,
+      displayName: row.displayName,
+      missingQuestions: questionRows
+        .filter((question) => !answered.has(question.id))
+        .map((question) => ({ id: question.id, prompt: question.prompt })),
+    };
+  });
 }
 
 // PUT /api/seasons/:id/picks — doc 03 §3.4: { picks: [{questionId, answer}]

@@ -78,3 +78,24 @@ export const allPicksResponseSchema = z.object({
   members: z.array(memberPicksSchema),
 });
 export type AllPicksResponse = z.infer<typeof allPicksResponseSchema>;
+
+// GET /api/seasons/:id/readiness [admin] — the "lock now" readiness check
+// (this session's brief): per active member, either complete (empty
+// `missingQuestions`) or exactly which questions they haven't answered yet.
+export const missingQuestionSchema = z.object({
+  id: z.string(),
+  prompt: z.string(),
+});
+export type MissingQuestion = z.infer<typeof missingQuestionSchema>;
+
+export const memberReadinessSchema = z.object({
+  memberId: z.string(),
+  displayName: z.string(),
+  missingQuestions: z.array(missingQuestionSchema),
+});
+export type MemberReadiness = z.infer<typeof memberReadinessSchema>;
+
+export const readinessResponseSchema = z.object({
+  members: z.array(memberReadinessSchema),
+});
+export type ReadinessResponse = z.infer<typeof readinessResponseSchema>;

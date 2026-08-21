@@ -5,9 +5,11 @@ import {
   allPicksResponseSchema,
   minePicksResponseSchema,
   putPicksRequestSchema,
+  readinessResponseSchema,
   type AllPicksResponse,
   type MinePicksResponse,
   type PutPicksRequest,
+  type ReadinessResponse,
 } from "@/lib/schemas/picks";
 
 async function errorMessage(response: Response, fallback: string): Promise<string> {
@@ -49,4 +51,17 @@ export async function fetchAllPicks(seasonId: string): Promise<AllPicksResponse>
     throw new Error(await errorMessage(response, "Could not load the reveal"));
   }
   return allPicksResponseSchema.parse(await response.json());
+}
+
+// GET /api/seasons/:id/readiness [admin] — the "Lock now" confirmation
+// panel's data source (this session's brief): who's complete, and exactly
+// which questions everyone else is still missing.
+export async function fetchReadiness(seasonId: string): Promise<ReadinessResponse> {
+  const response = await fetch(`/api/seasons/${encodeURIComponent(seasonId)}/readiness`, {
+    credentials: "include",
+  });
+  if (!response.ok) {
+    throw new Error(await errorMessage(response, "Could not load pick readiness"));
+  }
+  return readinessResponseSchema.parse(await response.json());
 }

@@ -31,12 +31,14 @@ import groupsIndexHandler from "./groups/index.js";
 import groupsJoinHandler from "./groups/join.js";
 import groupsByCodeHandler from "./groups/by-code/[code].js";
 import groupByIdHandler from "./groups/[id]/index.js";
-import groupTransferHandler from "./groups/[id]/transfer.js";
+import groupAdminsHandler from "./groups/[id]/admins.js";
+import groupAdminHandler from "./groups/[id]/admins/[memberId].js";
 import groupMemberHandler from "./groups/[id]/members/[memberId].js";
 import ingestHandler from "./ingest/[tournamentId].js";
 import seasonsIndexHandler from "./seasons/index.js";
 import seasonByIdHandler from "./seasons/[id]/index.js";
 import seasonPublishHandler from "./seasons/[id]/publish.js";
+import seasonReadinessHandler from "./seasons/[id]/readiness.js";
 import seasonRecomputeHandler from "./seasons/[id]/recompute.js";
 import seasonSettleHandler from "./seasons/[id]/settle.js";
 import seasonVoidHandler from "./seasons/[id]/void.js";
@@ -81,12 +83,14 @@ export const routes: Route[] = [
   { pattern: "/api/groups/join", handler: groupsJoinHandler },
   { pattern: "/api/groups/by-code/:code", handler: groupsByCodeHandler },
   { pattern: "/api/groups/:id", handler: groupByIdHandler },
-  { pattern: "/api/groups/:id/transfer", handler: groupTransferHandler },
+  { pattern: "/api/groups/:id/admins", handler: groupAdminsHandler },
+  { pattern: "/api/groups/:id/admins/:memberId", handler: groupAdminHandler },
   { pattern: "/api/groups/:id/members/:memberId", handler: groupMemberHandler },
   { pattern: "/api/ingest/:tournamentId", handler: ingestHandler },
   { pattern: "/api/seasons", handler: seasonsIndexHandler },
   { pattern: "/api/seasons/:id", handler: seasonByIdHandler },
   { pattern: "/api/seasons/:id/publish", handler: seasonPublishHandler },
+  { pattern: "/api/seasons/:id/readiness", handler: seasonReadinessHandler },
   { pattern: "/api/seasons/:id/recompute", handler: seasonRecomputeHandler },
   { pattern: "/api/seasons/:id/settle", handler: seasonSettleHandler },
   { pattern: "/api/seasons/:id/void", handler: seasonVoidHandler },

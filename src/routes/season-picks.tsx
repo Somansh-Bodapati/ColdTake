@@ -1,12 +1,15 @@
 import * as React from "react";
 import { Link, useParams } from "react-router";
+import { toast } from "sonner";
 import type { Route } from "./+types/season-picks";
-import { useSession } from "@/lib/session/use-session";
-import { fetchSeasonDetail } from "@/lib/seasons/client";
-import { fetchMyPicks, putPicks } from "@/lib/picks/client";
+import { useSession, useUser } from "@/lib/session/use-session";
+import { fetchSeasonDetail, updateSeason } from "@/lib/seasons/client";
+import { fetchGroupDetail } from "@/lib/groups/client";
+import { fetchMyPicks, fetchReadiness, putPicks } from "@/lib/picks/client";
 import type { QuestionResponse, SeasonDetailResponse, TeamSummary } from "@/lib/schemas/seasons";
-import type { PickAnswerInput } from "@/lib/schemas/picks";
+import type { PickAnswerInput, ReadinessResponse } from "@/lib/schemas/picks";
 import { IdentityBadge } from "@/components/identity-badge";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -88,25 +91,43 @@ function isAnswered(type: QuestionResponse["type"], answer: PickAnswerInput): bo
 export default function SeasonPicksPage() {
   const { groupId, seasonId } = useParams();
   const { status } = useSession();
+  const user = useUser();
 
   const [season, setSeason] = React.useState<SeasonDetailResponse | null>(null);
   const [answers, setAnswers] = React.useState<Record<string, PickAnswerInput>>({});
   const [saveState, setSaveState] = React.useState<Record<string, SaveState>>({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  // "Lock now" readiness flow (this session's brief): an admin can fetch a
+  // completion summary and, from that same panel, force the lock early
+  // instead of waiting for lock_at. `readiness === null` means the panel
+  // hasn't been opened yet; toggling it closed again just discards the
+  // fetched snapshot rather than tracking a separate "visible" boolean.
+  const [readiness, setReadiness] = React.useState<ReadinessResponse | null>(null);
+  const [readinessLoading, setReadinessLoading] = React.useState(false);
+  const [locking, setLocking] = React.useState(false);
 
   const timers = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  const reloadSeason = React.useCallback(async () => {
+    if (!seasonId) return;
+    setSeason(await fetchSeasonDetail(seasonId));
+  }, [seasonId]);
+
   React.useEffect(() => {
-    if (status !== "signed-in" || !seasonId) {
+    if (status !== "signed-in" || !seasonId || !groupId) {
       return;
     }
     let cancelled = false;
-    Promise.all([fetchSeasonDetail(seasonId), fetchMyPicks(seasonId)])
-      .then(([detail, mine]) => {
+    Promise.all([fetchSeasonDetail(seasonId), fetchMyPicks(seasonId), fetchGroupDetail(groupId)])
+      .then(([detail, mine, group]) => {
         if (cancelled) return;
         setSeason(detail);
         setAnswers(Object.fromEntries(mine.picks.map((p) => [p.questionId, p.answer])));
+        const membership = group.members.find((m) => m.userId === user?.id);
+        setIsAdmin(membership?.role === "admin");
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load the slate");
@@ -117,7 +138,7 @@ export default function SeasonPicksPage() {
     return () => {
       cancelled = true;
     };
-  }, [status, seasonId]);
+  }, [status, seasonId, groupId, user?.id]);
 
   // Cancel any pending debounced saves on unmount so they don't fire (and
   // call setState) after the page is gone.
@@ -151,6 +172,40 @@ export default function SeasonPicksPage() {
     scheduleSave(questionId, patch);
   }
 
+  async function handleCheckReadiness() {
+    if (!seasonId) return;
+    setReadinessLoading(true);
+    try {
+      setReadiness(await fetchReadiness(seasonId));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load pick readiness", {
+        action: { label: "Retry", onClick: () => void handleCheckReadiness() },
+      });
+    } finally {
+      setReadinessLoading(false);
+    }
+  }
+
+  // PATCH lockAt to right now — the very next lazy-lock check (this page's
+  // own reload) flips the season to `locked` (src/lib/seasons/state.ts's
+  // effectiveSeasonStatus), fully consistent with CLAUDE.md rule 3: nothing
+  // here is a scheduled job, it's a deliberate synchronous admin action.
+  async function handleLockNow() {
+    if (!seasonId) return;
+    setLocking(true);
+    try {
+      await updateSeason(seasonId, { lockAt: new Date().toISOString() });
+      setReadiness(null);
+      await reloadSeason();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not lock the season", {
+        action: { label: "Retry", onClick: () => void handleLockNow() },
+      });
+    } finally {
+      setLocking(false);
+    }
+  }
+
   if (!groupId || !seasonId) {
     return <p className="p-4">Missing route parameters.</p>;
   }
@@ -177,6 +232,11 @@ export default function SeasonPicksPage() {
   const locked = season.season.status !== "open";
   const progressPct = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
   const complete = answeredCount === total && total > 0;
+  // "Lock now" (this session's brief): only the group admin, and only
+  // before the season has already locked/settled/voided — once it's locked
+  // there's nothing left to check readiness for.
+  const canLockNow =
+    isAdmin && (season.season.status === "draft" || season.season.status === "open");
 
   return (
     <main className="mx-auto flex max-w-lg flex-col pb-24">
@@ -213,6 +273,17 @@ export default function SeasonPicksPage() {
       </div>
 
       <div className="flex flex-col gap-4 px-4 pt-4">
+        {canLockNow && (
+          <LockNowPanel
+            readiness={readiness}
+            loading={readinessLoading}
+            locking={locking}
+            onCheck={() => void handleCheckReadiness()}
+            onCancel={() => setReadiness(null)}
+            onConfirm={() => void handleLockNow()}
+          />
+        )}
+
         {locked && (
           <p className="border-border bg-card text-muted-foreground rounded-lg border px-4 py-3 text-sm">
             This season is {season.season.status} — picks can no longer be changed.
@@ -261,6 +332,71 @@ function LockCountdown({ lockAt }: { lockAt: string }) {
         Locks in
       </span>
       <span className="font-score text-lg">{label}</span>
+    </div>
+  );
+}
+
+interface LockNowPanelProps {
+  readiness: ReadinessResponse | null;
+  loading: boolean;
+  locking: boolean;
+  onCheck: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+
+// Admin-only "lock now" confirmation (this session's brief): a plain inline
+// panel, not a modal — matches this codebase's existing toast-for-errors,
+// inline-card-for-state pattern (e.g. the "slate is complete" banner above)
+// rather than pulling in a dialog library. Readiness is information for the
+// admin to act on, not a hard block — "Lock now" stays clickable even when
+// members are missing picks, per the product owner's own framing ("if not
+// tell me who needs to pick what... I will text them").
+function LockNowPanel({ readiness, loading, locking, onCheck, onCancel, onConfirm }: LockNowPanelProps) {
+  if (!readiness) {
+    return (
+      <div className="border-border bg-card flex items-center justify-between gap-3 rounded-lg border px-4 py-3">
+        <span className="text-sm font-medium">Ready to lock the season early?</span>
+        <Button type="button" size="sm" variant="outline" disabled={loading} onClick={onCheck}>
+          {loading ? "Checking…" : "Check readiness"}
+        </Button>
+      </div>
+    );
+  }
+
+  const incomplete = readiness.members.filter((m) => m.missingQuestions.length > 0);
+  const allComplete = incomplete.length === 0;
+
+  return (
+    <div className="border-border bg-card flex flex-col gap-3 rounded-lg border px-4 py-3">
+      {allComplete ? (
+        <p className="text-positive text-sm font-bold">Everyone's picks are in — lock the season now?</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-medium">
+            {incomplete.length} of {readiness.members.length} member{readiness.members.length === 1 ? "" : "s"}{" "}
+            still {incomplete.length === 1 ? "has" : "have"} picks missing:
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {incomplete.map((m) => (
+              <li key={m.memberId} className="text-sm">
+                <span className="font-medium">{m.displayName}</span>{" "}
+                <span className="text-muted-foreground">
+                  is missing: {m.missingQuestions.map((q) => q.prompt).join(", ")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="flex justify-end gap-2">
+        <Button type="button" size="sm" variant="outline" disabled={locking} onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="button" size="sm" variant="destructive" disabled={locking} onClick={onConfirm}>
+          {locking ? "Locking…" : "Lock now"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -416,6 +552,17 @@ function customOptions(value: unknown): CustomOption[] {
 // gap, not this bug, and out of scope here. `team_over_under`'s teamId is
 // fixed by the admin in the question's config when it's created (doc 03
 // §3.3), not chosen by the member — the member's answer here is just yes/no.
+// IdentityBadge derives both colour and initials from whatever string it's
+// given — passing a raw team.id (a hex createId(), e.g. "97318af0...")
+// silently produced two DIGITS as the badge's "initials" (a hex string's
+// first two characters are frequently digits), which is exactly the "random
+// 2 digits" bug: badges must be seeded with the team's actual name/shortName,
+// never its id.
+function teamBadgeSeed(teamId: string, teams: TeamSummary[]): string {
+  const team = teams.find((t) => t.id === teamId);
+  return team ? team.shortName || team.name : teamId;
+}
+
 function QuestionInput({ question, answer, teams, disabled, onChange }: QuestionInputProps) {
   switch (question.type) {
     case "champion":
@@ -423,7 +570,7 @@ function QuestionInput({ question, answer, teams, disabled, onChange }: Question
     case "wooden_spoon":
       return (
         <div className="flex items-center gap-2">
-          {answer.teamId && <IdentityBadge seed={answer.teamId} shape="square" />}
+          {answer.teamId && <IdentityBadge seed={teamBadgeSeed(answer.teamId, teams)} shape="square" />}
           <div className="flex-1">
             <TeamSelect
               teams={teams}
@@ -455,7 +602,7 @@ function QuestionInput({ question, answer, teams, disabled, onChange }: Question
               {question.type === "top_n_ordered" && (
                 <span className="font-score text-muted-foreground w-5 shrink-0 text-sm">{i + 1}.</span>
               )}
-              {teamId && <IdentityBadge seed={teamId} size="sm" shape="square" />}
+              {teamId && <IdentityBadge seed={teamBadgeSeed(teamId, teams)} size="sm" shape="square" />}
               <div className="flex-1">
                 <TeamSelect
                   teams={teams}

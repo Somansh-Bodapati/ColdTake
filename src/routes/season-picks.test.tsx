@@ -8,27 +8,38 @@
 // team's real id — never its display name — in the PUT /api/seasons/:id/picks
 // payload. Mocking pattern mirrors src/routes/season-new.test.tsx.
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import "@testing-library/jest-dom/vitest";
 
 const useSessionMock = vi.fn();
+const useUserMock = vi.fn();
 const fetchSeasonDetailMock = vi.fn();
+const updateSeasonMock = vi.fn();
 const fetchMyPicksMock = vi.fn();
 const putPicksMock = vi.fn();
+const fetchReadinessMock = vi.fn();
+const fetchGroupDetailMock = vi.fn();
 
 vi.mock("@/lib/session/use-session", () => ({
   useSession: () => useSessionMock(),
+  useUser: () => useUserMock(),
 }));
 
 vi.mock("@/lib/seasons/client", () => ({
   fetchSeasonDetail: (seasonId: string) => fetchSeasonDetailMock(seasonId),
+  updateSeason: (seasonId: string, patch: unknown) => updateSeasonMock(seasonId, patch),
+}));
+
+vi.mock("@/lib/groups/client", () => ({
+  fetchGroupDetail: (groupId: string) => fetchGroupDetailMock(groupId),
 }));
 
 vi.mock("@/lib/picks/client", () => ({
   fetchMyPicks: (seasonId: string) => fetchMyPicksMock(seasonId),
   putPicks: (seasonId: string, body: unknown) => putPicksMock(seasonId, body),
+  fetchReadiness: (seasonId: string) => fetchReadinessMock(seasonId),
 }));
 
 const { default: SeasonPicksPage } = await import("./season-picks");
@@ -97,6 +108,23 @@ function renderPage() {
     </MemoryRouter>
   );
 }
+
+function groupDetail(role: "admin" | "member" = "member") {
+  return {
+    group: { id: "group-1", name: "Test Group", slug: "test-group", joinCode: "ABCDEF" },
+    members: [
+      { id: "member-1", userId: "user-1", displayName: "Me", role, joinedAt: "2026-01-01T00:00:00.000Z" },
+    ],
+    seasons: [],
+  };
+}
+
+beforeEach(() => {
+  // Every test exercises a plain, non-admin member unless it overrides
+  // these — only the "Lock now" tests below need admin + readiness mocks.
+  useUserMock.mockReturnValue({ id: "user-1" });
+  fetchGroupDetailMock.mockResolvedValue(groupDetail("member"));
+});
 
 afterEach(() => {
   cleanup();
@@ -183,5 +211,69 @@ describe("SeasonPicksPage team dropdown", () => {
     const listbox = await screen.findByRole("listbox");
     await within(listbox).findByText("Chennai Super Kings (CSK)");
     expect(within(listbox).queryByText("Royal Challengers Bengaluru (RCB)")).not.toBeInTheDocument();
+  });
+});
+
+// "Lock now" readiness panel (this session's brief): an admin viewing the
+// pick sheet pre-lock can check completion and force an early lock.
+describe("SeasonPicksPage Lock now panel", () => {
+  it("does not show 'Check readiness' to a non-admin member", async () => {
+    useSessionMock.mockReturnValue({ status: "signed-in" });
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchMyPicksMock.mockResolvedValue({ picks: [] });
+    fetchGroupDetailMock.mockResolvedValue(groupDetail("member"));
+
+    renderPage();
+    expect(await screen.findByText(/who wins it all\?/i)).toBeInTheDocument();
+    expect(screen.queryByText(/check readiness/i)).not.toBeInTheDocument();
+  });
+
+  it("lists a specific incomplete member's specific missing question once an admin checks readiness", async () => {
+    useSessionMock.mockReturnValue({ status: "signed-in" });
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchMyPicksMock.mockResolvedValue({ picks: [] });
+    fetchGroupDetailMock.mockResolvedValue(groupDetail("admin"));
+    fetchReadinessMock.mockResolvedValue({
+      members: [
+        { memberId: "member-1", displayName: "Me", missingQuestions: [] },
+        {
+          memberId: "member-2",
+          displayName: "Straggler Sam",
+          missingQuestions: [{ id: "q-champion", prompt: "Who wins it all?" }],
+        },
+      ],
+    });
+
+    renderPage();
+    expect(await screen.findByText(/who wins it all\?/i)).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByText(/check readiness/i));
+
+    expect(await screen.findByText("Straggler Sam")).toBeInTheDocument();
+    expect(screen.getByText(/is missing: who wins it all\?/i)).toBeInTheDocument();
+  });
+
+  it("shows the all-complete message and locks on confirm", async () => {
+    useSessionMock.mockReturnValue({ status: "signed-in" });
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchMyPicksMock.mockResolvedValue({ picks: [] });
+    fetchGroupDetailMock.mockResolvedValue(groupDetail("admin"));
+    fetchReadinessMock.mockResolvedValue({
+      members: [{ memberId: "member-1", displayName: "Me", missingQuestions: [] }],
+    });
+    updateSeasonMock.mockResolvedValue(seasonDetail());
+
+    renderPage();
+    expect(await screen.findByText(/who wins it all\?/i)).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByText(/check readiness/i));
+    expect(await screen.findByText(/everyone's picks are in/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/^lock now$/i));
+
+    await waitFor(() => expect(updateSeasonMock).toHaveBeenCalled());
+    const [seasonIdArg, patch] = updateSeasonMock.mock.calls[0] as [string, { lockAt: string }];
+    expect(seasonIdArg).toBe("season-1");
+    expect(typeof patch.lockAt).toBe("string");
   });
 });

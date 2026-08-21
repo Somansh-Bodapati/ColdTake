@@ -6,7 +6,8 @@ import { useSession, useUser } from "@/lib/session/use-session";
 import {
   fetchGroupDetail,
   removeGroupMember,
-  transferGroupAdmin,
+  promoteGroupAdmin,
+  demoteGroupAdmin,
 } from "@/lib/groups/client";
 import type { GroupDetailResponse, GroupSeasonSummary } from "@/lib/schemas/groups";
 import { Button } from "@/components/ui/button";
@@ -132,6 +133,7 @@ export default function GroupPage() {
 
   const currentMembership = detail.members.find((m) => m.userId === user?.id);
   const isAdmin = currentMembership?.role === "admin";
+  const adminCount = detail.members.filter((m) => m.role === "admin").length;
   const appUrl = typeof window !== "undefined" ? window.location.origin : "";
   const inviteUrl = `${appUrl}/join?code=${detail.group.joinCode}`;
 
@@ -155,15 +157,30 @@ export default function GroupPage() {
     }
   }
 
-  async function handleTransfer(memberId: string) {
+  async function handlePromote(memberId: string) {
     if (!groupId) return;
     setBusyMemberId(memberId);
     try {
-      await transferGroupAdmin(groupId, memberId);
+      await promoteGroupAdmin(groupId, memberId);
       await reload();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not transfer the admin role", {
-        action: { label: "Retry", onClick: () => void handleTransfer(memberId) },
+      toast.error(err instanceof Error ? err.message : "Could not make that member an admin", {
+        action: { label: "Retry", onClick: () => void handlePromote(memberId) },
+      });
+    } finally {
+      setBusyMemberId(null);
+    }
+  }
+
+  async function handleDemote(memberId: string) {
+    if (!groupId) return;
+    setBusyMemberId(memberId);
+    try {
+      await demoteGroupAdmin(groupId, memberId);
+      await reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not remove that admin", {
+        action: { label: "Retry", onClick: () => void handleDemote(memberId) },
       });
     } finally {
       setBusyMemberId(null);
@@ -262,20 +279,37 @@ export default function GroupPage() {
               </span>
               {isAdmin && member.userId !== user?.id && (
                 <span className="flex gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={busyMemberId === member.id}
-                    onClick={() => void handleTransfer(member.id)}
-                  >
-                    Make admin
-                  </Button>
+                  {member.role === "admin" ? (
+                    // Any admin who isn't the group's last one can be
+                    // demoted by any other admin — the last admin can't be,
+                    // so this codebase never leaves a group with zero.
+                    adminCount > 1 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busyMemberId === member.id}
+                        onClick={() => void handleDemote(member.id)}
+                      >
+                        Remove admin
+                      </Button>
+                    )
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={busyMemberId === member.id}
+                      onClick={() => void handlePromote(member.id)}
+                    >
+                      Make admin
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     size="sm"
                     variant="destructive"
-                    disabled={busyMemberId === member.id}
+                    disabled={busyMemberId === member.id || (member.role === "admin" && adminCount <= 1)}
                     onClick={() => void handleRemove(member.id)}
                   >
                     Remove

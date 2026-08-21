@@ -8,7 +8,7 @@ import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "../../../../lib/db/client";
 import { group, member, user } from "../../../../lib/db/schema";
 import { createAnonymousUser, SESSION_COOKIE_NAME } from "../../../../lib/auth/session";
-import { createGroup, joinGroupByCode } from "../../../../lib/groups/service";
+import { createGroup, joinGroupByCode, promoteToAdmin } from "../../../../lib/groups/service";
 import handler from "./[memberId]";
 
 const createdUserIds: string[] = [];
@@ -103,7 +103,7 @@ describe("DELETE /api/groups/:id/members/:mid", () => {
     expect(removed?.removedAt).not.toBeNull();
   });
 
-  it("refuses to remove the admin without a transfer first", async () => {
+  it("refuses to remove the group's sole admin", async () => {
     const fixture = await makeGroupWithMember();
     const [adminMemberRow] = await db
       .select({ id: member.id })
@@ -115,6 +115,25 @@ describe("DELETE /api/groups/:id/members/:mid", () => {
       deleteRequest(fixture.groupId, adminMemberRow!.id, fixture.adminSessionToken)
     );
     expect(response.status).toBe(400);
+  });
+
+  it("allows removing an admin when another admin exists (multi-admin support)", async () => {
+    const fixture = await makeGroupWithMember();
+    const [adminMemberRow] = await db
+      .select({ id: member.id })
+      .from(member)
+      .where(and(eq(member.groupId, fixture.groupId), eq(member.userId, fixture.adminUserId)));
+    // Promote the second member to admin, so the original admin is no
+    // longer the sole one and can now be removed like anyone else.
+    await promoteToAdmin(db, fixture.groupId, fixture.memberMemberId);
+
+    const response = await handler(
+      deleteRequest(fixture.groupId, adminMemberRow!.id, fixture.memberSessionToken)
+    );
+    expect(response.status).toBe(200);
+
+    const [removed] = await db.select().from(member).where(eq(member.id, adminMemberRow!.id));
+    expect(removed?.removedAt).not.toBeNull();
   });
 
   it("rejects an unauthenticated request with 401", async () => {
