@@ -186,9 +186,25 @@ export const createSeasonRequestSchema = z.object({
 });
 export type CreateSeasonRequest = z.infer<typeof createSeasonRequestSchema>;
 
+// A season's tournament's real teams (this session's bug fix: the pick
+// sheet needs a catalogue of valid teamIds to build a dropdown from, rather
+// than free-typing a string like "RCB" that src/lib/scoring/resolvers/*.ts's
+// `validate()` — via src/lib/picks/service.ts's Tournament.teamIds check —
+// will reject unless it's a real internal team.id). Piggybacked onto season
+// detail rather than a new /api/tournaments/:id/teams endpoint since the
+// pick sheet already fetches this response and a season's tournament never
+// changes after creation.
+export const teamSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  shortName: z.string(),
+});
+export type TeamSummary = z.infer<typeof teamSummarySchema>;
+
 export const seasonDetailResponseSchema = z.object({
   season: seasonResponseSchema,
   questions: z.array(questionResponseSchema),
+  teams: z.array(teamSummarySchema),
 });
 export type SeasonDetailResponse = z.infer<typeof seasonDetailResponseSchema>;
 

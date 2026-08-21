@@ -6,7 +6,7 @@
 
 import { asc, and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Db } from "../auth/session.js";
-import { member, question, season, tournament, type SeasonStatus } from "../db/schema.js";
+import { member, question, season, team, tournament, type SeasonStatus } from "../db/schema.js";
 import { createId } from "../db/id.js";
 import { requireAdmin, requireMembership } from "../groups/service.js";
 import { canPublish, effectiveSeasonStatus, isMutableStatus } from "./state.js";
@@ -162,6 +162,18 @@ export async function createSeason(db: Db, args: CreateSeasonArgs) {
   }
 
   return seasonRow;
+}
+
+// This session's bug fix: the pick sheet's team-based questions (champion,
+// runner_up, wooden_spoon, top_n_*) need a real catalogue of the season's
+// tournament's teams to build a dropdown from, sorted alphabetically by
+// name (this session's brief, task 5) for usability.
+export async function getSeasonTeams(db: Db, tournamentId: string) {
+  return db
+    .select({ id: team.id, name: team.name, shortName: team.shortName })
+    .from(team)
+    .where(eq(team.tournamentId, tournamentId))
+    .orderBy(asc(team.name));
 }
 
 export async function getQuestions(db: Db, seasonId: string) {

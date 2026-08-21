@@ -6,7 +6,13 @@
 
 import { db } from "../../../lib/db/client.js";
 import { requireUser } from "../../../lib/auth/session.js";
-import { requireSeasonAdmin, requireSeasonMembership, getQuestions, updateSeason } from "../../../lib/seasons/service.js";
+import {
+  requireSeasonAdmin,
+  requireSeasonMembership,
+  getQuestions,
+  getSeasonTeams,
+  updateSeason,
+} from "../../../lib/seasons/service.js";
 import { toQuestionResponse, toSeasonResponse } from "../../../lib/seasons/dto.js";
 import { updateSeasonRequestSchema, type SeasonDetailResponse } from "../../../lib/schemas/seasons.js";
 import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http.js";
@@ -17,10 +23,14 @@ async function handleGet(request: Request): Promise<Response> {
   const currentUser = await requireUser(db, request);
   const seasonRow = await requireSeasonMembership(db, seasonId, currentUser.id, new Date());
 
-  const questionRows = await getQuestions(db, seasonId);
+  const [questionRows, teamRows] = await Promise.all([
+    getQuestions(db, seasonId),
+    getSeasonTeams(db, seasonRow.tournamentId),
+  ]);
   const body: SeasonDetailResponse = {
     season: toSeasonResponse(seasonRow),
     questions: questionRows.map(toQuestionResponse),
+    teams: teamRows,
   };
   return jsonResponse(body);
 }
@@ -32,11 +42,15 @@ async function handlePatch(request: Request): Promise<Response> {
 
   const patch = await parseJsonBody(request, updateSeasonRequestSchema);
   const updated = await updateSeason(db, seasonId, patch, new Date());
-  const questionRows = await getQuestions(db, seasonId);
+  const [questionRows, teamRows] = await Promise.all([
+    getQuestions(db, seasonId),
+    getSeasonTeams(db, updated.tournamentId),
+  ]);
 
   const body: SeasonDetailResponse = {
     season: toSeasonResponse(updated),
     questions: questionRows.map(toQuestionResponse),
+    teams: teamRows,
   };
   return jsonResponse(body);
 }
