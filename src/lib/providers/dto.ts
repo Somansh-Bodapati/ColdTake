@@ -2,9 +2,9 @@
 // api/admin/manual-standings/[tournamentId].ts, mirrors
 // src/lib/standings/dto.ts.
 
-import type { LiveStateStatLeaderEntry } from "@/lib/db/schema";
-import type { IngestResult } from "@/lib/providers/ingest";
-import type { IngestResponse } from "@/lib/schemas/providers";
+import type { LiveStateStatLeaderEntry } from "../db/schema.js";
+import type { IngestResult } from "./ingest.js";
+import type { IngestResponse } from "../schemas/providers.js";
 
 export function toIngestResponse(result: IngestResult): IngestResponse {
   const statLeaders: Record<string, LiveStateStatLeaderEntry[]> = {};

@@ -4,8 +4,8 @@
 // this shape; this file only ever builds a Satori element tree from it, so
 // it's testable with plain fixtures (reveal-card.test.ts), no DB required.
 
-import { cardFooter, cardFrame, el, COLORS, type CardElement } from "@/lib/cards/element";
-import type { RevealCardData } from "@/lib/cards/types";
+import { cardFooter, cardFrame, el, COLORS, type CardElement } from "./element.js";
+import type { RevealCardData } from "./types.js";
 
 // Rows beyond this still fit on the 630px-tall card at a readable size;
 // past it the list would overflow, so the card caption says how many more

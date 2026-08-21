@@ -2,11 +2,11 @@
 // Anonymous-first auth (doc 01 §7.1): this is the entire signup flow. No
 // email, no password — a display name creates a user + session cookie.
 
-import { db } from "../../lib/db/client";
-import { anonymousSignupRequestSchema } from "../../lib/schemas/auth";
-import { createAnonymousUser, buildSessionCookie } from "../../lib/auth/session";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
-import { AppError } from "../../lib/errors";
+import { db } from "../../lib/db/client.js";
+import { anonymousSignupRequestSchema } from "../../lib/schemas/auth.js";
+import { createAnonymousUser, buildSessionCookie } from "../../lib/auth/session.js";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
+import { AppError } from "../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

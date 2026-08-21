@@ -10,8 +10,8 @@
 // src/lib/http.ts) — Vercel Functions support this natively since Node 18,
 // no @vercel/node request/response adapter needed.
 
-import { matchRoute } from "../src/server/router";
-import { jsonResponse } from "../src/lib/http";
+import { matchRoute } from "../src/server/router.js";
+import { jsonResponse } from "../src/lib/http.js";
 
 export default async function handler(request: Request): Promise<Response> {
   const { pathname } = new URL(request.url);

@@ -1,12 +1,12 @@
 // DELETE /api/seasons/:id/questions/:qid — doc 03 §3.3 [admin, only while
 // draft/open].
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireSeasonAdmin, deleteQuestion } from "../../../../lib/seasons/service";
-import type { OkResponse } from "../../../../lib/schemas/groups";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireSeasonAdmin, deleteQuestion } from "../../../../lib/seasons/service.js";
+import type { OkResponse } from "../../../../lib/schemas/groups.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "DELETE") {

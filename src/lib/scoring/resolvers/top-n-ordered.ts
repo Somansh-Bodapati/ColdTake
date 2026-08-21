@@ -10,7 +10,7 @@ import type {
   ResultSet,
   Tournament,
   ValidationResult,
-} from "@/lib/scoring/types";
+} from "../types.js";
 
 function configN(question: Question): number | undefined {
   const n = question.config.n;

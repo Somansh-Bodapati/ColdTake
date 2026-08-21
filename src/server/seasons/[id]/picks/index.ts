@@ -4,14 +4,14 @@
 // src/lib/picks/service.ts's upsertPicks (this session's brief, tasks 2-3);
 // this handler is just membership + body parsing + status code.
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireSeasonMember, upsertPicks } from "../../../../lib/picks/service";
-import { toPickResponse } from "../../../../lib/picks/dto";
-import { putPicksRequestSchema, type MinePicksResponse } from "../../../../lib/schemas/picks";
-import { hitRateLimit } from "../../../../lib/groups/rate-limit";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireSeasonMember, upsertPicks } from "../../../../lib/picks/service.js";
+import { toPickResponse } from "../../../../lib/picks/dto.js";
+import { putPicksRequestSchema, type MinePicksResponse } from "../../../../lib/schemas/picks.js";
+import { hitRateLimit } from "../../../../lib/groups/rate-limit.js";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 // doc 03 §5 checklist: "Rate limiting on join, pick submission, and comment
 // endpoints" — join (api/groups/join.ts) and recompute

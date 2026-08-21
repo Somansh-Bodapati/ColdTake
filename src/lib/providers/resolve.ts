@@ -8,12 +8,12 @@
 // api/seasons/[id]/settle.ts.
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { tournament } from "@/lib/db/schema";
-import { ManualProvider } from "@/lib/providers/manual-provider";
-import { CricketDataProvider } from "@/lib/providers/cricketdata-provider";
-import type { StandingsProvider } from "@/lib/providers/types";
-import { AppError } from "@/lib/errors";
+import type { Db } from "../auth/session.js";
+import { tournament } from "../db/schema.js";
+import { ManualProvider } from "./manual-provider.js";
+import { CricketDataProvider } from "./cricketdata-provider.js";
+import type { StandingsProvider } from "./types.js";
+import { AppError } from "../errors.js";
 
 export async function resolveStandingsProvider(db: Db, tournamentId: string): Promise<StandingsProvider> {
   const [tournamentRow] = await db.select().from(tournament).where(eq(tournament.id, tournamentId)).limit(1);

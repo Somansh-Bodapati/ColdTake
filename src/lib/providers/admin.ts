@@ -8,10 +8,10 @@
 // caller in.
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { season } from "@/lib/db/schema";
-import { requireAdmin } from "@/lib/groups/service";
-import { AppError } from "@/lib/errors";
+import type { Db } from "../auth/session.js";
+import { season } from "../db/schema.js";
+import { requireAdmin } from "../groups/service.js";
+import { AppError } from "../errors.js";
 
 export async function requireTournamentAdmin(db: Db, tournamentId: string, userId: string): Promise<void> {
   const seasonRows = await db

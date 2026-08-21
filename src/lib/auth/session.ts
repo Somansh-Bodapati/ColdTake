@@ -9,11 +9,11 @@
 // never in the DB.
 
 import { and, eq, gt, isNull } from "drizzle-orm";
-import type { db as dbClient } from "@/lib/db/client";
-import { authToken, user, type AuthTokenPurpose } from "@/lib/db/schema";
-import { createId } from "@/lib/db/id";
-import { generateRawToken, hashToken } from "@/lib/auth/tokens";
-import { AppError } from "@/lib/errors";
+import type { db as dbClient } from "../db/client.js";
+import { authToken, user, type AuthTokenPurpose } from "../db/schema.js";
+import { createId } from "../db/id.js";
+import { generateRawToken, hashToken } from "./tokens.js";
+import { AppError } from "../errors.js";
 
 export type Db = typeof dbClient;
 

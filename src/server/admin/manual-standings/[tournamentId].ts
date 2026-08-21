@@ -10,16 +10,16 @@
 // stored) — everything downstream of "provider produced this data" is
 // identical.
 
-import { db } from "../../../lib/db/client";
-import { requireUser } from "../../../lib/auth/session";
-import { requireTournamentAdmin } from "../../../lib/providers/admin";
-import { saveManualStandings } from "../../../lib/providers/manual-input";
-import { ManualProvider } from "../../../lib/providers/manual-provider";
-import { ingestTournament } from "../../../lib/providers/ingest";
-import { toIngestResponse } from "../../../lib/providers/dto";
-import { manualStandingsRequestSchema, type IngestResponse } from "../../../lib/schemas/providers";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { requireUser } from "../../../lib/auth/session.js";
+import { requireTournamentAdmin } from "../../../lib/providers/admin.js";
+import { saveManualStandings } from "../../../lib/providers/manual-input.js";
+import { ManualProvider } from "../../../lib/providers/manual-provider.js";
+import { ingestTournament } from "../../../lib/providers/ingest.js";
+import { toIngestResponse } from "../../../lib/providers/dto.js";
+import { manualStandingsRequestSchema, type IngestResponse } from "../../../lib/schemas/providers.js";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

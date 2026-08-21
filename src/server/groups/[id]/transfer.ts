@@ -2,12 +2,12 @@
 // Admin-scoped (this session's brief, task 6): verifies the caller is the
 // admin of this specific group before handing the role to someone else.
 
-import { db } from "../../../lib/db/client";
-import { requireUser } from "../../../lib/auth/session";
-import { requireAdmin, transferAdmin } from "../../../lib/groups/service";
-import { transferAdminRequestSchema, type OkResponse } from "../../../lib/schemas/groups";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { requireUser } from "../../../lib/auth/session.js";
+import { requireAdmin, transferAdmin } from "../../../lib/groups/service.js";
+import { transferAdminRequestSchema, type OkResponse } from "../../../lib/schemas/groups.js";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

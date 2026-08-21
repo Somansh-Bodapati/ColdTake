@@ -13,7 +13,7 @@ import type {
   ResultSet,
   Tournament,
   ValidationResult,
-} from "@/lib/scoring/types";
+} from "../types.js";
 
 function configStatCategory(question: Question): string | undefined {
   const statCategory = question.config.statCategory;

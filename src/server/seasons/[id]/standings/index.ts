@@ -7,13 +7,13 @@
 // any current group member can see standings at any time, projected or
 // final.
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireStandingsReader, getLatestSnapshot } from "../../../../lib/standings/service";
-import { toStandingsSnapshotResponse } from "../../../../lib/standings/dto";
-import type { StandingsSnapshotResponse } from "../../../../lib/schemas/standings";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireStandingsReader, getLatestSnapshot } from "../../../../lib/standings/service.js";
+import { toStandingsSnapshotResponse } from "../../../../lib/standings/dto.js";
+import type { StandingsSnapshotResponse } from "../../../../lib/schemas/standings.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 // doc 02 §3.4's recommended stack: HTTP caching on top of the materialised
 // snapshot, so a page view costs "one indexed row read at worst, and

@@ -2,8 +2,8 @@
 // Pure function of StandingsCardData (src/lib/cards/types.ts) — assembled
 // from a single standings_snapshot row by src/lib/cards/assemble.ts.
 
-import { cardFooter, cardFrame, el, COLORS, type CardElement } from "@/lib/cards/element";
-import type { StandingsCardData } from "@/lib/cards/types";
+import { cardFooter, cardFrame, el, COLORS, type CardElement } from "./element.js";
+import type { StandingsCardData } from "./types.js";
 
 const MAX_ROWS = 8;
 

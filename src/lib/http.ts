@@ -5,7 +5,7 @@
 // directly and calling the handler, per doc 02 §"API routes: Vitest".
 
 import type { ZodType } from "zod";
-import { AppError } from "@/lib/errors";
+import { AppError } from "./errors.js";
 
 export function jsonResponse(
   body: unknown,

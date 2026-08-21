@@ -5,12 +5,12 @@
 // rule 2 ("Add Cache-Control to public GET endpoints") — a plain full-table
 // read with no per-user data, safe to cache briefly.
 
-import { db } from "../../lib/db/client";
-import { requireUser } from "../../lib/auth/session";
-import { getTournamentCatalogue } from "../../lib/seasons/service";
-import type { TournamentCatalogueResponse } from "../../lib/schemas/seasons";
-import { jsonResponse, withErrorHandling } from "../../lib/http";
-import { AppError } from "../../lib/errors";
+import { db } from "../../lib/db/client.js";
+import { requireUser } from "../../lib/auth/session.js";
+import { getTournamentCatalogue } from "../../lib/seasons/service.js";
+import type { TournamentCatalogueResponse } from "../../lib/schemas/seasons.js";
+import { jsonResponse, withErrorHandling } from "../../lib/http.js";
+import { AppError } from "../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

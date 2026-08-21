@@ -4,26 +4,26 @@
 // src/lib/seasons/service.ts and src/lib/groups/service.ts.
 
 import { and, eq, inArray } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { member, pick, pickHistory, team, user, type PickAnswer } from "@/lib/db/schema";
-import { createId } from "@/lib/db/id";
-import { requireMembership } from "@/lib/groups/service";
-import { loadSeason, getQuestions } from "@/lib/seasons/service";
-import { isPickWindowOpen } from "@/lib/seasons/state";
-import { createResolverRegistry } from "@/lib/scoring/registry";
-import { booleanResolver } from "@/lib/scoring/resolvers/boolean";
-import { championResolver } from "@/lib/scoring/resolvers/champion";
-import { customResolver } from "@/lib/scoring/resolvers/custom";
-import { numericResolver } from "@/lib/scoring/resolvers/numeric";
-import { runnerUpResolver } from "@/lib/scoring/resolvers/runner-up";
-import { statLeaderResolver } from "@/lib/scoring/resolvers/stat-leader";
-import { teamOverUnderResolver } from "@/lib/scoring/resolvers/team-over-under";
-import { topNOrderedResolver } from "@/lib/scoring/resolvers/top-n-ordered";
-import { topNUnorderedResolver } from "@/lib/scoring/resolvers/top-n-unordered";
-import { woodenSpoonResolver } from "@/lib/scoring/resolvers/wooden-spoon";
-import type { Question as ScoringQuestion, Tournament } from "@/lib/scoring/types";
-import type { PickInput } from "@/lib/schemas/picks";
-import { AppError } from "@/lib/errors";
+import type { Db } from "../auth/session.js";
+import { member, pick, pickHistory, team, user, type PickAnswer } from "../db/schema.js";
+import { createId } from "../db/id.js";
+import { requireMembership } from "../groups/service.js";
+import { loadSeason, getQuestions } from "../seasons/service.js";
+import { isPickWindowOpen } from "../seasons/state.js";
+import { createResolverRegistry } from "../scoring/registry.js";
+import { booleanResolver } from "../scoring/resolvers/boolean.js";
+import { championResolver } from "../scoring/resolvers/champion.js";
+import { customResolver } from "../scoring/resolvers/custom.js";
+import { numericResolver } from "../scoring/resolvers/numeric.js";
+import { runnerUpResolver } from "../scoring/resolvers/runner-up.js";
+import { statLeaderResolver } from "../scoring/resolvers/stat-leader.js";
+import { teamOverUnderResolver } from "../scoring/resolvers/team-over-under.js";
+import { topNOrderedResolver } from "../scoring/resolvers/top-n-ordered.js";
+import { topNUnorderedResolver } from "../scoring/resolvers/top-n-unordered.js";
+import { woodenSpoonResolver } from "../scoring/resolvers/wooden-spoon.js";
+import type { Question as ScoringQuestion, Tournament } from "../scoring/types.js";
+import type { PickInput } from "../schemas/picks.js";
+import { AppError } from "../errors.js";
 
 // Same registry construction as src/lib/scoring/index.ts (that module
 // doesn't export its instance — it's the engine's own orchestrator, not a

@@ -3,8 +3,8 @@
 // — assembled from the settled season's final standings_snapshot in
 // src/lib/cards/assemble.ts.
 
-import { cardFooter, cardFrame, el, COLORS, type CardElement } from "@/lib/cards/element";
-import type { RecapCardCall, RecapCardData } from "@/lib/cards/types";
+import { cardFooter, cardFrame, el, COLORS, type CardElement } from "./element.js";
+import type { RecapCardCall, RecapCardData } from "./types.js";
 
 const MAX_ROWS = 3;
 

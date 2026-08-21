@@ -5,8 +5,8 @@
 // Cache-Control header. Mirrors src/lib/http.ts's role for the JSON API
 // routes, just for this one binary-response shape.
 
-import { pathSegment } from "@/lib/http";
-import { AppError } from "@/lib/errors";
+import { pathSegment } from "../http.js";
+import { AppError } from "../errors.js";
 
 const PNG_SUFFIX = ".png";
 

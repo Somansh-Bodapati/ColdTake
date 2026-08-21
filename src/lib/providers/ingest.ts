@@ -7,11 +7,11 @@
 // of which provider produced the data or who was allowed to trigger it.
 
 import { and, eq, inArray } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { liveState, season, tournament, type LiveStateStatLeaders } from "@/lib/db/schema";
-import { AppError } from "@/lib/errors";
-import { recomputeStandings, type StandingsSnapshotRow } from "@/lib/standings/service";
-import type { StandingsProvider, TeamStanding } from "@/lib/providers/types";
+import type { Db } from "../auth/session.js";
+import { liveState, season, tournament, type LiveStateStatLeaders } from "../db/schema.js";
+import { AppError } from "../errors.js";
+import { recomputeStandings, type StandingsSnapshotRow } from "../standings/service.js";
+import type { StandingsProvider, TeamStanding } from "./types.js";
 
 export type LiveStateRow = typeof liveState.$inferSelect;
 

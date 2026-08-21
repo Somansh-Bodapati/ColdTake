@@ -3,13 +3,13 @@
 // requirement covers both endpoints: "/picks/mine must filter by the
 // authenticated member").
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireSeasonMember, getMyPicks } from "../../../../lib/picks/service";
-import { toPickResponse } from "../../../../lib/picks/dto";
-import type { MinePicksResponse } from "../../../../lib/schemas/picks";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireSeasonMember, getMyPicks } from "../../../../lib/picks/service.js";
+import { toPickResponse } from "../../../../lib/picks/dto.js";
+import type { MinePicksResponse } from "../../../../lib/schemas/picks.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

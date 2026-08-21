@@ -5,13 +5,13 @@
 // `config.options`, validated by questionInputSchema exactly like every
 // other type.
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireSeasonAdmin, addQuestion } from "../../../../lib/seasons/service";
-import { toQuestionResponse } from "../../../../lib/seasons/dto";
-import { questionInputSchema, type QuestionResponse } from "../../../../lib/schemas/seasons";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireSeasonAdmin, addQuestion } from "../../../../lib/seasons/service.js";
+import { toQuestionResponse } from "../../../../lib/seasons/dto.js";
+import { questionInputSchema, type QuestionResponse } from "../../../../lib/schemas/seasons.js";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

@@ -4,7 +4,7 @@
 // from the DB layer per CLAUDE.md rule 1 — callers assemble these from
 // query results, the engine never touches drizzle or postgres.
 
-import type { PickAnswer, QuestionConfig, QuestionType } from "@/lib/db/schema";
+import type { PickAnswer, QuestionConfig, QuestionType } from "../db/schema.js";
 
 // ---------------------------------------------------------------------------
 // Result type — typed Result returns per CLAUDE.md's error-handling

@@ -29,7 +29,7 @@
 //     refuses to compute standings for one anyway.
 
 import { and, desc, eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
+import type { Db } from "../auth/session.js";
 import {
   question,
   questionResult,
@@ -39,25 +39,25 @@ import {
   type PickAnswer,
   type ResultKind,
   type ResultSource,
-} from "@/lib/db/schema";
-import { createId } from "@/lib/db/id";
-import { getTournament, requireSeasonAdmin } from "@/lib/seasons/service";
-import { canSettle, canVoid } from "@/lib/seasons/state";
-import { recomputeStandings, type StandingsSnapshotRow } from "@/lib/standings/service";
-import { createResolverRegistry } from "@/lib/scoring/registry";
-import { booleanResolver } from "@/lib/scoring/resolvers/boolean";
-import { championResolver } from "@/lib/scoring/resolvers/champion";
-import { customResolver } from "@/lib/scoring/resolvers/custom";
-import { numericResolver } from "@/lib/scoring/resolvers/numeric";
-import { runnerUpResolver } from "@/lib/scoring/resolvers/runner-up";
-import { statLeaderResolver } from "@/lib/scoring/resolvers/stat-leader";
-import { teamOverUnderResolver } from "@/lib/scoring/resolvers/team-over-under";
-import { topNOrderedResolver } from "@/lib/scoring/resolvers/top-n-ordered";
-import { topNUnorderedResolver } from "@/lib/scoring/resolvers/top-n-unordered";
-import { woodenSpoonResolver } from "@/lib/scoring/resolvers/wooden-spoon";
-import type { Question as ScoringQuestion, Tournament } from "@/lib/scoring/types";
-import type { StandingsProvider } from "@/lib/providers/types";
-import { AppError } from "@/lib/errors";
+} from "../db/schema.js";
+import { createId } from "../db/id.js";
+import { getTournament, requireSeasonAdmin } from "./service.js";
+import { canSettle, canVoid } from "./state.js";
+import { recomputeStandings, type StandingsSnapshotRow } from "../standings/service.js";
+import { createResolverRegistry } from "../scoring/registry.js";
+import { booleanResolver } from "../scoring/resolvers/boolean.js";
+import { championResolver } from "../scoring/resolvers/champion.js";
+import { customResolver } from "../scoring/resolvers/custom.js";
+import { numericResolver } from "../scoring/resolvers/numeric.js";
+import { runnerUpResolver } from "../scoring/resolvers/runner-up.js";
+import { statLeaderResolver } from "../scoring/resolvers/stat-leader.js";
+import { teamOverUnderResolver } from "../scoring/resolvers/team-over-under.js";
+import { topNOrderedResolver } from "../scoring/resolvers/top-n-ordered.js";
+import { topNUnorderedResolver } from "../scoring/resolvers/top-n-unordered.js";
+import { woodenSpoonResolver } from "../scoring/resolvers/wooden-spoon.js";
+import type { Question as ScoringQuestion, Tournament } from "../scoring/types.js";
+import type { StandingsProvider } from "../providers/types.js";
+import { AppError } from "../errors.js";
 
 // Same registry construction as src/lib/picks/service.ts and
 // src/lib/scoring/index.ts — reused here for exactly one thing, `validate`,

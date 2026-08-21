@@ -12,22 +12,22 @@
 // trusting the caller's claim.
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { team, type PickAnswer } from "@/lib/db/schema";
-import { loadSeason, getQuestions } from "@/lib/seasons/service";
-import { getGroupBranding } from "@/lib/groups/service";
-import { getAllPicks } from "@/lib/picks/service";
-import { getLatestSnapshot, getStandingsHistory, type StandingsSnapshotRow } from "@/lib/standings/service";
-import { isRevealed } from "@/lib/seasons/state";
-import { buildJoinUrl } from "@/lib/cards/branding";
-import { AppError } from "@/lib/errors";
+import type { Db } from "../auth/session.js";
+import { team, type PickAnswer } from "../db/schema.js";
+import { loadSeason, getQuestions } from "../seasons/service.js";
+import { getGroupBranding } from "../groups/service.js";
+import { getAllPicks } from "../picks/service.js";
+import { getLatestSnapshot, getStandingsHistory, type StandingsSnapshotRow } from "../standings/service.js";
+import { isRevealed } from "../seasons/state.js";
+import { buildJoinUrl } from "./branding.js";
+import { AppError } from "../errors.js";
 import type {
   RecapCardCall,
   RecapCardData,
   RevealCardData,
   StandingsCardData,
   SwingCardData,
-} from "@/lib/cards/types";
+} from "./types.js";
 
 async function loadBranding(db: Db, groupId: string): Promise<{ groupName: string; joinUrl: string }> {
   const branding = await getGroupBranding(db, groupId);

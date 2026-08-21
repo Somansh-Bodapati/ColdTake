@@ -3,13 +3,13 @@
 // Only renders once the season is settled (src/lib/cards/assemble.ts throws
 // 409 otherwise) — public, same as the other three card routes.
 
-import { db } from "../../../../lib/db/client";
-import { assembleRecapCard } from "../../../../lib/cards/assemble";
-import { buildRecapCardElement } from "../../../../lib/cards/recap-card";
-import { renderCardToPng } from "../../../../lib/cards/render";
-import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http";
-import { pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { assembleRecapCard } from "../../../../lib/cards/assemble.js";
+import { buildRecapCardElement } from "../../../../lib/cards/recap-card.js";
+import { renderCardToPng } from "../../../../lib/cards/render.js";
+import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http.js";
+import { pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

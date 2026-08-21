@@ -9,7 +9,7 @@ import type {
   ResultSet,
   Tournament,
   ValidationResult,
-} from "@/lib/scoring/types";
+} from "../types.js";
 
 function validate(
   answer: unknown,
