@@ -121,6 +121,22 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     [refresh]
   );
 
+  const confirmName = React.useCallback(
+    async (displayName: string) => {
+      const response = await fetch("/api/auth/confirm-name", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ displayName }),
+      });
+      if (!response.ok) {
+        throw new Error(await errorMessage(response, "Could not save your name"));
+      }
+      await refresh();
+    },
+    [refresh]
+  );
+
   const claimEmail = React.useCallback(async (email: string): Promise<ClaimResponse> => {
     const response = await fetch("/api/auth/claim", {
       method: "POST",
@@ -140,8 +156,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [applyMe]);
 
   const value = React.useMemo<SessionContextValue>(
-    () => ({ status, user, groups, refresh, signInAnonymous, claimEmail, logout }),
-    [status, user, groups, refresh, signInAnonymous, claimEmail, logout]
+    () => ({ status, user, groups, refresh, signInAnonymous, confirmName, claimEmail, logout }),
+    [status, user, groups, refresh, signInAnonymous, confirmName, claimEmail, logout]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

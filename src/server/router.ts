@@ -2,8 +2,8 @@
 // both the production catch-all Vercel Function (api/gateway.ts) and the
 // local dev middleware (vite-plugins/api-dev-server.ts). Exists because
 // Vercel's Hobby plan caps a deployment at 12 Serverless Functions, and this
-// project has 34 route handlers under src/server/ — every file under api/
-// becomes its own Function, so all 32 handlers are consolidated behind the
+// project has 37 route handlers under src/server/ — every file under api/
+// becomes its own Function, so all of them are consolidated behind the
 // one catch-all file and dispatched internally via this static table
 // instead.
 //
@@ -15,6 +15,9 @@
 import meHandler from "./me.js";
 import authAnonymousHandler from "./auth/anonymous.js";
 import authClaimHandler from "./auth/claim.js";
+import authConfirmNameHandler from "./auth/confirm-name.js";
+import authGoogleHandler from "./auth/google.js";
+import authGoogleCallbackHandler from "./auth/google/callback.js";
 import authLogoutHandler from "./auth/logout.js";
 import authVerifyHandler from "./auth/verify.js";
 import adminManualStandingsHandler from "./admin/manual-standings/[tournamentId].js";
@@ -62,6 +65,9 @@ export const routes: Route[] = [
   { pattern: "/api/me", handler: meHandler },
   { pattern: "/api/auth/anonymous", handler: authAnonymousHandler },
   { pattern: "/api/auth/claim", handler: authClaimHandler },
+  { pattern: "/api/auth/confirm-name", handler: authConfirmNameHandler },
+  { pattern: "/api/auth/google", handler: authGoogleHandler },
+  { pattern: "/api/auth/google/callback", handler: authGoogleCallbackHandler },
   { pattern: "/api/auth/logout", handler: authLogoutHandler },
   { pattern: "/api/auth/verify", handler: authVerifyHandler },
   { pattern: "/api/admin/manual-standings/:tournamentId", handler: adminManualStandingsHandler },
