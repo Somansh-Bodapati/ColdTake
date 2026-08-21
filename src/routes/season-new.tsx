@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import type { Route } from "./+types/season-new";
 import { useSession, useUser } from "@/lib/session/use-session";
 import { fetchGroupDetail } from "@/lib/groups/client";
@@ -44,6 +44,8 @@ export default function SeasonNewPage() {
   const navigate = useNavigate();
   const user = useUser();
   const { status } = useSession();
+  const [searchParams] = useSearchParams();
+  const preselectTournamentId = searchParams.get("tournamentId");
 
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   const [tournaments, setTournaments] = React.useState<TournamentSummary[]>([]);
@@ -71,6 +73,12 @@ export default function SeasonNewPage() {
         const membership = group.members.find((m) => m.userId === user.id);
         setIsAdmin(membership?.role === "admin");
         setTournaments(catalogue);
+        // Lands here with ?tournamentId=... straight from tournament-new.tsx
+        // right after that flow created it — preselect it so the admin
+        // doesn't have to re-find it in the (now-longer) catalogue dropdown.
+        if (preselectTournamentId && catalogue.some((t) => t.id === preselectTournamentId)) {
+          handleSelectTournament(preselectTournamentId);
+        }
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load setup data");
@@ -81,7 +89,11 @@ export default function SeasonNewPage() {
     return () => {
       cancelled = true;
     };
-  }, [status, groupId, user]);
+    // handleSelectTournament omitted deliberately: it's a stable function
+    // declaration (not a prop/state-derived closure), so including it would
+    // just re-run this effect on every render for no behavioral difference.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, groupId, user, preselectTournamentId]);
 
   const selectedTournament = tournaments.find((t) => t.id === tournamentId) ?? null;
   const templates: QuestionTemplate[] = React.useMemo(
@@ -260,6 +272,9 @@ export default function SeasonNewPage() {
                 </option>
               ))}
             </select>
+            <Link className="text-muted-foreground text-xs underline" to={`/groups/${groupId}/tournaments/new`}>
+              Don't see it? Add a real tournament from CricketData →
+            </Link>
           </div>
 
           {selectedTournament && (
