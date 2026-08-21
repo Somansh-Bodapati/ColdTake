@@ -11,10 +11,10 @@
 // no @vercel/node request/response adapter needed.
 
 import { matchRoute } from "../src/server/router.js";
-import { jsonResponse } from "../src/lib/http.js";
+import { jsonResponse, requestUrl } from "../src/lib/http.js";
 
 export default async function handler(request: Request): Promise<Response> {
-  const { pathname } = new URL(request.url);
+  const { pathname } = requestUrl(request);
   const match = matchRoute(pathname);
 
   if (!match) {
