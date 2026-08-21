@@ -13,21 +13,21 @@
 //     this table exists. Neither ever touches picks, questions, or results.
 
 import { desc, eq, inArray } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
+import type { Db } from "../auth/session.js";
 import {
   member,
   standingsSnapshot,
   user,
   type StandingsBreakdownEntry,
   type StandingsEntry,
-} from "@/lib/db/schema";
-import { getAllPicks } from "@/lib/picks/service";
-import { activeMemberIds, getQuestions, loadSeason } from "@/lib/seasons/service";
-import { requireMembership, requireAdmin } from "@/lib/groups/service";
-import { buildResultSetFromLiveState, buildResultSetFromResults } from "@/lib/standings/results";
-import { score } from "@/lib/scoring";
-import type { Pick as ScoringPick, Question as ScoringQuestion, ScoringConfig } from "@/lib/scoring/types";
-import { AppError } from "@/lib/errors";
+} from "../db/schema.js";
+import { getAllPicks } from "../picks/service.js";
+import { activeMemberIds, getQuestions, loadSeason } from "../seasons/service.js";
+import { requireMembership, requireAdmin } from "../groups/service.js";
+import { buildResultSetFromLiveState, buildResultSetFromResults } from "./results.js";
+import { score } from "../scoring/index.js";
+import type { Pick as ScoringPick, Question as ScoringQuestion, ScoringConfig } from "../scoring/types.js";
+import { AppError } from "../errors.js";
 
 // doc 03 §2.1's ScoringConfig carries a `boldnessWeight` the season row
 // itself has no column for (src/lib/db/schema.ts's SeasonScoringConfig is

@@ -14,8 +14,8 @@
 // below as aliases so call sites can use the doc's vocabulary without a
 // second, divergent type definition.
 
-import type { LiveStateStatLeaderEntry, LiveStateTableRow } from "@/lib/db/schema";
-import type { FinalResult } from "@/lib/scoring/types";
+import type { LiveStateStatLeaderEntry, LiveStateTableRow } from "../db/schema.js";
+import type { FinalResult } from "../scoring/types.js";
 
 export type TeamStanding = LiveStateTableRow;
 export type PlayerStat = LiveStateStatLeaderEntry;

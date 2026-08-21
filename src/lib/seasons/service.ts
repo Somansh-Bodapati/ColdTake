@@ -5,13 +5,13 @@
 // api/tournaments/*.
 
 import { asc, and, desc, eq, isNull, sql } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { member, question, season, tournament, type SeasonStatus } from "@/lib/db/schema";
-import { createId } from "@/lib/db/id";
-import { requireAdmin, requireMembership } from "@/lib/groups/service";
-import { canPublish, effectiveSeasonStatus, isMutableStatus } from "@/lib/seasons/state";
-import { AppError } from "@/lib/errors";
-import type { QuestionInput } from "@/lib/schemas/seasons";
+import type { Db } from "../auth/session.js";
+import { member, question, season, tournament, type SeasonStatus } from "../db/schema.js";
+import { createId } from "../db/id.js";
+import { requireAdmin, requireMembership } from "../groups/service.js";
+import { canPublish, effectiveSeasonStatus, isMutableStatus } from "./state.js";
+import { AppError } from "../errors.js";
+import type { QuestionInput } from "../schemas/seasons.js";
 
 // Mirrors src/lib/groups/service.ts's isUniqueViolation, but also checks
 // `.cause`: drizzle-orm's node-postgres driver wraps the raw pg error (which

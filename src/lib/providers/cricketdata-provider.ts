@@ -25,8 +25,8 @@
 // JSON from __fixtures__/ — never global fetch, never a real network call.
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { player, team, tournament } from "@/lib/db/schema";
+import type { Db } from "../auth/session.js";
+import { player, team, tournament } from "../db/schema.js";
 import {
   cricketDataSeriesInfoResponseSchema,
   cricketDataSeriesPointsResponseSchema,
@@ -34,9 +34,9 @@ import {
   type CricketDataSeriesInfoResponse,
   type CricketDataSeriesPointsResponse,
   type CricketDataStatsResponse,
-} from "@/lib/providers/cricketdata-dto";
-import type { PlayerStat, StandingsProvider, TeamStanding, TournamentResult } from "@/lib/providers/types";
-import { playerStatSchema, teamStandingSchema } from "@/lib/schemas/providers";
+} from "./cricketdata-dto.js";
+import type { PlayerStat, StandingsProvider, TeamStanding, TournamentResult } from "./types.js";
+import { playerStatSchema, teamStandingSchema } from "../schemas/providers.js";
 import type { ZodType } from "zod";
 
 // Matches the global `fetch` signature closely enough to inject a fake in

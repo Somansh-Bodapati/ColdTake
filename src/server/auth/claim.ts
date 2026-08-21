@@ -8,12 +8,12 @@
 // instead.
 
 import { eq } from "drizzle-orm";
-import { db } from "../../lib/db/client";
-import { user } from "../../lib/db/schema";
-import { claimRequestSchema, type ClaimResponse } from "../../lib/schemas/auth";
-import { createClaimToken, requireUser } from "../../lib/auth/session";
-import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http";
-import { AppError } from "../../lib/errors";
+import { db } from "../../lib/db/client.js";
+import { user } from "../../lib/db/schema.js";
+import { claimRequestSchema, type ClaimResponse } from "../../lib/schemas/auth.js";
+import { createClaimToken, requireUser } from "../../lib/auth/session.js";
+import { jsonResponse, parseJsonBody, withErrorHandling } from "../../lib/http.js";
+import { AppError } from "../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

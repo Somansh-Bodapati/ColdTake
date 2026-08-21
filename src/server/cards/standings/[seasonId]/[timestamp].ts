@@ -7,13 +7,13 @@
 // (src/lib/cards/assemble.ts) or this 404s instead of rendering a
 // different snapshot under an already-issued URL.
 
-import { db } from "../../../../lib/db/client";
-import { assembleStandingsCard } from "../../../../lib/cards/assemble";
-import { buildStandingsCardElement } from "../../../../lib/cards/standings-card";
-import { renderCardToPng } from "../../../../lib/cards/render";
-import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http";
-import { pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { assembleStandingsCard } from "../../../../lib/cards/assemble.js";
+import { buildStandingsCardElement } from "../../../../lib/cards/standings-card.js";
+import { renderCardToPng } from "../../../../lib/cards/render.js";
+import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http.js";
+import { pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

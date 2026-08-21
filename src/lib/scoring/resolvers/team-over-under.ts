@@ -18,7 +18,7 @@ import type {
   ResultSet,
   Tournament,
   ValidationResult,
-} from "@/lib/scoring/types";
+} from "../types.js";
 
 type Comparison = "over" | "under";
 

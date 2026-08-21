@@ -6,9 +6,9 @@
 // like a pick answer."
 
 import { z } from "zod";
-import { pickAnswerSchema } from "@/lib/schemas/picks";
-import { seasonResponseSchema } from "@/lib/schemas/seasons";
-import { standingsSnapshotResponseSchema } from "@/lib/schemas/standings";
+import { pickAnswerSchema } from "./picks.js";
+import { seasonResponseSchema } from "./seasons.js";
+import { standingsSnapshotResponseSchema } from "./standings.js";
 
 export const resultKindSchema = z.enum(["final_table", "stat_leaders", "final_result"]);
 

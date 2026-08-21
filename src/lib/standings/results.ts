@@ -22,15 +22,15 @@
 // questionId (types.ts's own doc comment on that field).
 
 import { desc, eq, inArray } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { liveState, question, questionResult, result, type PickAnswer } from "@/lib/db/schema";
+import type { Db } from "../auth/session.js";
+import { liveState, question, questionResult, result, type PickAnswer } from "../db/schema.js";
 import type {
   Answer,
   FinalResult,
   FinalTableRow,
   ResultSet,
   StatLeaderEntry,
-} from "@/lib/scoring/types";
+} from "../scoring/types.js";
 
 function isFinalTableRow(value: unknown): value is FinalTableRow {
   return (

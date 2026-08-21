@@ -4,13 +4,13 @@
 // amount of business logic around them, imported directly by api/groups/*.
 
 import { and, eq, isNull, sql } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { group, member, user, type MemberRole } from "@/lib/db/schema";
-import { createId } from "@/lib/db/id";
-import { generateJoinCode } from "@/lib/groups/join-code";
-import { slugifyGroupName } from "@/lib/groups/slug";
-import { AppError } from "@/lib/errors";
-import type { GroupMember, GroupSummary } from "@/lib/schemas/groups";
+import type { Db } from "../auth/session.js";
+import { group, member, user, type MemberRole } from "../db/schema.js";
+import { createId } from "../db/id.js";
+import { generateJoinCode } from "./join-code.js";
+import { slugifyGroupName } from "./slug.js";
+import { AppError } from "../errors.js";
+import type { GroupMember, GroupSummary } from "../schemas/groups.js";
 
 const MAX_GENERATION_ATTEMPTS = 5;
 

@@ -5,18 +5,18 @@
 // input (questions, picks, results, config, the frozen member snapshot) is
 // a function argument.
 
-import { applyBoldness, computeShare } from "@/lib/scoring/boldness";
-import { createResolverRegistry } from "@/lib/scoring/registry";
-import { booleanResolver } from "@/lib/scoring/resolvers/boolean";
-import { championResolver } from "@/lib/scoring/resolvers/champion";
-import { customResolver } from "@/lib/scoring/resolvers/custom";
-import { numericResolver } from "@/lib/scoring/resolvers/numeric";
-import { runnerUpResolver } from "@/lib/scoring/resolvers/runner-up";
-import { statLeaderResolver } from "@/lib/scoring/resolvers/stat-leader";
-import { teamOverUnderResolver } from "@/lib/scoring/resolvers/team-over-under";
-import { topNOrderedResolver } from "@/lib/scoring/resolvers/top-n-ordered";
-import { topNUnorderedResolver } from "@/lib/scoring/resolvers/top-n-unordered";
-import { woodenSpoonResolver } from "@/lib/scoring/resolvers/wooden-spoon";
+import { applyBoldness, computeShare } from "./boldness.js";
+import { createResolverRegistry } from "./registry.js";
+import { booleanResolver } from "./resolvers/boolean.js";
+import { championResolver } from "./resolvers/champion.js";
+import { customResolver } from "./resolvers/custom.js";
+import { numericResolver } from "./resolvers/numeric.js";
+import { runnerUpResolver } from "./resolvers/runner-up.js";
+import { statLeaderResolver } from "./resolvers/stat-leader.js";
+import { teamOverUnderResolver } from "./resolvers/team-over-under.js";
+import { topNOrderedResolver } from "./resolvers/top-n-ordered.js";
+import { topNUnorderedResolver } from "./resolvers/top-n-unordered.js";
+import { woodenSpoonResolver } from "./resolvers/wooden-spoon.js";
 import type {
   Answer,
   MemberStanding,
@@ -27,7 +27,7 @@ import type {
   ResultSet,
   ScoringInput,
   ScoringOutput,
-} from "@/lib/scoring/types";
+} from "./types.js";
 
 const resolverRegistry = createResolverRegistry([
   championResolver,

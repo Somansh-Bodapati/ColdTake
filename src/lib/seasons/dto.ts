@@ -2,8 +2,8 @@
 // api/tournaments/* route, so the ISO-string/JSON-safe shape is defined once
 // instead of re-derived per handler.
 
-import type { question, season } from "@/lib/db/schema";
-import type { QuestionResponse, SeasonResponse } from "@/lib/schemas/seasons";
+import type { question, season } from "../db/schema.js";
+import type { QuestionResponse, SeasonResponse } from "../schemas/seasons.js";
 
 type SeasonRow = typeof season.$inferSelect;
 type QuestionRow = typeof question.$inferSelect;

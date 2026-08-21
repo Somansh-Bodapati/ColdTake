@@ -6,14 +6,14 @@
 // eventually implement it) read-only.
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
+import type { Db } from "../auth/session.js";
 import {
   manualStandingsInput,
   type LiveStateStatLeaders,
   type LiveStateTableRow,
   type ManualFinalResult,
-} from "@/lib/db/schema";
-import { AppError } from "@/lib/errors";
+} from "../db/schema.js";
+import { AppError } from "../errors.js";
 
 export interface SaveManualStandingsArgs {
   tournamentId: string;

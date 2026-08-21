@@ -19,7 +19,7 @@
 // folder, but the derivation logic itself has no I/O and no hidden clock —
 // only the callers in service.ts do DB reads/writes around it.
 
-import type { SeasonStatus } from "@/lib/db/schema";
+import type { SeasonStatus } from "../db/schema.js";
 
 const TERMINAL_STATUSES: ReadonlySet<SeasonStatus> = new Set(["settled", "voided"]);
 

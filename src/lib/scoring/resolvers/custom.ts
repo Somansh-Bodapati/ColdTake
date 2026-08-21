@@ -12,7 +12,7 @@ import type {
   ResultSet,
   Tournament,
   ValidationResult,
-} from "@/lib/scoring/types";
+} from "../types.js";
 
 function configOptionIds(question: Question): Set<string> | undefined {
   const options = question.config.options;

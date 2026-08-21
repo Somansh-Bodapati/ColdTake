@@ -5,11 +5,11 @@
 // Mirrors joinGroupByCode's own lookup (src/lib/groups/service.ts) but
 // read-only and without requiring a session.
 
-import { db } from "../../../lib/db/client";
-import { getGroupByJoinCode } from "../../../lib/groups/service";
-import { joinCodeSchema, type GroupPreviewResponse } from "../../../lib/schemas/groups";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { getGroupByJoinCode } from "../../../lib/groups/service.js";
+import { joinCodeSchema, type GroupPreviewResponse } from "../../../lib/schemas/groups.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

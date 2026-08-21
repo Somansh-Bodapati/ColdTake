@@ -6,13 +6,13 @@
 // assembleRevealCard throws 403 via isRevealed(seasonRow.status) before any
 // pick is ever read, exactly like api/seasons/[id]/picks/all.ts.
 
-import { db } from "../../../../lib/db/client";
-import { assembleRevealCard } from "../../../../lib/cards/assemble";
-import { buildRevealCardElement } from "../../../../lib/cards/reveal-card";
-import { renderCardToPng } from "../../../../lib/cards/render";
-import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http";
-import { pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { assembleRevealCard } from "../../../../lib/cards/assemble.js";
+import { buildRevealCardElement } from "../../../../lib/cards/reveal-card.js";
+import { renderCardToPng } from "../../../../lib/cards/render.js";
+import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http.js";
+import { pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

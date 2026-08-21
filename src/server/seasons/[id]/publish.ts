@@ -3,13 +3,13 @@
 // src/lib/seasons/service.ts's publishSeason via src/lib/seasons/state.ts's
 // canPublish.
 
-import { db } from "../../../lib/db/client";
-import { requireUser } from "../../../lib/auth/session";
-import { requireSeasonAdmin, getQuestions, publishSeason } from "../../../lib/seasons/service";
-import { toQuestionResponse, toSeasonResponse } from "../../../lib/seasons/dto";
-import type { SeasonDetailResponse } from "../../../lib/schemas/seasons";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { requireUser } from "../../../lib/auth/session.js";
+import { requireSeasonAdmin, getQuestions, publishSeason } from "../../../lib/seasons/service.js";
+import { toQuestionResponse, toSeasonResponse } from "../../../lib/seasons/dto.js";
+import type { SeasonDetailResponse } from "../../../lib/schemas/seasons.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

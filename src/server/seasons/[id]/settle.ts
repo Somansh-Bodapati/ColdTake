@@ -9,16 +9,16 @@
 // per-type special-casing is needed here).
 
 import { eq } from "drizzle-orm";
-import { db } from "../../../lib/db/client";
-import { season } from "../../../lib/db/schema";
-import { requireUser } from "../../../lib/auth/session";
-import { settleSeason } from "../../../lib/seasons/settlement";
-import { toSeasonResponse } from "../../../lib/seasons/dto";
-import { toStandingsSnapshotResponse } from "../../../lib/standings/dto";
-import { resolveStandingsProvider } from "../../../lib/providers/resolve";
-import type { SettleSeasonResponse } from "../../../lib/schemas/settlement";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { season } from "../../../lib/db/schema.js";
+import { requireUser } from "../../../lib/auth/session.js";
+import { settleSeason } from "../../../lib/seasons/settlement.js";
+import { toSeasonResponse } from "../../../lib/seasons/dto.js";
+import { toStandingsSnapshotResponse } from "../../../lib/standings/dto.js";
+import { resolveStandingsProvider } from "../../../lib/providers/resolve.js";
+import type { SettleSeasonResponse } from "../../../lib/schemas/settlement.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

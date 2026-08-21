@@ -3,13 +3,13 @@
 // member of this specific group (this session's brief, task 6) before
 // returning anything.
 
-import { db } from "../../../lib/db/client";
-import { requireUser } from "../../../lib/auth/session";
-import { requireMembership, getGroupDetail } from "../../../lib/groups/service";
-import { listSeasonsByGroup } from "../../../lib/seasons/service";
-import type { GroupDetailResponse } from "../../../lib/schemas/groups";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http";
-import { AppError } from "../../../lib/errors";
+import { db } from "../../../lib/db/client.js";
+import { requireUser } from "../../../lib/auth/session.js";
+import { requireMembership, getGroupDetail } from "../../../lib/groups/service.js";
+import { listSeasonsByGroup } from "../../../lib/seasons/service.js";
+import type { GroupDetailResponse } from "../../../lib/schemas/groups.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../lib/http.js";
+import { AppError } from "../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

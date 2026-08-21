@@ -2,13 +2,13 @@
 // for the chart." Same read discipline as ./index.ts: one indexed query
 // against standings_snapshot alone, membership-gated, cached at the edge.
 
-import { db } from "../../../../lib/db/client";
-import { requireUser } from "../../../../lib/auth/session";
-import { requireStandingsReader, getStandingsHistory } from "../../../../lib/standings/service";
-import { toStandingsSnapshotResponse } from "../../../../lib/standings/dto";
-import type { StandingsHistoryResponse } from "../../../../lib/schemas/standings";
-import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { requireUser } from "../../../../lib/auth/session.js";
+import { requireStandingsReader, getStandingsHistory } from "../../../../lib/standings/service.js";
+import { toStandingsSnapshotResponse } from "../../../../lib/standings/dto.js";
+import type { StandingsHistoryResponse } from "../../../../lib/schemas/standings.js";
+import { jsonResponse, pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 const CACHE_CONTROL = "s-maxage=300";
 

@@ -7,8 +7,8 @@
 import satori from "satori";
 import type { ReactNode } from "react";
 import { Resvg } from "@resvg/resvg-js";
-import { CARD_HEIGHT, CARD_WIDTH, type CardElement } from "@/lib/cards/element";
-import { loadCardFonts } from "@/lib/cards/fonts";
+import { CARD_HEIGHT, CARD_WIDTH, type CardElement } from "./element.js";
+import { loadCardFonts } from "./fonts.js";
 
 // Satori's public signature takes `ReactNode` because it's normally fed a
 // real JSX tree, but it only ever inspects `.type`/`.props.style`/

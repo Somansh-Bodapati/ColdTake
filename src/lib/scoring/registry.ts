@@ -2,8 +2,8 @@
 // type. Adding a new question type = adding one file. No changes to the
 // engine." Pure: just a Map wrapper, no I/O.
 
-import type { QuestionType } from "@/lib/db/schema";
-import type { QuestionResolver, Result } from "@/lib/scoring/types";
+import type { QuestionType } from "../db/schema.js";
+import type { QuestionResolver, Result } from "./types.js";
 
 export interface UnknownResolverError {
   code: "unknown_resolver";

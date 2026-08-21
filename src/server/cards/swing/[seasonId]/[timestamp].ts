@@ -3,13 +3,13 @@
 // two most recent standings_snapshot rows (src/lib/cards/assemble.ts) —
 // public, same as the other three card routes.
 
-import { db } from "../../../../lib/db/client";
-import { assembleSwingCard } from "../../../../lib/cards/assemble";
-import { buildSwingCardElement } from "../../../../lib/cards/swing-card";
-import { renderCardToPng } from "../../../../lib/cards/render";
-import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http";
-import { pathSegment, withErrorHandling } from "../../../../lib/http";
-import { AppError } from "../../../../lib/errors";
+import { db } from "../../../../lib/db/client.js";
+import { assembleSwingCard } from "../../../../lib/cards/assemble.js";
+import { buildSwingCardElement } from "../../../../lib/cards/swing-card.js";
+import { renderCardToPng } from "../../../../lib/cards/render.js";
+import { assertCanonicalTimestamp, pngResponse, readTimestampSegment } from "../../../../lib/cards/http.js";
+import { pathSegment, withErrorHandling } from "../../../../lib/http.js";
+import { AppError } from "../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "GET") {

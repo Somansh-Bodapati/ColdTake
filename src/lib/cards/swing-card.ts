@@ -3,8 +3,8 @@
 // assembled by comparing a season's two most recent standings_snapshot rows
 // in src/lib/cards/assemble.ts (Session 9's snapshot history).
 
-import { cardFooter, cardFrame, el, COLORS, type CardElement } from "@/lib/cards/element";
-import type { SwingCardData } from "@/lib/cards/types";
+import { cardFooter, cardFrame, el, COLORS, type CardElement } from "./element.js";
+import type { SwingCardData } from "./types.js";
 
 function directionWord(fromRank: number, toRank: number): string {
   return toRank < fromRank ? "jumped" : toRank > fromRank ? "dropped" : "held";

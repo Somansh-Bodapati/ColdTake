@@ -6,14 +6,14 @@
 // src/lib/seasons/settlement.ts's settleQuestion is the single function
 // behind both cases.
 
-import { db } from "../../../../../lib/db/client";
-import { requireUser } from "../../../../../lib/auth/session";
-import { settleQuestion } from "../../../../../lib/seasons/settlement";
-import { toQuestionResultResponse } from "../../../../../lib/seasons/settlement-dto";
-import { toStandingsSnapshotResponse } from "../../../../../lib/standings/dto";
-import { settleQuestionRequestSchema, type SettleQuestionResponse } from "../../../../../lib/schemas/settlement";
-import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../../lib/http";
-import { AppError } from "../../../../../lib/errors";
+import { db } from "../../../../../lib/db/client.js";
+import { requireUser } from "../../../../../lib/auth/session.js";
+import { settleQuestion } from "../../../../../lib/seasons/settlement.js";
+import { toQuestionResultResponse } from "../../../../../lib/seasons/settlement-dto.js";
+import { toStandingsSnapshotResponse } from "../../../../../lib/standings/dto.js";
+import { settleQuestionRequestSchema, type SettleQuestionResponse } from "../../../../../lib/schemas/settlement.js";
+import { jsonResponse, parseJsonBody, pathSegment, withErrorHandling } from "../../../../../lib/http.js";
+import { AppError } from "../../../../../lib/errors.js";
 
 async function handler(request: Request): Promise<Response> {
   if (request.method !== "POST") {

@@ -6,9 +6,9 @@
 // entire point of the interface (CLAUDE.md rule 4).
 
 import { eq } from "drizzle-orm";
-import type { Db } from "@/lib/auth/session";
-import { manualStandingsInput } from "@/lib/db/schema";
-import type { PlayerStat, StandingsProvider, TeamStanding, TournamentResult } from "@/lib/providers/types";
+import type { Db } from "../auth/session.js";
+import { manualStandingsInput } from "../db/schema.js";
+import type { PlayerStat, StandingsProvider, TeamStanding, TournamentResult } from "./types.js";
 
 export class ManualProvider implements StandingsProvider {
   readonly source = "manual";
