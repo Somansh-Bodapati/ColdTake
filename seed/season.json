@@ -1,0 +1,847 @@
+{
+  "season": {
+    "id": "season-friends-xi-cpl2026",
+    "groupId": "group-friends-xi",
+    "tournamentId": "cpl-2026",
+    "name": "CPL 2026",
+    "lockAt": "2026-03-20T14:00:00.000Z",
+    "status": "locked",
+    "scoringConfig": {
+      "boldPickEnabled": true,
+      "injuryRule": "zero"
+    },
+    "memberSnapshot": [
+      "member-priya",
+      "member-arjun",
+      "member-fatima",
+      "member-devansh",
+      "member-meera",
+      "member-oscar"
+    ],
+    "createdAt": "2026-03-09T10:00:00.000Z",
+    "settledAt": null
+  },
+  "questions": [
+    {
+      "id": "q-champion",
+      "type": "champion",
+      "prompt": "Who wins CPL 2026?",
+      "config": {},
+      "points": 30,
+      "sortOrder": 1,
+      "settlement": "auto",
+      "createdAt": "2026-03-09T10:05:00.000Z"
+    },
+    {
+      "id": "q-runner-up",
+      "type": "runner_up",
+      "prompt": "Who finishes runner-up?",
+      "config": {},
+      "points": 20,
+      "sortOrder": 2,
+      "settlement": "auto",
+      "createdAt": "2026-03-09T10:05:00.000Z"
+    },
+    {
+      "id": "q-top4",
+      "type": "top_n_unordered",
+      "prompt": "Which 4 teams make the playoffs?",
+      "config": {
+        "n": 4
+      },
+      "points": 25,
+      "sortOrder": 3,
+      "settlement": "auto",
+      "createdAt": "2026-03-09T10:05:00.000Z"
+    },
+    {
+      "id": "q-wooden-spoon",
+      "type": "wooden_spoon",
+      "prompt": "Who finishes last?",
+      "config": {},
+      "points": 15,
+      "sortOrder": 4,
+      "settlement": "auto",
+      "createdAt": "2026-03-09T10:05:00.000Z"
+    },
+    {
+      "id": "q-orange-cap",
+      "type": "stat_leader",
+      "prompt": "Who wins the Orange Cap (most runs)?",
+      "config": {
+        "statCategory": "runs"
+      },
+      "points": 20,
+      "sortOrder": 5,
+      "settlement": "auto",
+      "createdAt": "2026-03-09T10:05:00.000Z"
+    }
+  ],
+  "picks": [
+    {
+      "id": "pick-member-priya-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-priya",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-18T09:30:00.000Z"
+    },
+    {
+      "id": "pick-member-priya-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-priya",
+      "answer": {
+        "teamId": "team-blr"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-priya-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-priya",
+      "answer": {
+        "teamIds": [
+          "team-pun",
+          "team-raj",
+          "team-guj",
+          "team-lko"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-priya-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-priya",
+      "answer": {
+        "teamId": "team-del"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-priya-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-priya",
+      "answer": {
+        "playerId": "player-blr-1"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-arjun-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-arjun",
+      "answer": {
+        "teamId": "team-raj"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-arjun-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-arjun",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-arjun-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-arjun",
+      "answer": {
+        "teamIds": [
+          "team-kol",
+          "team-blr",
+          "team-hyd",
+          "team-pun"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-arjun-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-arjun",
+      "answer": {
+        "teamId": "team-lko"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-arjun-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-arjun",
+      "answer": {
+        "playerId": "player-pun-2"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-fatima-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-fatima",
+      "answer": {
+        "teamId": "team-blr"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-fatima-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-fatima",
+      "answer": {
+        "teamId": "team-guj"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-fatima-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-fatima",
+      "answer": {
+        "teamIds": [
+          "team-mum",
+          "team-che",
+          "team-del",
+          "team-kol"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-fatima-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-fatima",
+      "answer": {
+        "teamId": "team-pun"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-fatima-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-fatima",
+      "answer": {
+        "playerId": "player-guj-3"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-devansh-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-devansh",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-devansh-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-devansh",
+      "answer": {
+        "teamId": "team-hyd"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-devansh-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-devansh",
+      "answer": {
+        "teamIds": [
+          "team-raj",
+          "team-guj",
+          "team-lko",
+          "team-mum"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-devansh-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-devansh",
+      "answer": {
+        "teamId": "team-kol"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-devansh-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-devansh",
+      "answer": {
+        "playerId": "player-che-1"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-meera-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-meera",
+      "answer": {
+        "teamId": "team-guj"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-meera-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-meera",
+      "answer": {
+        "teamId": "team-del"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-meera-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-meera",
+      "answer": {
+        "teamIds": [
+          "team-blr",
+          "team-hyd",
+          "team-pun",
+          "team-raj"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-meera-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-meera",
+      "answer": {
+        "teamId": "team-mum"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-meera-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-meera",
+      "answer": {
+        "playerId": "player-kol-2"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-oscar-q-champion",
+      "questionId": "q-champion",
+      "memberId": "member-oscar",
+      "answer": {
+        "teamId": "team-hyd"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-oscar-q-runner-up",
+      "questionId": "q-runner-up",
+      "memberId": "member-oscar",
+      "answer": {
+        "teamId": "team-lko"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-oscar-q-top4",
+      "questionId": "q-top4",
+      "memberId": "member-oscar",
+      "answer": {
+        "teamIds": [
+          "team-che",
+          "team-del",
+          "team-kol",
+          "team-blr"
+        ]
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-oscar-q-wooden-spoon",
+      "questionId": "q-wooden-spoon",
+      "memberId": "member-oscar",
+      "answer": {
+        "teamId": "team-raj"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": "pick-member-oscar-q-orange-cap",
+      "questionId": "q-orange-cap",
+      "memberId": "member-oscar",
+      "answer": {
+        "playerId": "player-hyd-3"
+      },
+      "submittedAt": "2026-03-15T18:00:00.000Z",
+      "updatedAt": "2026-03-15T18:00:00.000Z"
+    }
+  ],
+  "pickHistory": [
+    {
+      "id": 1,
+      "pickId": "pick-member-priya-q-champion",
+      "answer": {
+        "teamId": "team-mum"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "pickId": "pick-member-priya-q-runner-up",
+      "answer": {
+        "teamId": "team-blr"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "pickId": "pick-member-priya-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-pun",
+          "team-raj",
+          "team-guj",
+          "team-lko"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "pickId": "pick-member-priya-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-del"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "pickId": "pick-member-priya-q-orange-cap",
+      "answer": {
+        "playerId": "player-blr-1"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "pickId": "pick-member-arjun-q-champion",
+      "answer": {
+        "teamId": "team-raj"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "pickId": "pick-member-arjun-q-runner-up",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "pickId": "pick-member-arjun-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-kol",
+          "team-blr",
+          "team-hyd",
+          "team-pun"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 9,
+      "pickId": "pick-member-arjun-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-lko"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 10,
+      "pickId": "pick-member-arjun-q-orange-cap",
+      "answer": {
+        "playerId": "player-pun-2"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 11,
+      "pickId": "pick-member-fatima-q-champion",
+      "answer": {
+        "teamId": "team-blr"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 12,
+      "pickId": "pick-member-fatima-q-runner-up",
+      "answer": {
+        "teamId": "team-guj"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 13,
+      "pickId": "pick-member-fatima-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-mum",
+          "team-che",
+          "team-del",
+          "team-kol"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 14,
+      "pickId": "pick-member-fatima-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-pun"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 15,
+      "pickId": "pick-member-fatima-q-orange-cap",
+      "answer": {
+        "playerId": "player-guj-3"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 16,
+      "pickId": "pick-member-devansh-q-champion",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 17,
+      "pickId": "pick-member-devansh-q-runner-up",
+      "answer": {
+        "teamId": "team-hyd"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 18,
+      "pickId": "pick-member-devansh-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-raj",
+          "team-guj",
+          "team-lko",
+          "team-mum"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 19,
+      "pickId": "pick-member-devansh-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-kol"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 20,
+      "pickId": "pick-member-devansh-q-orange-cap",
+      "answer": {
+        "playerId": "player-che-1"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 21,
+      "pickId": "pick-member-meera-q-champion",
+      "answer": {
+        "teamId": "team-guj"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 22,
+      "pickId": "pick-member-meera-q-runner-up",
+      "answer": {
+        "teamId": "team-del"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 23,
+      "pickId": "pick-member-meera-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-blr",
+          "team-hyd",
+          "team-pun",
+          "team-raj"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 24,
+      "pickId": "pick-member-meera-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-mum"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 25,
+      "pickId": "pick-member-meera-q-orange-cap",
+      "answer": {
+        "playerId": "player-kol-2"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 26,
+      "pickId": "pick-member-oscar-q-champion",
+      "answer": {
+        "teamId": "team-hyd"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 27,
+      "pickId": "pick-member-oscar-q-runner-up",
+      "answer": {
+        "teamId": "team-lko"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 28,
+      "pickId": "pick-member-oscar-q-top4",
+      "answer": {
+        "teamIds": [
+          "team-che",
+          "team-del",
+          "team-kol",
+          "team-blr"
+        ]
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 29,
+      "pickId": "pick-member-oscar-q-wooden-spoon",
+      "answer": {
+        "teamId": "team-raj"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 30,
+      "pickId": "pick-member-oscar-q-orange-cap",
+      "answer": {
+        "playerId": "player-hyd-3"
+      },
+      "recordedAt": "2026-03-15T18:00:00.000Z"
+    },
+    {
+      "id": 31,
+      "pickId": "pick-member-priya-q-champion",
+      "answer": {
+        "teamId": "team-che"
+      },
+      "recordedAt": "2026-03-18T09:30:00.000Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": "comment-general-1",
+      "questionId": null,
+      "memberId": "member-arjun",
+      "body": "Excited for this season, good luck all!",
+      "createdAt": "2026-03-10T08:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "comment-champion-1",
+      "questionId": "q-champion",
+      "memberId": "member-meera",
+      "body": "I still think MUM takes it this year.",
+      "createdAt": "2026-03-16T11:00:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "result": {
+    "id": "result-cpl2026-mid-season",
+    "tournamentId": "cpl-2026",
+    "kind": "stat_leaders",
+    "payload": {
+      "runs": [
+        {
+          "playerId": "player-mum-1",
+          "value": 512
+        },
+        {
+          "playerId": "player-mum-2",
+          "value": 478
+        },
+        {
+          "playerId": "player-mum-3",
+          "value": 444
+        },
+        {
+          "playerId": "player-mum-4",
+          "value": 410
+        },
+        {
+          "playerId": "player-che-1",
+          "value": 376
+        }
+      ]
+    },
+    "source": "manual",
+    "isFinal": false,
+    "recordedAt": "2026-08-17T06:05:00.000Z",
+    "recordedBy": "user-priya"
+  },
+  "standingsSnapshot": {
+    "id": 1,
+    "seasonId": "season-friends-xi-cpl2026",
+    "isProjected": true,
+    "standings": [
+      {
+        "memberId": "member-priya",
+        "rank": 1,
+        "points": 60,
+        "delta": 1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 20
+          },
+          {
+            "questionId": "q-top4",
+            "points": 25
+          }
+        ]
+      },
+      {
+        "memberId": "member-arjun",
+        "rank": 2,
+        "points": 52,
+        "delta": -1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 0
+          },
+          {
+            "questionId": "q-top4",
+            "points": 23
+          }
+        ]
+      },
+      {
+        "memberId": "member-fatima",
+        "rank": 3,
+        "points": 44,
+        "delta": 1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 0
+          },
+          {
+            "questionId": "q-top4",
+            "points": 21
+          }
+        ]
+      },
+      {
+        "memberId": "member-devansh",
+        "rank": 4,
+        "points": 36,
+        "delta": -1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 0
+          },
+          {
+            "questionId": "q-top4",
+            "points": 19
+          }
+        ]
+      },
+      {
+        "memberId": "member-meera",
+        "rank": 5,
+        "points": 28,
+        "delta": 1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 0
+          },
+          {
+            "questionId": "q-top4",
+            "points": 17
+          }
+        ]
+      },
+      {
+        "memberId": "member-oscar",
+        "rank": 6,
+        "points": 20,
+        "delta": -1,
+        "breakdown": [
+          {
+            "questionId": "q-orange-cap",
+            "points": 0
+          },
+          {
+            "questionId": "q-top4",
+            "points": 15
+          }
+        ]
+      }
+    ],
+    "computedAt": "2026-08-17T06:10:00.000Z"
+  }
+}

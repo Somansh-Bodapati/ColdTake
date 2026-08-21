@@ -1,0 +1,165 @@
+{
+  "tournamentId": "cpl-2026",
+  "tableData": [
+    {
+      "teamId": "team-mum",
+      "played": 8,
+      "won": 6,
+      "lost": 2,
+      "points": 12,
+      "nrr": 1.24,
+      "position": 1
+    },
+    {
+      "teamId": "team-che",
+      "played": 8,
+      "won": 5,
+      "lost": 3,
+      "points": 10,
+      "nrr": 0.87,
+      "position": 2
+    },
+    {
+      "teamId": "team-del",
+      "played": 8,
+      "won": 5,
+      "lost": 3,
+      "points": 10,
+      "nrr": 0.65,
+      "position": 3
+    },
+    {
+      "teamId": "team-kol",
+      "played": 8,
+      "won": 4,
+      "lost": 4,
+      "points": 8,
+      "nrr": 0.31,
+      "position": 4
+    },
+    {
+      "teamId": "team-blr",
+      "played": 8,
+      "won": 4,
+      "lost": 4,
+      "points": 8,
+      "nrr": 0.12,
+      "position": 5
+    },
+    {
+      "teamId": "team-hyd",
+      "played": 8,
+      "won": 4,
+      "lost": 4,
+      "points": 8,
+      "nrr": -0.05,
+      "position": 6
+    },
+    {
+      "teamId": "team-pun",
+      "played": 8,
+      "won": 3,
+      "lost": 5,
+      "points": 6,
+      "nrr": -0.22,
+      "position": 7
+    },
+    {
+      "teamId": "team-raj",
+      "played": 8,
+      "won": 3,
+      "lost": 5,
+      "points": 6,
+      "nrr": -0.41,
+      "position": 8
+    },
+    {
+      "teamId": "team-guj",
+      "played": 8,
+      "won": 2,
+      "lost": 6,
+      "points": 4,
+      "nrr": -0.68,
+      "position": 9
+    },
+    {
+      "teamId": "team-lko",
+      "played": 8,
+      "won": 2,
+      "lost": 6,
+      "points": 4,
+      "nrr": -0.95,
+      "position": 10
+    }
+  ],
+  "statLeaders": {
+    "runs": [
+      {
+        "playerId": "player-mum-1",
+        "value": 512
+      },
+      {
+        "playerId": "player-che-1",
+        "value": 478
+      },
+      {
+        "playerId": "player-del-1",
+        "value": 444
+      },
+      {
+        "playerId": "player-kol-1",
+        "value": 410
+      },
+      {
+        "playerId": "player-blr-1",
+        "value": 376
+      }
+    ],
+    "wickets": [
+      {
+        "playerId": "player-mum-2",
+        "value": 21
+      },
+      {
+        "playerId": "player-che-2",
+        "value": 19
+      },
+      {
+        "playerId": "player-del-2",
+        "value": 17
+      },
+      {
+        "playerId": "player-kol-2",
+        "value": 15
+      },
+      {
+        "playerId": "player-blr-2",
+        "value": 13
+      }
+    ],
+    "sixes": [
+      {
+        "playerId": "player-mum-3",
+        "value": 27
+      },
+      {
+        "playerId": "player-che-3",
+        "value": 24
+      },
+      {
+        "playerId": "player-del-3",
+        "value": 21
+      },
+      {
+        "playerId": "player-kol-3",
+        "value": 18
+      },
+      {
+        "playerId": "player-blr-3",
+        "value": 15
+      }
+    ]
+  },
+  "source": "manual",
+  "fetchedAt": "2026-08-17T06:00:00.000Z"
+}

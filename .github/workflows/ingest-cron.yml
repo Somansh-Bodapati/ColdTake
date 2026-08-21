@@ -1,0 +1,53 @@
+name: Ingest cron
+
+# Doc 02 §4.4's recommendation: "GitHub Actions as the primary scheduler
+# with an on-demand TTL refresh as a fallback ... Guard the ingestion
+# endpoint with a bearer secret." Separate workflow file from ci.yml
+# (Session 0) — this one runs on a schedule against the deployed app, not on
+# every PR against the repo's own code.
+#
+# Interval: every 30 minutes. Doc 02 §4.1's own framing is "one poll per day,
+# not thousands" for a season-slate game (league table + stat leaders, not
+# ball-by-ball), so this is already generous, not minimal — 30 minutes keeps
+# the table and stat leaders reasonably current during a live match without
+# meaningfully denting either the sports-data provider's free-tier rate limit
+# or Neon's compute budget (CLAUDE.md rule 2), since ingestTournament writes
+# one upserted live_state row and a handful of standings_snapshot rows per
+# active season, not a scan. Runs across all 24 hours rather than a narrower
+# "match hours" window because match times vary by tournament/timezone and
+# there's no per-tournament schedule metadata to key a narrower cron off of;
+# an idle ingest during off-hours is a no-op write, not meaningful cost.
+#
+# workflow_dispatch is added so a poll can be triggered by hand (verifying
+# the secret/URL are wired up, or catching up after the 60-day scheduled-
+# Actions-on-inactive-repos disable doc 02 §4.4 warns about) without waiting
+# for the next scheduled tick.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      tournamentId:
+        description: "Tournament id to ingest (defaults to the configured INGEST_TOURNAMENT_ID secret)"
+        required: false
+        type: string
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST /api/ingest/:tournamentId
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          INGEST_SECRET: ${{ secrets.INGEST_SECRET }}
+          TOURNAMENT_ID: ${{ inputs.tournamentId || secrets.INGEST_TOURNAMENT_ID }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$INGEST_SECRET" ] || [ -z "$TOURNAMENT_ID" ]; then
+            echo "APP_URL, INGEST_SECRET, and INGEST_TOURNAMENT_ID (or a workflow_dispatch tournamentId input) must all be set" >&2
+            exit 1
+          fi
+          curl --fail --show-error --silent \
+            --max-time 30 \
+            --request POST \
+            --header "Authorization: Bearer ${INGEST_SECRET}" \
+            "${APP_URL%/}/api/ingest/${TOURNAMENT_ID}"

@@ -1,0 +1,111 @@
+{
+  "users": [
+    {
+      "id": "user-priya",
+      "displayName": "Priya",
+      "email": "priya@example.com",
+      "avatarSeed": "priya-seed-1",
+      "claimedAt": "2026-03-10T09:00:00.000Z"
+    },
+    {
+      "id": "user-arjun",
+      "displayName": "Arjun",
+      "email": null,
+      "avatarSeed": "arjun-seed-1",
+      "claimedAt": null
+    },
+    {
+      "id": "user-fatima",
+      "displayName": "Fatima",
+      "email": null,
+      "avatarSeed": "fatima-seed-1",
+      "claimedAt": null
+    },
+    {
+      "id": "user-devansh",
+      "displayName": "Devansh",
+      "email": null,
+      "avatarSeed": "devansh-seed-1",
+      "claimedAt": null
+    },
+    {
+      "id": "user-meera",
+      "displayName": "Meera",
+      "email": null,
+      "avatarSeed": "meera-seed-1",
+      "claimedAt": null
+    },
+    {
+      "id": "user-oscar",
+      "displayName": "Oscar",
+      "email": null,
+      "avatarSeed": "oscar-seed-1",
+      "claimedAt": null
+    }
+  ],
+  "authTokens": [
+    {
+      "id": "auth-priya-claim",
+      "userId": "user-priya",
+      "tokenHash": "9f3c1b6e2a7d4e5f8c0b1a2d3e4f5061728394a5b6c7d8e9f0a1b2c3d4e5f60",
+      "purpose": "claim",
+      "expiresAt": "2026-03-10T10:00:00.000Z",
+      "usedAt": "2026-03-10T09:00:00.000Z"
+    },
+    {
+      "id": "auth-arjun-login",
+      "userId": "user-arjun",
+      "tokenHash": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+      "purpose": "login",
+      "expiresAt": "2026-08-25T00:00:00.000Z",
+      "usedAt": null
+    }
+  ],
+  "group": {
+    "id": "group-friends-xi",
+    "name": "The Friends XI",
+    "slug": "the-friends-xi",
+    "joinCode": "9K7H3P",
+    "createdBy": "user-priya",
+    "createdAt": "2026-03-08T12:00:00.000Z",
+    "archivedAt": null
+  },
+  "members": [
+    {
+      "id": "member-priya",
+      "userId": "user-priya",
+      "role": "admin",
+      "joinedAt": "2026-03-08T12:00:00.000Z"
+    },
+    {
+      "id": "member-arjun",
+      "userId": "user-arjun",
+      "role": "member",
+      "joinedAt": "2026-03-08T13:15:00.000Z"
+    },
+    {
+      "id": "member-fatima",
+      "userId": "user-fatima",
+      "role": "member",
+      "joinedAt": "2026-03-08T14:02:00.000Z"
+    },
+    {
+      "id": "member-devansh",
+      "userId": "user-devansh",
+      "role": "member",
+      "joinedAt": "2026-03-08T15:47:00.000Z"
+    },
+    {
+      "id": "member-meera",
+      "userId": "user-meera",
+      "role": "member",
+      "joinedAt": "2026-03-09T08:20:00.000Z"
+    },
+    {
+      "id": "member-oscar",
+      "userId": "user-oscar",
+      "role": "member",
+      "joinedAt": "2026-03-09T09:05:00.000Z"
+    }
+  ]
+}

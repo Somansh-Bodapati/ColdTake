@@ -1,0 +1,9 @@
+node_modules
+build
+.react-router
+pnpm-lock.yaml
+
+# Spec docs and repo instructions — not part of the app, don't reformat
+docs/
+CLAUDE.md
+README.md

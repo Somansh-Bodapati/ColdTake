@@ -1,0 +1,526 @@
+{
+  "standings": [
+    {
+      "memberId": "member-priya",
+      "points": 271,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 42,
+          "maxPossible": 30,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-mum for champion. team-mum won. 30 of 30 points."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-che for runner-up. team-che finished runner-up. 20 of 20 points."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 33,
+          "maxPossible": 25,
+          "status": "correct",
+          "boldnessMultiplier": 1.35,
+          "explanation": "You picked 4 of 4 correct teams. 25 of 25 points."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 50,
+          "maxPossible": 30,
+          "status": "correct",
+          "boldnessMultiplier": 1.2666666666666668,
+          "explanation": "You picked 3 of 3 positions exactly right, plus a 10-point bonus for a perfect order. 40 of 40 points."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-lko for the wooden spoon. team-lko finished last. 15 of 15 points."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked player-mum-1 to lead runs. 20 of 20 points."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The proposition was true. 15 of 15 points."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 20,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1,
+          "explanation": "Your guess of 1450 was closest to the actual value of 1450 (off by 0). 20 of 20 points."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The answer was yes. 10 of 10 points."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked \"opt-che\". The settled answer was \"opt-che\". 10 of 10 points."
+        }
+      ],
+      "rank": 1
+    },
+    {
+      "memberId": "member-fatima",
+      "points": 152,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 42,
+          "maxPossible": 30,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-mum for champion. team-mum won. 30 of 30 points."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-del for runner-up. team-che finished runner-up. 0 of 20 points."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 0,
+          "maxPossible": 25,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked 0 of 4 correct teams. 0 of 25 points."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 12,
+          "maxPossible": 30,
+          "status": "partial",
+          "boldnessMultiplier": 1.2666666666666668,
+          "explanation": "You picked 1 of 3 positions exactly right. 10 of 30 points."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-lko for the wooden spoon. team-lko finished last. 15 of 15 points."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked player-mum-1 to lead runs. 20 of 20 points."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The proposition was true. 15 of 15 points."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "Your guess of 1500 was not among the closest to the actual value of 1450. 0 of 20 points."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The answer was yes. 10 of 10 points."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked \"opt-che\". The settled answer was \"opt-che\". 10 of 10 points."
+        }
+      ],
+      "rank": 2
+    },
+    {
+      "memberId": "member-meera",
+      "points": 114,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 0,
+          "maxPossible": 30,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-che for runner-up. team-che finished runner-up. 20 of 20 points."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 23,
+          "maxPossible": 25,
+          "status": "partial",
+          "boldnessMultiplier": 1.333333333333333,
+          "explanation": "You picked 3 of 4 correct teams. 18 of 25 points."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 0,
+          "maxPossible": 30,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked 0 of 3 positions exactly right. 0 of 30 points."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-lko for the wooden spoon. team-lko finished last. 15 of 15 points."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked player-mum-1 to lead runs. 20 of 20 points."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You said no. The answer was yes. 0 of 10 points."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked \"opt-che\". The settled answer was \"opt-che\". 10 of 10 points."
+        }
+      ],
+      "rank": 3
+    },
+    {
+      "memberId": "member-devansh",
+      "points": 99,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 0,
+          "maxPossible": 30,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-del for champion. team-mum won. 0 of 30 points."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 28,
+          "maxPossible": 20,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-che for runner-up. team-che finished runner-up. 20 of 20 points."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 23,
+          "maxPossible": 25,
+          "status": "partial",
+          "boldnessMultiplier": 1.333333333333333,
+          "explanation": "You picked 3 of 4 correct teams. 18 of 25 points."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 24,
+          "maxPossible": 30,
+          "status": "partial",
+          "boldnessMultiplier": 1.2,
+          "explanation": "You picked 2 of 3 positions exactly right. 20 of 30 points."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-raj for the wooden spoon. team-lko finished last. 0 of 15 points."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked player-del-1 to lead runs. That wasn't the leader. 0 of 20 points."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You said no. The proposition was true. 0 of 15 points."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 10,
+          "maxPossible": 20,
+          "status": "partial",
+          "boldnessMultiplier": 1,
+          "explanation": "Your guess of 1460 was second-closest to the actual value of 1450 (off by 10). 10 of 20 points."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 14,
+          "maxPossible": 10,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The answer was yes. 10 of 10 points."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked \"opt-del\". The settled answer was \"opt-che\". 0 of 10 points."
+        }
+      ],
+      "rank": 4
+    },
+    {
+      "memberId": "member-oscar",
+      "points": 63,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 42,
+          "maxPossible": 30,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You picked team-mum for champion. team-mum won. 30 of 30 points."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 0,
+          "maxPossible": 25,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 0,
+          "maxPossible": 30,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 21,
+          "maxPossible": 15,
+          "status": "correct",
+          "boldnessMultiplier": 1.4,
+          "explanation": "You said yes. The proposition was true. 15 of 15 points."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "Your guess of 2000 was not among the closest to the actual value of 1450. 0 of 20 points."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "no_pick",
+          "boldnessMultiplier": 1,
+          "explanation": "No pick submitted for this question."
+        }
+      ],
+      "rank": 5
+    },
+    {
+      "memberId": "member-arjun",
+      "points": 35,
+      "breakdown": [
+        {
+          "questionId": "q-champion",
+          "awarded": 0,
+          "maxPossible": 30,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-che for champion. team-mum won. 0 of 30 points."
+        },
+        {
+          "questionId": "q-runner-up",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-mum for runner-up. team-che finished runner-up. 0 of 20 points."
+        },
+        {
+          "questionId": "q-top4",
+          "awarded": 23,
+          "maxPossible": 25,
+          "status": "partial",
+          "boldnessMultiplier": 1.333333333333333,
+          "explanation": "You picked 3 of 4 correct teams. 18 of 25 points."
+        },
+        {
+          "questionId": "q-podium",
+          "awarded": 12,
+          "maxPossible": 30,
+          "status": "partial",
+          "boldnessMultiplier": 1.2666666666666668,
+          "explanation": "You picked 1 of 3 positions exactly right. 10 of 30 points."
+        },
+        {
+          "questionId": "q-wooden-spoon",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked team-guj for the wooden spoon. team-lko finished last. 0 of 15 points."
+        },
+        {
+          "questionId": "q-orange-cap",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked player-che-1 to lead runs. That wasn't the leader. 0 of 20 points."
+        },
+        {
+          "questionId": "q-guj-over-under",
+          "awarded": 0,
+          "maxPossible": 15,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You said no. The proposition was true. 0 of 15 points."
+        },
+        {
+          "questionId": "q-total-sixes",
+          "awarded": 0,
+          "maxPossible": 20,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "Your guess of 1400 was not among the closest to the actual value of 1450. 0 of 20 points."
+        },
+        {
+          "questionId": "q-super-over-final",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You said no. The answer was yes. 0 of 10 points."
+        },
+        {
+          "questionId": "q-fair-play",
+          "awarded": 0,
+          "maxPossible": 10,
+          "status": "incorrect",
+          "boldnessMultiplier": 1,
+          "explanation": "You picked \"opt-mum\". The settled answer was \"opt-che\". 0 of 10 points."
+        }
+      ],
+      "rank": 6
+    }
+  ]
+}

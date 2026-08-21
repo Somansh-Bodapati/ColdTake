@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+.react-router/
+
+# Env files (keep .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# Editor / OS
+.DS_Store
+*.local
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+
+# Test / coverage
+coverage/

@@ -1,0 +1,17 @@
+{
+  "status": "success",
+  "data": {
+    "matchList": [
+      {
+        "matchType": "league",
+        "name": "Mumbai Indians vs Chennai Super Kings, 1st Match",
+        "matchWinner": "Mumbai Indians"
+      },
+      {
+        "matchType": "final",
+        "name": "Mumbai Indians vs Chennai Super Kings, Final",
+        "matchWinner": "Mumbai Indians"
+      }
+    ]
+  }
+}
