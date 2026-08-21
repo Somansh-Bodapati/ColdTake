@@ -118,8 +118,22 @@ async function runEntryPoint() {
   process.env.DB_DRIVER ??= "node-postgres";
 
   const mod = await import(pathToFileURL(entryOutAbs).href);
-  if (typeof mod.default !== "function") {
-    throw new Error("api/[...slug].js did not export a default handler function");
+  // Vercel's Node runtime treats a *bare* default function export as its
+  // legacy (req: IncomingMessage, res: ServerResponse) convention, not a Web
+  // handler — that mismatch is exactly what caused the production
+  // "Invalid URL" / "headers.get is not a function" crashes. The correct,
+  // zero-config contract for a Web `Request` on every method is the "fetch
+  // Web Standard export": `export default { fetch(request) }`. Assert that
+  // shape here so a regression back to a bare default function fails this
+  // harness instead of only surfacing on a real Vercel deploy.
+  if (typeof mod.default !== "object" || mod.default === null) {
+    throw new Error(
+      "api/[...slug].js's default export must be an object ({ fetch }), not a bare function — " +
+        "a bare default function is Vercel's legacy (req, res) handler contract, not a Web handler.",
+    );
+  }
+  if (typeof mod.default.fetch !== "function") {
+    throw new Error("api/[...slug].js's default export is missing a `fetch` function");
   }
   return mod;
 }
