@@ -84,10 +84,14 @@ export const groupDetailResponseSchema = z.object({
 });
 export type GroupDetailResponse = z.infer<typeof groupDetailResponseSchema>;
 
-export const transferAdminRequestSchema = z.object({
+// POST /api/groups/:id/admins { memberId } -> promote (multi-admin support:
+// any current admin can promote another member without losing their own
+// role). DELETE /api/groups/:id/admins/:memberId demotes; that one's
+// memberId comes from the path, not a body, so it has no schema of its own.
+export const promoteAdminRequestSchema = z.object({
   memberId: z.string().min(1, "memberId is required"),
 });
-export type TransferAdminRequest = z.infer<typeof transferAdminRequestSchema>;
+export type PromoteAdminRequest = z.infer<typeof promoteAdminRequestSchema>;
 
 export const okResponseSchema = z.object({ ok: z.literal(true) });
 export type OkResponse = z.infer<typeof okResponseSchema>;

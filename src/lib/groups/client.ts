@@ -12,7 +12,7 @@ import {
   joinGroupResponseSchema,
   groupDetailResponseSchema,
   groupPreviewResponseSchema,
-  transferAdminRequestSchema,
+  promoteAdminRequestSchema,
   type CreateGroupResponse,
   type JoinGroupResponse,
   type GroupDetailResponse,
@@ -83,14 +83,28 @@ export async function removeGroupMember(groupId: string, memberId: string): Prom
   }
 }
 
-export async function transferGroupAdmin(groupId: string, memberId: string): Promise<void> {
-  const response = await fetch(`/api/groups/${encodeURIComponent(groupId)}/transfer`, {
+// Promotes a member to admin without touching anyone else's role — any
+// current admin can call this (multi-admin support, this session's fix).
+export async function promoteGroupAdmin(groupId: string, memberId: string): Promise<void> {
+  const response = await fetch(`/api/groups/${encodeURIComponent(groupId)}/admins`, {
     method: "POST",
     credentials: "include",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(transferAdminRequestSchema.parse({ memberId })),
+    body: JSON.stringify(promoteAdminRequestSchema.parse({ memberId })),
   });
   if (!response.ok) {
-    throw new Error(await errorMessage(response, "Could not transfer the admin role"));
+    throw new Error(await errorMessage(response, "Could not make that member an admin"));
+  }
+}
+
+// Demotes an admin back to a plain member — the server refuses (400) if
+// they're currently the group's only admin.
+export async function demoteGroupAdmin(groupId: string, memberId: string): Promise<void> {
+  const response = await fetch(
+    `/api/groups/${encodeURIComponent(groupId)}/admins/${encodeURIComponent(memberId)}`,
+    { method: "DELETE", credentials: "include" }
+  );
+  if (!response.ok) {
+    throw new Error(await errorMessage(response, "Could not remove that admin"));
   }
 }

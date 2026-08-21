@@ -247,9 +247,25 @@ export async function requireAdmin(db: Db, groupId: string, userId: string): Pro
   return membership;
 }
 
-// Soft-deletes a member (removedAt), refusing to remove the current admin —
-// transfer admin first (POST /api/groups/:id/transfer) so a group is never
-// left without one.
+// Counts currently-active admins for a group — the shared "must always have
+// >= 1 admin" invariant that both demoteFromAdmin and removeMember enforce.
+// Multiple simultaneous admins are fully supported by the schema (member.role
+// is just a per-row 'admin' | 'member' with no uniqueness constraint), so
+// this is a plain count, not an exists-check for "the" admin.
+async function countActiveAdmins(db: Db, groupId: string): Promise<number> {
+  const [row] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(member)
+    .where(and(eq(member.groupId, groupId), eq(member.role, "admin"), isNull(member.removedAt)));
+  return Number(row?.count ?? 0);
+}
+
+// Soft-deletes a member (removedAt), refusing to remove the group's LAST
+// remaining admin — a group must always have at least one admin, but any
+// admin who isn't the sole one can be removed like anyone else (their admin
+// status is simply lost along with their membership). Replaces the old
+// "no admin can ever be removed" rule now that multiple admins are
+// supported (POST /api/groups/:id/admins promotes without demoting anyone).
 export async function removeMember(db: Db, groupId: string, targetMemberId: string): Promise<void> {
   const [target] = await db
     .select({ id: member.id, role: member.role })
@@ -261,42 +277,59 @@ export async function removeMember(db: Db, groupId: string, targetMemberId: stri
     throw new AppError(404, "Member not found");
   }
   if (target.role === "admin") {
-    throw new AppError(400, "Transfer the admin role to someone else before removing this member");
+    const adminCount = await countActiveAdmins(db, groupId);
+    if (adminCount <= 1) {
+      throw new AppError(400, "Make someone else admin before removing the only admin");
+    }
   }
 
   await db.update(member).set({ removedAt: new Date() }).where(eq(member.id, targetMemberId));
 }
 
-// Moves the admin role from `currentAdminMemberId` to `targetMemberId` in
-// one statement (a CASE-driven UPDATE across both rows) rather than
-// db.transaction(...): the neon-http driver this project swaps in for
-// deploy (src/lib/db/client.ts) doesn't support multi-statement
-// transactions, so a single atomic UPDATE is the driver-compatible way to
-// make sure a group is never left with two admins or zero.
-export async function transferAdmin(
-  db: Db,
-  groupId: string,
-  args: { currentAdminMemberId: string; targetMemberId: string }
-): Promise<void> {
+// Grants admin to `targetMemberId` without touching anyone else's role —
+// the product owner's explicit request: multiple simultaneous admins,
+// promoting someone should never revoke your own role. Idempotent:
+// promoting an already-admin member is a harmless no-op, not an error.
+export async function promoteToAdmin(db: Db, groupId: string, targetMemberId: string): Promise<void> {
   const [target] = await db
-    .select({ id: member.id })
+    .select({ id: member.id, role: member.role })
     .from(member)
-    .where(
-      and(eq(member.id, args.targetMemberId), eq(member.groupId, groupId), isNull(member.removedAt))
-    )
+    .where(and(eq(member.id, targetMemberId), eq(member.groupId, groupId), isNull(member.removedAt)))
     .limit(1);
 
   if (!target) {
     throw new AppError(404, "Member not found");
   }
-  if (target.id === args.currentAdminMemberId) {
-    throw new AppError(400, "That member is already the admin");
+  if (target.role === "admin") {
+    return; // already admin — no-op
   }
 
-  await db
-    .update(member)
-    .set({
-      role: sql`case when ${member.id} = ${args.targetMemberId} then 'admin' else 'member' end`,
-    })
-    .where(and(eq(member.groupId, groupId), sql`${member.id} in (${args.currentAdminMemberId}, ${args.targetMemberId})`));
+  await db.update(member).set({ role: "admin" }).where(eq(member.id, targetMemberId));
+}
+
+// Revokes admin from `targetMemberId`, refusing when they're currently the
+// group's ONLY admin — same "must always have >= 1 admin" invariant as
+// removeMember. Never touches any other member's role (replaces the old
+// transferAdmin, which destructively demoted the caller in the same
+// statement it promoted someone else).
+export async function demoteFromAdmin(db: Db, groupId: string, targetMemberId: string): Promise<void> {
+  const [target] = await db
+    .select({ id: member.id, role: member.role })
+    .from(member)
+    .where(and(eq(member.id, targetMemberId), eq(member.groupId, groupId), isNull(member.removedAt)))
+    .limit(1);
+
+  if (!target) {
+    throw new AppError(404, "Member not found");
+  }
+  if (target.role !== "admin") {
+    throw new AppError(400, "That member isn't an admin");
+  }
+
+  const adminCount = await countActiveAdmins(db, groupId);
+  if (adminCount <= 1) {
+    throw new AppError(400, "A group must always have at least one admin — make someone else admin first");
+  }
+
+  await db.update(member).set({ role: "member" }).where(eq(member.id, targetMemberId));
 }
