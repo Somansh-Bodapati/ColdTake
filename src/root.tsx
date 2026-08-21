@@ -9,6 +9,7 @@ import {
 
 import type { Route } from "./+types/root";
 import { SessionProvider } from "@/lib/session/provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./app.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,10 @@ export default function App() {
   return (
     <SessionProvider>
       <Outlet />
+      {/* Mounted once at the root so every route's async-error handling
+          (season publish, tournament creation, group admin actions, ...)
+          can just call `toast(...)` from "sonner" — no per-route setup. */}
+      <Toaster position="top-center" richColors />
     </SessionProvider>
   );
 }
