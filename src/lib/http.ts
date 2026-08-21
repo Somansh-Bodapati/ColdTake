@@ -7,6 +7,24 @@
 import type { ZodType } from "zod";
 import { AppError } from "./errors.js";
 
+// Vercel's Node runtime hands handlers a Request whose `.url` is sometimes a
+// bare path (e.g. "/api/me?...slug=me") rather than an absolute URL — unlike
+// our local dev server (vite-plugins/api-dev-server.ts), which always builds
+// a full http://localhost:<port>/... URL, and unlike a Request built by hand
+// in a test, which also uses an absolute URL. `new URL()` throws on a
+// relative string with no base, so every parse goes through this helper,
+// which supplies a base from the Host header when `.url` isn't absolute
+// already (the value of the base is irrelevant beyond that — only the
+// resulting `.pathname` is ever read).
+export function requestUrl(request: Request): URL {
+  try {
+    return new URL(request.url);
+  } catch {
+    const host = request.headers.get("host") ?? "localhost";
+    return new URL(request.url, `http://${host}`);
+  }
+}
+
 export function jsonResponse(
   body: unknown,
   init: { status?: number; headers?: HeadersInit } = {}
@@ -48,7 +66,7 @@ export async function parseJsonBody<T>(
 // parsing the pathname works identically against a real deployed request
 // and a `new Request(...)` built by hand in a test.
 export function pathSegment(request: Request, fromEnd: number): string {
-  const { pathname } = new URL(request.url);
+  const { pathname } = requestUrl(request);
   const segments = pathname.split("/").filter(Boolean);
   const value = segments[segments.length - 1 - fromEnd];
   if (!value) {
