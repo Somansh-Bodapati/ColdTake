@@ -20,12 +20,40 @@ describe("searchCricketDataSeriesRequestSchema", () => {
     const result = searchCricketDataSeriesRequestSchema.safeParse({ query: "  a  " });
     expect(result.success).toBe(false);
   });
+
+  it("defaults offset to 0 when omitted (the first page)", () => {
+    const result = searchCricketDataSeriesRequestSchema.safeParse({ query: "india" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.offset).toBe(0);
+  });
+
+  it("accepts an explicit offset for paging forward", () => {
+    const result = searchCricketDataSeriesRequestSchema.safeParse({ query: "india", offset: 25 });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.offset).toBe(25);
+  });
+
+  it("rejects a negative offset", () => {
+    const result = searchCricketDataSeriesRequestSchema.safeParse({ query: "india", offset: -1 });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("searchCricketDataSeriesResponseSchema", () => {
-  it("accepts a list of series with nullable dates/matches", () => {
+  it("accepts a list of series with nullable dates/matches, plus pagination info", () => {
     const result = searchCricketDataSeriesResponseSchema.safeParse({
       series: [{ id: "abc", name: "IPL 2026", startDate: null, endDate: null, matches: null }],
+      total: 1,
+      nextOffset: null,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a non-null nextOffset when more results remain", () => {
+    const result = searchCricketDataSeriesResponseSchema.safeParse({
+      series: [],
+      total: 97,
+      nextOffset: 25,
     });
     expect(result.success).toBe(true);
   });
@@ -33,6 +61,8 @@ describe("searchCricketDataSeriesResponseSchema", () => {
   it("rejects a series entry missing an id", () => {
     const result = searchCricketDataSeriesResponseSchema.safeParse({
       series: [{ name: "IPL 2026", startDate: null, endDate: null, matches: null }],
+      total: 1,
+      nextOffset: null,
     });
     expect(result.success).toBe(false);
   });

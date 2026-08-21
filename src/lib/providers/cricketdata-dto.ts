@@ -44,6 +44,12 @@ export const cricketDataInfoSchema = z
     hitsUsed: z.number().int().nonnegative().optional(),
     hitsLimit: z.number().int().positive().optional(),
     credits: z.number().optional(),
+    // Only present on list endpoints (e.g. /v1/series) -- verified live:
+    // offsetRows echoes back exactly what was requested, totalRows is the
+    // full match count across all pages. Absent on singular-resource
+    // endpoints like series_info/match_info.
+    offsetRows: z.number().int().nonnegative().optional(),
+    totalRows: z.number().int().nonnegative().optional(),
   })
   .passthrough();
 export type CricketDataInfo = z.infer<typeof cricketDataInfoSchema>;

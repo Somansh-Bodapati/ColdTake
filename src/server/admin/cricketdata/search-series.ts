@@ -25,7 +25,7 @@ async function handler(request: Request): Promise<Response> {
   }
 
   await requireUser(db, request);
-  const { query } = await parseJsonBody(request, searchCricketDataSeriesRequestSchema);
+  const { query, offset } = await parseJsonBody(request, searchCricketDataSeriesRequestSchema);
 
   const apiKey = process.env.CRICKETDATA_API_KEY;
   if (!apiKey) {
@@ -34,7 +34,7 @@ async function handler(request: Request): Promise<Response> {
 
   let results;
   try {
-    results = await searchCricketDataSeries({ apiKey }, query);
+    results = await searchCricketDataSeries({ apiKey }, query, offset);
   } catch (error) {
     // Surfaces as a clear, catchable 502 rather than a generic 500 —
     // network failure, malformed upstream JSON, or CricketData's own
@@ -47,13 +47,15 @@ async function handler(request: Request): Promise<Response> {
   }
 
   const body: SearchCricketDataSeriesResponse = {
-    series: results.map((entry) => ({
+    series: results.entries.map((entry) => ({
       id: entry.id,
       name: entry.name,
       startDate: entry.startDate ?? null,
       endDate: entry.endDate ?? null,
       matches: entry.matches ?? null,
     })),
+    total: results.total,
+    nextOffset: results.nextOffset,
   };
   return jsonResponse(body);
 }

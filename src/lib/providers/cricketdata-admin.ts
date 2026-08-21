@@ -103,19 +103,38 @@ async function request<T>(
   return parsed.data;
 }
 
-// GET /v1/series?apikey=X&offset=0&search=<query> — one request, costs one
-// hit against the shared 100/day free-tier budget.
+export interface CricketDataSeriesSearchResult {
+  entries: CricketDataSeriesListEntry[];
+  total: number;
+  // Null once every row has been returned -- offsetRows + this page's
+  // length reaching totalRows -- so the caller knows there's no more to
+  // "Load more" without a guessing follow-up call.
+  nextOffset: number | null;
+}
+
+// GET /v1/series?apikey=X&offset=<offset>&search=<query> — one request per
+// call, costs one hit against the shared 100/day free-tier budget.
+// offset is row-based (verified live: offset=1 shifted the result set by
+// exactly one row, not one page) -- pass the previous call's nextOffset to
+// page forward.
 export async function searchCricketDataSeries(
   options: CricketDataAdminOptions,
-  query: string
-): Promise<CricketDataSeriesListEntry[]> {
+  query: string,
+  offset = 0
+): Promise<CricketDataSeriesSearchResult> {
   const response = await request(
     options,
     "/series",
-    { apikey: options.apiKey, offset: "0", search: query },
+    { apikey: options.apiKey, offset: String(offset), search: query },
     cricketDataSeriesListResponseSchema
   );
-  return response.data;
+  const total = response.info?.totalRows ?? response.data.length;
+  const seenThroughRow = offset + response.data.length;
+  return {
+    entries: response.data,
+    total,
+    nextOffset: seenThroughRow < total ? seenThroughRow : null,
+  };
 }
 
 // GET /v1/series_info?apikey=X&offset=0&id=<seriesId> — one request. Used

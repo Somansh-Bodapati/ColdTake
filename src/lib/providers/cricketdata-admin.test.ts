@@ -43,18 +43,59 @@ function fixtureFetch(byPath: Record<string, unknown>): FetchLike {
 }
 
 describe("searchCricketDataSeries", () => {
-  it("returns the matched series list from /v1/series", async () => {
+  it("returns the matched series list from /v1/series, with pagination info from the response", async () => {
     const fetchImpl = fixtureFetch({
       "/v1/series": {
         status: "success",
         data: [{ id: "series-1", name: "Indian Premier League 2026", startDate: "2026-03-20", endDate: "2026-05-24" }],
-        info: { hitsToday: 1, hitsLimit: 100 },
+        info: { hitsToday: 1, hitsLimit: 100, offsetRows: 0, totalRows: 1 },
       },
     });
-    const results = await searchCricketDataSeries({ apiKey: "test-key", fetchImpl }, "Indian Premier League");
-    expect(results).toEqual([
+    const result = await searchCricketDataSeries({ apiKey: "test-key", fetchImpl }, "Indian Premier League");
+    expect(result.entries).toEqual([
       { id: "series-1", name: "Indian Premier League 2026", startDate: "2026-03-20", endDate: "2026-05-24" },
     ]);
+    expect(result.total).toBe(1);
+    expect(result.nextOffset).toBeNull();
+  });
+
+  it("computes a non-null nextOffset when more rows remain than this page returned", async () => {
+    // Real, verified shape: /v1/series caps each page at 25 rows regardless
+    // of how many total matches exist. offset is row-based (offset=1 shifts
+    // by exactly one row, not one page) -- nextOffset = offset + this
+    // page's length, only while that's still less than totalRows.
+    const fetchImpl = fixtureFetch({
+      "/v1/series": {
+        status: "success",
+        data: Array.from({ length: 25 }, (_, i) => ({ id: `series-${i}`, name: `India series ${i}` })),
+        info: { offsetRows: 0, totalRows: 97 },
+      },
+    });
+    const result = await searchCricketDataSeries({ apiKey: "test-key", fetchImpl }, "india", 0);
+    expect(result.total).toBe(97);
+    expect(result.nextOffset).toBe(25);
+  });
+
+  it("returns a null nextOffset once the last page has been reached", async () => {
+    const fetchImpl = fixtureFetch({
+      "/v1/series": {
+        status: "success",
+        data: Array.from({ length: 22 }, (_, i) => ({ id: `series-${i}`, name: `India series ${i}` })),
+        info: { offsetRows: 75, totalRows: 97 },
+      },
+    });
+    const result = await searchCricketDataSeries({ apiKey: "test-key", fetchImpl }, "india", 75);
+    expect(result.nextOffset).toBeNull();
+  });
+
+  it("passes the offset through to the request's offset query parameter", async () => {
+    let requestedUrl = "";
+    const fetchImpl: FetchLike = async (url) => {
+      requestedUrl = url;
+      return new Response(JSON.stringify({ status: "success", data: [], info: {} }), { status: 200 });
+    };
+    await searchCricketDataSeries({ apiKey: "test-key", fetchImpl }, "india", 50);
+    expect(new URL(requestedUrl).searchParams.get("offset")).toBe("50");
   });
 
   it("throws CricketDataAdminFetchError on a non-OK HTTP response", async () => {

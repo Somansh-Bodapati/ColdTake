@@ -26,7 +26,10 @@ export default function TournamentNewPage() {
 
   const [query, setQuery] = React.useState("");
   const [searching, setSearching] = React.useState(false);
+  const [loadingMore, setLoadingMore] = React.useState(false);
   const [results, setResults] = React.useState<CricketDataSeriesSummary[]>([]);
+  const [total, setTotal] = React.useState(0);
+  const [nextOffset, setNextOffset] = React.useState<number | null>(null);
   const [searched, setSearched] = React.useState(false);
   const [creatingId, setCreatingId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -40,8 +43,10 @@ export default function TournamentNewPage() {
     setSearching(true);
     setError(null);
     try {
-      const series = await searchCricketDataSeries(query.trim());
-      setResults(series);
+      const page = await searchCricketDataSeries(query.trim());
+      setResults(page.series);
+      setTotal(page.total);
+      setNextOffset(page.nextOffset);
       setSearched(true);
     } catch (err) {
       // The search-result list can grow long, pushing a bottom-of-page
@@ -53,6 +58,28 @@ export default function TournamentNewPage() {
       });
     } finally {
       setSearching(false);
+    }
+  }
+
+  // CricketData caps each response at 25 rows regardless of how many total
+  // matches exist ("india" alone has 97 real matches, verified live) — this
+  // pages forward from wherever the previous page left off (row-based
+  // offset, not page-based) and appends rather than replacing, so earlier
+  // results stay visible.
+  async function handleLoadMore() {
+    if (nextOffset === null) return;
+    setLoadingMore(true);
+    try {
+      const page = await searchCricketDataSeries(query.trim(), nextOffset);
+      setResults((prev) => [...prev, ...page.series]);
+      setTotal(page.total);
+      setNextOffset(page.nextOffset);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not load more results", {
+        action: { label: "Retry", onClick: () => void handleLoadMore() },
+      });
+    } finally {
+      setLoadingMore(false);
     }
   }
 
@@ -118,28 +145,43 @@ export default function TournamentNewPage() {
       )}
 
       {results.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {results.map((series) => (
-            <li key={series.id} className="flex items-center justify-between gap-2 rounded-md border p-3">
-              <div>
-                <p className="text-sm font-medium">{series.name}</p>
-                {(series.startDate || series.endDate) && (
-                  <p className="text-muted-foreground text-xs">
-                    {series.startDate ?? "?"} – {series.endDate ?? "?"}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                disabled={creatingId !== null}
-                onClick={() => void handleCreate(series)}
-              >
-                {creatingId === series.id ? "Creating…" : "Use this series"}
-              </Button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="text-muted-foreground text-xs">
+            Showing {results.length} of {total} match{total === 1 ? "" : "es"}
+          </p>
+          <ul className="flex flex-col gap-2">
+            {results.map((series) => (
+              <li key={series.id} className="flex items-center justify-between gap-2 rounded-md border p-3">
+                <div>
+                  <p className="text-sm font-medium">{series.name}</p>
+                  {(series.startDate || series.endDate) && (
+                    <p className="text-muted-foreground text-xs">
+                      {series.startDate ?? "?"} – {series.endDate ?? "?"}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={creatingId !== null}
+                  onClick={() => void handleCreate(series)}
+                >
+                  {creatingId === series.id ? "Creating…" : "Use this series"}
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {nextOffset !== null && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loadingMore}
+              onClick={() => void handleLoadMore()}
+            >
+              {loadingMore ? "Loading…" : `Load more (${total - results.length} remaining)`}
+            </Button>
+          )}
+        </>
       )}
     </main>
   );

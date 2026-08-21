@@ -53,7 +53,7 @@ describe("POST /api/admin/cricketdata/search-series", () => {
         JSON.stringify({
           status: "success",
           data: [{ id: "series-1", name: "Indian Premier League 2026", startDate: "2026-03-20", endDate: "2026-05-24" }],
-          info: { hitsToday: 1, hitsLimit: 100 },
+          info: { hitsToday: 1, hitsLimit: 100, offsetRows: 0, totalRows: 1 },
         }),
         { status: 200, headers: { "content-type": "application/json" } }
       )
@@ -65,10 +65,35 @@ describe("POST /api/admin/cricketdata/search-series", () => {
 
     const response = await handler(searchRequest(session.rawToken, { query: "Indian Premier League" }));
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { series: Array<{ id: string; name: string }> };
+    const body = (await response.json()) as {
+      series: Array<{ id: string; name: string }>;
+      total: number;
+      nextOffset: number | null;
+    };
     expect(body.series).toEqual([
       { id: "series-1", name: "Indian Premier League 2026", startDate: "2026-03-20", endDate: "2026-05-24", matches: null },
     ]);
+    expect(body.total).toBe(1);
+    expect(body.nextOffset).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("forwards a non-zero offset to the upstream request, for paging forward", async () => {
+    vi.stubEnv("CRICKETDATA_API_KEY", "test-key");
+    const fetchMock = vi.fn(async (url: string) => {
+      expect(new URL(url).searchParams.get("offset")).toBe("25");
+      return new Response(
+        JSON.stringify({ status: "success", data: [], info: { offsetRows: 25, totalRows: 25 } }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { userId, session } = await createAnonymousUser(db, "Searcher");
+    createdUserIds.push(userId);
+
+    const response = await handler(searchRequest(session.rawToken, { query: "india", offset: 25 }));
+    expect(response.status).toBe(200);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

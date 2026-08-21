@@ -66,6 +66,11 @@ export type IngestResponse = z.infer<typeof ingestResponseSchema>;
 // than exactly, since this is our request shape, not a passthrough of theirs.
 export const searchCricketDataSeriesRequestSchema = z.object({
   query: z.string().trim().min(2, "Search query must be at least 2 characters"),
+  // Row-based, not page-based -- verified live against the real API: offset
+  // echoes back as-is in the response's offsetRows, and passing offset=1
+  // shifted the result set by exactly one row, not one page of 25. "Load
+  // more" advances this by however many rows the previous page returned.
+  offset: z.number().int().nonnegative().default(0),
 });
 export type SearchCricketDataSeriesRequest = z.infer<typeof searchCricketDataSeriesRequestSchema>;
 
@@ -80,6 +85,11 @@ export type CricketDataSeriesSummary = z.infer<typeof cricketDataSeriesSummarySc
 
 export const searchCricketDataSeriesResponseSchema = z.object({
   series: z.array(cricketDataSeriesSummarySchema),
+  // From CricketData's own info.totalRows/offsetRows -- lets the client show
+  // "Load more" only when there's actually more, and know what offset to
+  // request next, without a second guessing call.
+  total: z.number().int().nonnegative(),
+  nextOffset: z.number().int().nonnegative().nullable(),
 });
 export type SearchCricketDataSeriesResponse = z.infer<typeof searchCricketDataSeriesResponseSchema>;
 

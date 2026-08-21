@@ -41,17 +41,26 @@ export async function saveManualStandings(
   return ingestResponseSchema.parse(await response.json());
 }
 
-export async function searchCricketDataSeries(query: string): Promise<CricketDataSeriesSummary[]> {
+export interface CricketDataSeriesSearchPage {
+  series: CricketDataSeriesSummary[];
+  total: number;
+  nextOffset: number | null;
+}
+
+export async function searchCricketDataSeries(
+  query: string,
+  offset = 0
+): Promise<CricketDataSeriesSearchPage> {
   const response = await fetch("/api/admin/cricketdata/search-series", {
     method: "POST",
     credentials: "include",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(searchCricketDataSeriesRequestSchema.parse({ query })),
+    body: JSON.stringify(searchCricketDataSeriesRequestSchema.parse({ query, offset })),
   });
   if (!response.ok) {
     throw new Error(await errorMessage(response, "Could not search CricketData"));
   }
-  return searchCricketDataSeriesResponseSchema.parse(await response.json()).series;
+  return searchCricketDataSeriesResponseSchema.parse(await response.json());
 }
 
 export async function createTournamentFromSeries(
