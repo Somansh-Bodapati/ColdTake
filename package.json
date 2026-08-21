@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
+    "dev:all": "./scripts/dev.sh",
     "build": "react-router build",
     "typecheck": "react-router typegen && tsc --noEmit",
     "lint": "eslint .",
