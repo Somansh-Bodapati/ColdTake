@@ -247,15 +247,36 @@ export default function GroupPage() {
                       {SEASON_STATUS_LABEL[seasonRow.status]}
                     </span>
                   </span>
-                  {path ? (
-                    <Link className="underline" to={path}>
-                      {seasonRow.status === "draft" ? "Continue setup →" : "Open →"}
-                    </Link>
-                  ) : (
-                    <span className="text-muted-foreground text-xs">
-                      {seasonRow.status === "draft" ? "Not published yet" : "Not available"}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-3">
+                    {path ? (
+                      <Link className="underline" to={path}>
+                        {seasonRow.status === "draft" ? "Continue setup →" : "Open →"}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">
+                        {seasonRow.status === "draft" ? "Not published yet" : "Not available"}
+                      </span>
+                    )}
+                    {/* Leaderboard is reachable regardless of season status
+                        (bug fix, tonight): seasonLinkPath above only ever
+                        points a season's one link at picks/reveal/edit —
+                        `open` and `locked` seasons had no dashboard link to
+                        standings at all, so a member had no way in short of
+                        guessing the URL. recomputeStandings itself allows
+                        any non-draft, non-voided status (locked/settled)
+                        plus open (projected standings), so the same set
+                        gets a link here; voided already got one via
+                        seasonLinkPath and standings there is empty/historic
+                        only, not worth a second identical link. */}
+                    {seasonRow.status !== "draft" && seasonRow.status !== "voided" && (
+                      <Link
+                        className="text-muted-foreground underline"
+                        to={`/groups/${groupId}/seasons/${seasonRow.id}/standings`}
+                      >
+                        Leaderboard →
+                      </Link>
+                    )}
+                  </span>
                 </li>
               );
             })}
