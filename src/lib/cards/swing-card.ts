@@ -47,6 +47,6 @@ export function buildSwingCardElement(data: SwingCardData): CardElement {
         ),
       ]
     ),
-    cardFooter(data.groupName, data.joinUrl),
+    cardFooter(data.groupName),
   ]);
 }

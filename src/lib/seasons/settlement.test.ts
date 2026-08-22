@@ -17,7 +17,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { question, questionResult, season } from "@/lib/db/schema";
 import { createSeason, getQuestions } from "@/lib/seasons/service";
-import { settleQuestion, settleSeason, voidSeason } from "@/lib/seasons/settlement";
+import { listQuestionResults, settleQuestion, settleSeason, voidSeason } from "@/lib/seasons/settlement";
 import { recomputeStandings } from "@/lib/standings/service";
 import { upsertPicks } from "@/lib/picks/service";
 import { ManualProvider } from "@/lib/providers/manual-provider";
@@ -289,6 +289,75 @@ describe("settleQuestion", () => {
     // The standings snapshot reflects the *latest* (overridden) value.
     const snapshot = overridden.snapshot;
     expect(snapshot.isProjected).toBe(false);
+  });
+});
+
+describe("listQuestionResults", () => {
+  it("rejects a non-admin caller", async () => {
+    const fixture = await makeGroupWithAdminAndMember(createdUserIds, createdGroupIds);
+    const tournamentId = await insertTestTournament(createdTournamentIds);
+    const created = await createSeason(db, { groupId: fixture.groupId, tournamentId, questions: [] });
+
+    await expect(
+      listQuestionResults(db, created.id, fixture.memberUserId, new Date())
+    ).rejects.toThrow();
+  });
+
+  it("returns an empty map for a season with no settled questions yet", async () => {
+    const fixture = await makeGroupWithAdminAndMember(createdUserIds, createdGroupIds);
+    const tournamentId = await insertTestTournament(createdTournamentIds);
+    const created = await createSeason(db, {
+      groupId: fixture.groupId,
+      tournamentId,
+      questions: [{ type: "boolean", prompt: "Any Super Over?", config: {}, points: 10, settlement: "manual" }],
+    });
+
+    const results = await listQuestionResults(db, created.id, fixture.adminUserId, new Date());
+
+    expect(results).toEqual({});
+  });
+
+  it("keys results by questionId and reflects the latest (overridden) answer", async () => {
+    const fixture = await makeGroupWithAdminAndMember(createdUserIds, createdGroupIds);
+    const tournamentId = await insertTestTournament(createdTournamentIds);
+    const teamIds = await insertTestTeams(tournamentId, ["mi"]);
+    const created = await createSeason(db, {
+      groupId: fixture.groupId,
+      tournamentId,
+      questions: [
+        { type: "boolean", prompt: "Any Super Over?", config: {}, points: 10, settlement: "manual" },
+      ],
+    });
+    await lockSeason(created.id);
+    await saveManualStandings(
+      db,
+      {
+        tournamentId,
+        tableData: [{ teamId: teamIds.mi!, played: 1, won: 1, lost: 0, points: 2, nrr: 1, position: 1 }],
+        statLeaders: {},
+        updatedBy: fixture.adminUserId,
+      },
+      new Date()
+    );
+    await settleSeason(db, created.id, new ManualProvider(db), fixture.adminUserId, new Date());
+    const [questionRow] = await db.select().from(question).where(eq(question.seasonId, created.id));
+
+    await settleQuestion(db, created.id, questionRow!.id, { bool: true }, undefined, fixture.adminUserId, new Date());
+    await settleQuestion(
+      db,
+      created.id,
+      questionRow!.id,
+      { bool: false },
+      "Scorecard was corrected by the league after review",
+      fixture.adminUserId,
+      new Date()
+    );
+
+    const results = await listQuestionResults(db, created.id, fixture.adminUserId, new Date());
+
+    expect(Object.keys(results)).toEqual([questionRow!.id]);
+    expect(results[questionRow!.id]!.answer).toEqual({ bool: false });
+    expect(results[questionRow!.id]!.source).toBe("override");
   });
 });
 

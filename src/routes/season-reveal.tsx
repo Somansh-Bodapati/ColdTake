@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Link, useParams } from "react-router";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 import type { Route } from "./+types/season-reveal";
 import { useSession } from "@/lib/session/use-session";
 import { fetchSeasonDetail } from "@/lib/seasons/client";
@@ -10,6 +12,7 @@ import { customQuestionOptions } from "@/lib/seasons/question-config";
 import { ShareCardButton } from "@/components/share-card-button";
 import { buildCardUrl } from "@/lib/cards/client";
 import { IdentityBadge } from "@/components/identity-badge";
+import { Button } from "@/components/ui/button";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Reveal | ColdTake" }];
@@ -39,6 +42,110 @@ function resolveTeam(teamId: string, teams: readonly TeamSummary[]): TeamSummary
 function customOptionLabel(question: QuestionResponse, optionId: string): string {
   const options = customQuestionOptions(question.config.options);
   return options.find((o) => o.id === optionId)?.label ?? optionId;
+}
+
+// Plain-text counterpart to <AnswerValue> below, for contexts that need a
+// string rather than JSX — the per-member share text (this session's brief,
+// "a share option for the individual cards"). Reuses the exact same
+// resolution helpers (resolveTeam, customOptionLabel) as the on-screen
+// render, so the shared text never drifts from what the card itself shows —
+// real team names and option labels, never raw ids.
+function answerText(question: QuestionResponse, answer: PickAnswerInput | undefined, teams: readonly TeamSummary[]): string {
+  if (!answer) return "No pick";
+  switch (question.type) {
+    case "champion":
+    case "runner_up":
+    case "wooden_spoon": {
+      if (!answer.teamId) return "No pick";
+      const team = resolveTeam(answer.teamId, teams);
+      return team ? team.name : answer.teamId;
+    }
+    case "top_n_unordered":
+    case "top_n_ordered": {
+      if (!answer.teamIds || answer.teamIds.length === 0) return "No pick";
+      return answer.teamIds
+        .map((teamId) => resolveTeam(teamId, teams)?.name ?? teamId)
+        .join(", ");
+    }
+    case "custom":
+      return answer.optionId ? customOptionLabel(question, answer.optionId) : "No pick";
+    case "stat_leader":
+      return answer.playerId ?? "No pick";
+    case "numeric":
+      return typeof answer.value === "number" ? String(answer.value) : "No pick";
+    case "boolean":
+    case "team_over_under":
+      return typeof answer.bool === "boolean" ? (answer.bool ? "Yes" : "No") : "No pick";
+    default:
+      return "No pick";
+  }
+}
+
+// Builds the text body for a single member's share (Web Share API `text`
+// field, and the clipboard-fallback body) — one line per question, in the
+// season's own question order, same real-name resolution as the on-screen
+// slate.
+export function buildMemberShareText(
+  member: AllPicksResponse["members"][number],
+  season: SeasonDetailResponse
+): string {
+  const lines = season.questions.map((question) => {
+    const memberPick = member.picks.find((p) => p.questionId === question.id);
+    return `${question.prompt}: ${answerText(question, memberPick?.answer, season.teams)}`;
+  });
+  return [`${member.displayName}'s picks for ${season.season.name}:`, ...lines].join("\n");
+}
+
+// Small icon-only share button for one member's header (this session's
+// brief: not the page's whole-season <ShareCardButton>, just a compact icon
+// alongside the IdentityBadge/name). No server-rendered image exists per
+// member — building that Satori card type is a bigger lift than "a small
+// icon" calls for tonight — so this shares plain text plus a link back to
+// this reveal page, mirroring share-card-button.tsx's Web Share API /
+// clipboard fallback pattern and its AbortError handling.
+function MemberShareButton({
+  member,
+  season,
+}: {
+  member: AllPicksResponse["members"][number];
+  season: SeasonDetailResponse;
+}) {
+  async function handleShare() {
+    const text = buildMemberShareText(member, season);
+    const url = window.location.href;
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: `${member.displayName}'s picks`, text, url });
+      } catch (err) {
+        // AbortError is the user dismissing the native share sheet — not a
+        // failure worth surfacing (same convention as share-card-button.tsx).
+        if (err instanceof Error && err.name !== "AbortError") {
+          toast.error("Could not open the share sheet");
+        }
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      toast.success("Copied to clipboard");
+    } catch {
+      toast.error("Could not copy to clipboard");
+    }
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      aria-label={`Share ${member.displayName}'s picks`}
+      onClick={() => void handleShare()}
+    >
+      <Share2 />
+    </Button>
+  );
 }
 
 // Every question type gets its own small answer renderer rather than one
@@ -276,6 +383,7 @@ function MemberSlate({
       <div className="border-border bg-secondary/40 flex items-center gap-3 border-b px-4 py-3">
         <IdentityBadge seed={member.displayName} />
         <span className="flex-1 truncate font-bold">{member.displayName}</span>
+        <MemberShareButton member={member} season={season} />
         <span className="text-muted-foreground font-score text-xs">
           {member.picks.length}/{season.questions.length}
         </span>

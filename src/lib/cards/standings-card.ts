@@ -119,6 +119,6 @@ export function buildStandingsCardElement(data: StandingsCardData): CardElement 
         ? shown.map(standingsRow)
         : [el("div", { display: "flex", fontSize: "24px", color: COLORS.muted }, "No standings yet.")]
     ),
-    cardFooter(data.groupName, data.joinUrl),
+    cardFooter(data.groupName),
   ]);
 }

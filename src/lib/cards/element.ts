@@ -71,10 +71,16 @@ export function cardFrame(children: CardElement["props"]["children"]): CardEleme
   );
 }
 
-// Every card's footer (this session's brief, task 5): group name on the
-// left, join link on the right, no external images — just text and a
-// hairline rule drawn with flex + border, never `<img>`.
-export function cardFooter(groupName: string, joinUrl: string): CardElement {
+// Every card's footer: the group name only, no external images — just text
+// and a hairline rule drawn with flex + border, never `<img>`. Used to also
+// render the group's join link alongside the name, but product asked for
+// that removed (2026-08-21) — a share card circulating in a group chat
+// doesn't need to double as an invite flyer, and the join link is already
+// surfaced through the group's own invite flow. Applied to all four card
+// types (reveal/standings/swing/recap) for consistency: they all share this
+// footer, and there's no reason the join link would be unwanted on one but
+// wanted on another.
+export function cardFooter(groupName: string): CardElement {
   return el(
     "div",
     {
@@ -87,24 +93,8 @@ export function cardFooter(groupName: string, joinUrl: string): CardElement {
     [
       el(
         "div",
-        {
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        },
-        [
-          el(
-            "div",
-            { display: "flex", fontSize: "28px", fontWeight: 700, color: COLORS.text },
-            groupName
-          ),
-          el(
-            "div",
-            { display: "flex", fontSize: "22px", color: COLORS.accent },
-            joinUrl
-          ),
-        ]
+        { display: "flex", fontSize: "28px", fontWeight: 700, color: COLORS.text },
+        groupName
       ),
     ]
   );

@@ -45,6 +45,7 @@ import seasonVoidHandler from "./seasons/[id]/void.js";
 import seasonQuestionsIndexHandler from "./seasons/[id]/questions/index.js";
 import seasonQuestionByIdHandler from "./seasons/[id]/questions/[qid].js";
 import seasonQuestionSettleHandler from "./seasons/[id]/questions/[qid]/settle.js";
+import seasonQuestionResultsHandler from "./seasons/[id]/questions/results.js";
 import seasonPicksIndexHandler from "./seasons/[id]/picks/index.js";
 import seasonPicksMineHandler from "./seasons/[id]/picks/mine.js";
 import seasonPicksAllHandler from "./seasons/[id]/picks/all.js";
@@ -100,6 +101,7 @@ export const routes: Route[] = [
     pattern: "/api/seasons/:id/questions/:qid/settle",
     handler: seasonQuestionSettleHandler,
   },
+  { pattern: "/api/seasons/:id/questions/results", handler: seasonQuestionResultsHandler },
   { pattern: "/api/seasons/:id/picks", handler: seasonPicksIndexHandler },
   { pattern: "/api/seasons/:id/picks/mine", handler: seasonPicksMineHandler },
   { pattern: "/api/seasons/:id/picks/all", handler: seasonPicksAllHandler },

@@ -5,7 +5,6 @@ import { flattenText } from "@/lib/cards/test-support";
 
 const baseData: SwingCardData = {
   groupName: "The Cool Group",
-  joinUrl: "http://localhost:5173/join?code=ABC234",
   seasonName: "IPL 2027",
   displayName: "Somansh",
   fromRank: 5,
@@ -16,10 +15,10 @@ const baseData: SwingCardData = {
 };
 
 describe("buildSwingCardElement", () => {
-  it("includes the group name, join link, member name, and both ranks", () => {
+  it("includes the group name, member name, and both ranks, but not a join link (product removed the join link from cards)", () => {
     const text = flattenText(buildSwingCardElement(baseData));
     expect(text).toContain(baseData.groupName);
-    expect(text).toContain(baseData.joinUrl);
+    expect(text).not.toContain("/join?code=");
     expect(text).toContain(baseData.displayName);
     expect(text).toContain("#5");
     expect(text).toContain("#1");

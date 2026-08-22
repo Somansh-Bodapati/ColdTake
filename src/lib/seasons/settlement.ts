@@ -28,7 +28,7 @@
 //     season "records no scores," and src/lib/standings/service.ts now
 //     refuses to compute standings for one anyway.
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { Db } from "../auth/session.js";
 import {
   question,
@@ -217,6 +217,47 @@ export async function settleSeason(
   const snapshot = await recomputeStandings(db, seasonId, now);
 
   return { season: updatedSeason, snapshot, resultKindsWritten };
+}
+
+// GET /api/seasons/:id/questions/results — the settlement UI's read path
+// (task 1's brief): "for every question still pending after auto-settlement,
+// show a form" and "show existing settled answers plainly." Neither of those
+// is derivable client-side from the standings snapshot alone (its breakdown
+// carries points/status, never the raw settled answer), so this exposes the
+// same "latest question_result row per questionId" read
+// src/lib/standings/results.ts's loadQuestionResults already does
+// internally, keyed the same way, but returning the full row (source/note/
+// settledBy/settledAt) rather than just the bare Answer that module needs.
+// Admin-gated like every other settlement read/write in this module — a
+// season's settled facts are only interesting to the person who can act on
+// them.
+export async function listQuestionResults(
+  db: Db,
+  seasonId: string,
+  adminUserId: string,
+  now: Date
+): Promise<Record<string, QuestionResultRow>> {
+  await requireSeasonAdmin(db, seasonId, adminUserId, now);
+
+  const questionRows = await db.select({ id: question.id }).from(question).where(eq(question.seasonId, seasonId));
+  const questionIds = questionRows.map((row) => row.id);
+  if (questionIds.length === 0) {
+    return {};
+  }
+
+  const rows = await db
+    .select()
+    .from(questionResult)
+    .where(inArray(questionResult.questionId, questionIds))
+    .orderBy(desc(questionResult.settledAt));
+
+  const out: Record<string, QuestionResultRow> = {};
+  for (const row of rows) {
+    if (!(row.questionId in out)) {
+      out[row.questionId] = row;
+    }
+  }
+  return out;
 }
 
 export interface SettleQuestionResult {

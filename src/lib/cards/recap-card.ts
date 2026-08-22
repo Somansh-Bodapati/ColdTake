@@ -72,6 +72,6 @@ export function buildRecapCardElement(data: RecapCardData): CardElement {
         callBlock("WORST CALL", COLORS.negative, data.worstCall),
       ]
     ),
-    cardFooter(data.groupName, data.joinUrl),
+    cardFooter(data.groupName),
   ]);
 }

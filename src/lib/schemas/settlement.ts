@@ -52,6 +52,16 @@ export const settleQuestionResponseSchema = z.object({
 });
 export type SettleQuestionResponse = z.infer<typeof settleQuestionResponseSchema>;
 
+// GET /api/seasons/:id/questions/results — doc 03 §3.6 [admin]: the
+// settlement UI's read path for "which questions are still pending vs
+// already settled, and what was the settled answer" (src/lib/seasons/
+// settlement.ts's listQuestionResults). Keyed by questionId; a question
+// absent from `results` has never been settled.
+export const questionResultsResponseSchema = z.object({
+  results: z.record(z.string(), questionResultResponseSchema),
+});
+export type QuestionResultsResponse = z.infer<typeof questionResultsResponseSchema>;
+
 // POST /api/seasons/:id/void — doc 03 §3.6 [admin]: doc 01 §4.3's "team
 // withdraws or tournament is abandoned" case. `reason` is required — see
 // settleQuestionRequestSchema's note above on why this lives in the service

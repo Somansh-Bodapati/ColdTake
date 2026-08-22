@@ -11,7 +11,6 @@ import { flattenText } from "@/lib/cards/test-support";
 
 const baseData: RevealCardData = {
   groupName: "The Cool Group",
-  joinUrl: "http://localhost:5173/join?code=ABC234",
   seasonName: "IPL 2027",
   highlightPrompt: "Who wins the title?",
   picks: [
@@ -37,10 +36,10 @@ describe("buildRevealCardElement", () => {
     assertFlexOnly(tree);
   });
 
-  it("includes the group name and join link (task 5: every card carries branding)", () => {
+  it("includes the group name but not a join link (product removed the join link from cards)", () => {
     const text = flattenText(buildRevealCardElement(baseData));
     expect(text).toContain(baseData.groupName);
-    expect(text).toContain(baseData.joinUrl);
+    expect(text).not.toContain("/join?code=");
   });
 
   it("includes the season name, highlight prompt, and every member's pick", () => {
