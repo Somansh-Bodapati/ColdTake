@@ -9,14 +9,17 @@
 // pattern mirrors src/routes/season-picks.test.tsx.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import "@testing-library/jest-dom/vitest";
 import { franchiseColorFor, identityColorFor } from "@/lib/design/identity-colors";
+import type { SeasonDetailResponse } from "@/lib/schemas/seasons";
 
 const useSessionMock = vi.fn();
 const fetchSeasonDetailMock = vi.fn();
 const fetchAllPicksMock = vi.fn();
+const toastSuccessMock = vi.fn();
+const toastErrorMock = vi.fn();
 
 vi.mock("@/lib/session/use-session", () => ({
   useSession: () => useSessionMock(),
@@ -34,7 +37,14 @@ vi.mock("@/lib/cards/client", () => ({
   buildCardUrl: () => "https://example.com/card.png",
 }));
 
-const { default: SeasonRevealPage } = await import("./season-reveal");
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => toastSuccessMock(...args),
+    error: (...args: unknown[]) => toastErrorMock(...args),
+  },
+}));
+
+const { default: SeasonRevealPage, buildMemberShareText } = await import("./season-reveal");
 
 const TEAMS = [
   { id: "team-csk-hex", name: "Chennai Super Kings", shortName: "CSK" },
@@ -42,7 +52,7 @@ const TEAMS = [
   { id: "team-unknown-hex", name: "Some Local XI", shortName: "SLX" },
 ];
 
-function seasonDetail(overrides?: { questions?: unknown[] }) {
+function seasonDetail(overrides?: { questions?: SeasonDetailResponse["questions"] }): SeasonDetailResponse {
   return {
     season: {
       id: "season-1",
@@ -206,5 +216,116 @@ describe("SeasonRevealPage IPL brand colors", () => {
     const seed = "Some Local XI";
     expect(franchiseColorFor(seed)).toBeUndefined();
     expect(identityColorFor(seed)).toBeDefined();
+  });
+});
+
+// This session's brief: a small per-member share icon in each member card's
+// header, distinct from the page's whole-season <ShareCardButton>. Builds
+// its text from the same real-name resolution the on-screen slate already
+// uses (season-reveal.test.tsx's answer-resolution describe block above),
+// so these assert both the text-building function directly and the button's
+// wiring to navigator.share / the clipboard fallback.
+describe("SeasonRevealPage per-member share button", () => {
+  const member = {
+    memberId: "member-1",
+    userId: "user-1",
+    displayName: "Ada",
+    picks: [
+      {
+        id: "pick-1",
+        questionId: "q-champion",
+        answer: { teamId: "team-rcb-hex" },
+        submittedAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: "pick-2",
+        questionId: "q-custom",
+        answer: { optionId: "option-2" },
+        submittedAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+  };
+
+  it("builds a text summary from real resolved answers, not raw ids", () => {
+    const text = buildMemberShareText(member, seasonDetail());
+
+    expect(text).toContain("Ada's picks for IPL 2026:");
+    expect(text).toContain("Who wins it all?: Royal Challengers Bengaluru");
+    expect(text).toContain("Who has the best haircut?: Nobody, everyone's a mess");
+    expect(text).not.toContain("team-rcb-hex");
+    expect(text).not.toContain("option-2");
+  });
+
+  it("says 'No pick' for a question the member left blank", () => {
+    const text = buildMemberShareText(
+      { ...member, picks: [member.picks[0]] },
+      seasonDetail()
+    );
+    expect(text).toContain("Who has the best haircut?: No pick");
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("calls navigator.share with the resolved text and the reveal page's URL when available", async () => {
+    const shareMock = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { ...navigator, share: shareMock });
+
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchAllPicksMock.mockResolvedValue({ members: [member] });
+
+    renderPage();
+
+    const shareButton = await screen.findByRole("button", { name: "Share Ada's picks" });
+    fireEvent.click(shareButton);
+
+    await vi.waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+    const call = shareMock.mock.calls[0][0] as { title: string; text: string; url: string };
+    expect(call.text).toContain("Royal Challengers Bengaluru");
+    expect(call.text).not.toContain("team-rcb-hex");
+    expect(typeof call.url).toBe("string");
+  });
+
+  it("does not surface an error when the user dismisses the native share sheet (AbortError)", async () => {
+    const abortError = new DOMException("dismissed", "AbortError");
+    const shareMock = vi.fn().mockRejectedValue(abortError);
+    vi.stubGlobal("navigator", { ...navigator, share: shareMock });
+
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchAllPicksMock.mockResolvedValue({ members: [member] });
+
+    renderPage();
+
+    const shareButton = await screen.findByRole("button", { name: "Share Ada's picks" });
+    fireEvent.click(shareButton);
+
+    await vi.waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+    expect(toastErrorMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the clipboard with a success toast when the Web Share API is unavailable", async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    // Spread everything but `share`, so `typeof navigator.share === "function"`
+    // is false — the same "API doesn't exist" branch a real desktop browser
+    // without Web Share support would hit.
+    const { share: _share, ...navigatorWithoutShare } = navigator;
+    vi.stubGlobal("navigator", { ...navigatorWithoutShare, clipboard: { writeText: writeTextMock } });
+
+    fetchSeasonDetailMock.mockResolvedValue(seasonDetail());
+    fetchAllPicksMock.mockResolvedValue({ members: [member] });
+
+    renderPage();
+
+    const shareButton = await screen.findByRole("button", { name: "Share Ada's picks" });
+    fireEvent.click(shareButton);
+
+    await vi.waitFor(() => expect(writeTextMock).toHaveBeenCalledTimes(1));
+    const [copiedText] = writeTextMock.mock.calls[0] as [string];
+    expect(copiedText).toContain("Royal Challengers Bengaluru");
+    expect(copiedText).not.toContain("team-rcb-hex");
+    await vi.waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());
   });
 });

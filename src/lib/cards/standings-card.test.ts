@@ -5,7 +5,6 @@ import { flattenText } from "@/lib/cards/test-support";
 
 const baseData: StandingsCardData = {
   groupName: "The Cool Group",
-  joinUrl: "http://localhost:5173/join?code=ABC234",
   seasonName: "IPL 2027",
   isProjected: true,
   computedAt: "2027-04-01T12:00:00.000Z",
@@ -17,10 +16,10 @@ const baseData: StandingsCardData = {
 };
 
 describe("buildStandingsCardElement", () => {
-  it("includes the group name and join link", () => {
+  it("includes the group name but not a join link (product removed the join link from cards)", () => {
     const text = flattenText(buildStandingsCardElement(baseData));
     expect(text).toContain(baseData.groupName);
-    expect(text).toContain(baseData.joinUrl);
+    expect(text).not.toContain("/join?code=");
   });
 
   it("renders every row's rank, name, and points", () => {

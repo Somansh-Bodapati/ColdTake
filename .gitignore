@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # Test / coverage
 coverage/
+
+# Local tool state
+.serena/

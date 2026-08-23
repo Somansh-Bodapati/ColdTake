@@ -19,7 +19,6 @@ import { getGroupBranding } from "../groups/service.js";
 import { getAllPicks } from "../picks/service.js";
 import { getLatestSnapshot, getStandingsHistory, type StandingsSnapshotRow } from "../standings/service.js";
 import { isRevealed } from "../seasons/state.js";
-import { buildJoinUrl } from "./branding.js";
 import { AppError } from "../errors.js";
 import type {
   RecapCardCall,
@@ -29,9 +28,9 @@ import type {
   SwingCardData,
 } from "./types.js";
 
-async function loadBranding(db: Db, groupId: string): Promise<{ groupName: string; joinUrl: string }> {
+async function loadBranding(db: Db, groupId: string): Promise<{ groupName: string }> {
   const branding = await getGroupBranding(db, groupId);
-  return { groupName: branding.name, joinUrl: buildJoinUrl(branding.joinCode) };
+  return { groupName: branding.name };
 }
 
 function formatPickAnswer(

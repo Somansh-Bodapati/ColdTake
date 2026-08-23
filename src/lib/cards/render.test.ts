@@ -12,7 +12,6 @@ import type { StandingsCardData } from "@/lib/cards/types";
 
 const data: StandingsCardData = {
   groupName: "The Cool Group",
-  joinUrl: "http://localhost:5173/join?code=ABC234",
   seasonName: "IPL 2027",
   isProjected: false,
   computedAt: "2027-05-01T00:00:00.000Z",

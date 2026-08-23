@@ -5,7 +5,6 @@ import { flattenText } from "@/lib/cards/test-support";
 
 const baseData: RecapCardData = {
   groupName: "The Cool Group",
-  joinUrl: "http://localhost:5173/join?code=ABC234",
   seasonName: "IPL 2027",
   finalStandings: [
     { rank: 1, displayName: "Somansh", points: 88 },
@@ -16,10 +15,10 @@ const baseData: RecapCardData = {
 };
 
 describe("buildRecapCardElement", () => {
-  it("includes the group name and join link", () => {
+  it("includes the group name but not a join link (product removed the join link from cards)", () => {
     const text = flattenText(buildRecapCardElement(baseData));
     expect(text).toContain(baseData.groupName);
-    expect(text).toContain(baseData.joinUrl);
+    expect(text).not.toContain("/join?code=");
   });
 
   it("renders final standings rows", () => {

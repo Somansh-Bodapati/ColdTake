@@ -65,6 +65,6 @@ export function buildRevealCardElement(data: RevealCardData): CardElement {
           ]
         : [el("div", { display: "flex", fontSize: "24px", color: COLORS.muted }, "No picks yet.")]
     ),
-    cardFooter(data.groupName, data.joinUrl),
+    cardFooter(data.groupName),
   ]);
 }

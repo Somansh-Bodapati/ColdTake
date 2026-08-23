@@ -5,11 +5,11 @@
 // touching Postgres. src/lib/cards/assemble.ts is the only place that reads
 // the DB and turns rows into these shapes.
 
-// Carried on every card (this session's brief, task 5): "Every card must
-// include the group name and a join link" (doc 01 §6.1).
+// Carried on every card. Doc 01 §6.1 originally called for a join link
+// alongside the group name too, but product asked for that dropped from the
+// rendered card (2026-08-21) — see cardFooter's comment in element.ts.
 export interface CardBranding {
   groupName: string;
-  joinUrl: string;
 }
 
 export interface RevealCardPick {
